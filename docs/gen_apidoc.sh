@@ -1,2 +1,1 @@
-sphinx-apidoc -o source ..
-make html
+sphinx-apidoc -o source ../torch_sla
