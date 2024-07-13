@@ -5,6 +5,6 @@
 **.DS_Store**
 **.vscode**
 **.pytest_cache**
-/docs/source/*.rst
-!/docs/source/conf.py
+# /docs/source/*.rst
+# !/docs/source/conf.py
 *.egg-info
