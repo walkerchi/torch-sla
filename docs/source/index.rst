@@ -7,10 +7,12 @@ Welcome to torch-sla's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-
+   introduction
+   installation
+   torch_sla
 
 Indices and tables
 ==================
