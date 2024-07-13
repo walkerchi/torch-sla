@@ -11,6 +11,6 @@ setup(
     ],
     extras_require={
         'test':['pytest','numpy','scipy'],
-        'docs':['sphinx']
+        'docs':['sphinx','furo']
     }
 )
