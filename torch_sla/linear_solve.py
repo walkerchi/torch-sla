@@ -78,7 +78,8 @@ def spsolve(val:torch.Tensor,
             method:str="bicgstab", 
             atol:float=1e-10, 
             maxiter:int=10000)->torch.Tensor:
-    """Solve the Sparse Linear Equation of Pytorch represented in COO format with gradient support
+    """
+    Solve the Sparse Linear Equation of Pytorch represented in COO format with gradient support
 
     Only the val and b can receive graident 
 
@@ -109,6 +110,18 @@ def spsolve(val:torch.Tensor,
     -------
     torch.Tensor
         [n]
+
+
+    Usage
+    -----
+    >>> A = torch.rand(10, 10).double().to(device)
+    >>> A = A @ A.T
+    >>> A[A<0.5] = 0
+    >>> A = A.to_sparse_coo()
+    >>> b = torch.rand(10).double().to(device)
+    >>> x = spsolve(A.values(), A.indices()[0], A.indices()[1], A.shape, b, method="cg", atol=1e-10, maxiter=10000)
+
+
     """
 
     # assertion 

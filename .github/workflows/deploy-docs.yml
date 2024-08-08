@@ -25,7 +25,7 @@ jobs:
 
     - name: Build documentation
       run: |
-        sphinx-apidoc -o docs/source .
+        sphinx-apidoc -o docs/source torch_sla
         cd docs
         make html
 
