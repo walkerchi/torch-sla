@@ -3,40 +3,46 @@
 {% block extrahead %}
 {{ super() }}
 
-{# SEO Meta Tags #}
-<meta name="description" content="{{ description|default('torch-sla: Differentiable sparse linear algebra library for PyTorch with CUDA support.') }}">
-<meta name="keywords" content="{{ keywords|default('PyTorch, sparse matrix, linear algebra, CUDA, cuSOLVER, cuDSS, sparse solver, differentiable, autograd') }}">
+{# SEO Meta Tags - Targeting key search terms #}
+<meta name="description" content="{{ description|default('torch-sla: Solve torch sparse matrix systems in PyTorch. GPU-accelerated sparse tensor solver with autograd. Works with torch.sparse, COO, CSR. pip install torch-sla.') }}">
+<meta name="keywords" content="{{ keywords|default('torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear solver pytorch, torch.sparse, sparse matrix solver, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, spsolve pytorch, scipy sparse pytorch') }}">
 <meta name="author" content="{{ author|default('walker chi') }}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="googlebot" content="index, follow">
+<meta name="bingbot" content="index, follow">
 
 {# Open Graph / Facebook #}
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://walkerchi.github.io/torch-sla/">
-<meta property="og:title" content="{{ og_title|default('torch-sla: Torch Sparse Linear Algebra') }}">
-<meta property="og:description" content="{{ og_description|default('Differentiable sparse linear equation solver for PyTorch with multiple backends.') }}">
+<meta property="og:url" content="https://walkerchi.github.io/torch-sla/{{ pagename }}.html">
+<meta property="og:title" content="{{ og_title|default('torch-sla: PyTorch Sparse Matrix Solver | GPU Sparse Linear Algebra') }}">
+<meta property="og:description" content="{{ og_description|default('Solve torch sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd support. Works with torch.sparse tensors.') }}">
 <meta property="og:image" content="https://walkerchi.github.io/torch-sla/_static/logo.jpg">
-<meta property="og:site_name" content="torch-sla Documentation">
+<meta property="og:image:alt" content="torch-sla: PyTorch Sparse Matrix Solver">
+<meta property="og:site_name" content="torch-sla - PyTorch Sparse Solver">
 <meta property="og:locale" content="en_US">
 
 {# Twitter Card #}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ og_title|default('torch-sla: Torch Sparse Linear Algebra') }}">
-<meta name="twitter:description" content="{{ og_description|default('Differentiable sparse linear equation solver for PyTorch with multiple backends.') }}">
+<meta name="twitter:title" content="{{ og_title|default('torch-sla: PyTorch Sparse Matrix Solver') }}">
+<meta name="twitter:description" content="{{ og_description|default('Solve torch sparse linear systems in PyTorch with GPU acceleration. Full autograd support.') }}">
 <meta name="twitter:image" content="https://walkerchi.github.io/torch-sla/_static/logo.jpg">
 
 {# Additional SEO #}
-<link rel="canonical" href="https://walkerchi.github.io/torch-sla/">
+<link rel="canonical" href="https://walkerchi.github.io/torch-sla/{{ pagename }}.html">
 <meta name="theme-color" content="#9b59b6">
 
-{# JSON-LD Structured Data #}
+{# Preconnect for performance #}
+<link rel="preconnect" href="https://github.com">
+<link rel="dns-prefetch" href="https://pypi.org">
+
+{# JSON-LD Structured Data - SEO optimized #}
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
     "name": "torch-sla",
-    "alternateName": "Torch Sparse Linear Algebra",
-    "description": "Differentiable sparse linear algebra library for PyTorch with CUDA support. Solve sparse linear systems with automatic differentiation using multiple backends including SciPy, Eigen, cuSOLVER, and cuDSS.",
+    "alternateName": ["Torch Sparse Linear Algebra", "PyTorch Sparse Solver", "torch sparse matrix solver"],
+    "description": "torch-sla: Solve sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd support. Works with torch.sparse tensors, COO/CSR formats. Alternative to scipy.sparse for PyTorch with CUDA acceleration.",
     "url": "https://github.com/walkerchi/torch-sla",
     "codeRepository": "https://github.com/walkerchi/torch-sla",
     "programmingLanguage": ["Python", "C++", "CUDA"],
@@ -47,20 +53,26 @@
     },
     "license": "https://opensource.org/licenses/MIT",
     "keywords": [
-        "PyTorch",
-        "sparse matrix",
-        "linear algebra",
-        "CUDA",
+        "torch sparse",
+        "torch sparse matrix",
+        "torch sparse tensor",
+        "pytorch sparse",
+        "pytorch sparse matrix",
+        "pytorch sparse solver",
+        "sparse linear solver",
+        "torch.sparse",
+        "GPU sparse solver",
+        "CUDA sparse",
         "cuSOLVER",
         "cuDSS",
-        "sparse solver",
-        "differentiable programming",
-        "automatic differentiation",
-        "scientific computing",
-        "finite element method",
-        "FEM",
-        "CFD",
-        "numerical methods"
+        "spsolve pytorch",
+        "scipy sparse pytorch",
+        "differentiable sparse",
+        "autograd sparse",
+        "FEM pytorch",
+        "CFD pytorch",
+        "sparse COO",
+        "sparse CSR"
     ],
     "applicationCategory": "Scientific Computing",
     "operatingSystem": ["Linux", "Windows", "macOS"],

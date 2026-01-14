@@ -15,16 +15,17 @@ version = '0.1.0'
 release = '0.1.0'
 
 # -- SEO & Metadata ----------------------------------------------------------
-# Project description for search engines
-html_short_title = 'torch-sla'
+# SEO-optimized title with high-value keywords
+html_short_title = 'torch-sla - PyTorch Sparse Matrix Solver'
 html_baseurl = 'https://walkerchi.github.io/torch-sla/'
 
 # Open Graph metadata for social sharing
 ogp_site_url = 'https://walkerchi.github.io/torch-sla/'
-ogp_site_name = 'torch-sla: Torch Sparse Linear Algebra'
-ogp_image = '_static/logo.jpg'
-ogp_description_length = 200
+ogp_site_name = 'torch-sla: PyTorch Sparse Matrix Solver'
+ogp_image = 'https://walkerchi.github.io/torch-sla/_static/logo.jpg'
+ogp_description_length = 300
 ogp_type = 'website'
+ogp_description = 'torch-sla: Solve sparse linear systems in PyTorch with GPU acceleration. Differentiable sparse matrix solver with autograd support for torch.sparse tensors.'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -33,6 +34,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',  # Link to external docs
     'sphinx.ext.graphviz',     # For vector diagrams
+    'sphinx_sitemap',          # Generate sitemap.xml for SEO
 ]
 
 # Graphviz settings
@@ -76,24 +78,29 @@ html_theme_options = {
     ],
 }
 
-# Logo and title
+# Logo and title - SEO optimized with high-value keywords
 html_logo = "_static/logo.jpg"
-html_title = f"torch-sla v{version}"
+html_title = "torch-sla: PyTorch Sparse Matrix Solver | GPU Sparse Linear Algebra"
 html_favicon = "_static/logo.jpg"
 
-# Additional SEO meta tags
+# Additional SEO meta tags - targeting common search queries
 html_context = {
-    'description': 'torch-sla: Differentiable sparse linear algebra library for PyTorch with CUDA support. Solve sparse linear systems with automatic differentiation.',
-    'keywords': 'PyTorch, sparse matrix, linear algebra, CUDA, cuSOLVER, cuDSS, sparse solver, differentiable, autograd, scientific computing, FEM, CFD',
+    # Primary description targeting key search terms
+    'description': 'torch-sla: Solve sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd support. Works with torch.sparse tensors, COO/CSR formats. pip install torch-sla.',
+    # Comprehensive keywords covering all search variations
+    'keywords': 'torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear solver pytorch, torch.sparse, sparse matrix solver, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse solver, autograd sparse, scipy sparse pytorch, sparse COO, sparse CSR, FEM pytorch, CFD pytorch, spsolve pytorch',
     'author': 'walker chi',
-    'og_title': 'torch-sla: Torch Sparse Linear Algebra',
-    'og_description': 'Differentiable sparse linear equation solver for PyTorch with multiple backends (SciPy, Eigen, cuSOLVER, cuDSS). Full gradient support via autograd.',
-    'og_image': '_static/logo.jpg',
+    'og_title': 'torch-sla: PyTorch Sparse Matrix Solver with GPU Acceleration',
+    'og_description': 'Solve sparse linear systems Ax=b in PyTorch. GPU-accelerated with cuSOLVER/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
+    'og_image': 'https://walkerchi.github.io/torch-sla/_static/logo.jpg',
     'twitter_card': 'summary_large_image',
+    'google_site_verification': '',  # Add your Google Search Console verification code here
 }
 
-# Sitemap for search engines
-html_extra_path = []
+# Sitemap for search engines (requires sphinx-sitemap)
+sitemap_url_scheme = '{link}'
+sitemap_locales = ['en']
+html_extra_path = ['robots.txt']
 
 # Search engine optimization
 html_use_index = True
@@ -102,5 +109,3 @@ html_copy_source = True
 html_show_sourcelink = True
 html_show_sphinx = False
 html_show_copyright = True
-
-# JSON-LD structured data will be added via template

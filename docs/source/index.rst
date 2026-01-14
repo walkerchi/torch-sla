@@ -1,15 +1,17 @@
 .. torch-sla documentation master file
 .. meta::
-   :description: torch-sla - Differentiable sparse linear algebra library for PyTorch with CUDA support
-   :keywords: PyTorch, sparse matrix, linear algebra, CUDA, cuSOLVER, cuDSS, sparse solver, differentiable, autograd, FEM, CFD
+   :description: torch-sla: Solve sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd. Works with torch.sparse tensors. pip install torch-sla.
+   :keywords: torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear solver, torch.sparse, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse, autograd sparse, scipy sparse pytorch, spsolve pytorch, FEM pytorch
+   :google-site-verification: 
+   :robots: index, follow
 
 .. image:: _static/logo.jpg
-   :alt: torch-sla - Torch Sparse Linear Algebra Logo
+   :alt: torch-sla - PyTorch Sparse Matrix Solver with GPU Acceleration
    :align: center
    :width: 300px
 
-torch-sla: Torch Sparse Linear Algebra
-======================================
+torch-sla: PyTorch Sparse Matrix Solver
+=======================================
 
 .. raw:: html
 
