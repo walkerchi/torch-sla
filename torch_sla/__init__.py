@@ -119,7 +119,7 @@ from .nonlinear_solve import (
     NonlinearSolveAdjoint,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "walkerchi"
 
 __all__ = [
