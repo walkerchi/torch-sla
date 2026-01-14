@@ -1,9 +1,87 @@
-**__pycache__**
-**.ipynb_checkpoints**
-**tmp**
-**cache**
-**.DS_Store**
-**.vscode**
-**.pytest_cache**
-/docs/build/
-*.egg-info
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+*.manifest
+*.spec
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Documentation build
+docs/build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# =============================================================================
+# Project-specific ignores
+# =============================================================================
+
+# Cache directories (downloaded datasets, compiled objects)
+cache/
+.cache/
+**/cache/
+.gmsh_cache/
+
+# Benchmark results (generated, regenerate by running benchmarks)
+benchmarks/results/
+benchmark_results.json
+suitesparse_results.json
+
+# Results directory (generated outputs)
+results/
+
+# Example generated figures (regenerate by running examples)
+examples/figures/
+figures/
+
+# Downloaded SuiteSparse matrices
+*.mtx
+!tests/fixtures/*.mtx
+
+# Large binary files
+*.npy
+*.npz
+*.pt
+*.pth
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+
+# Logs
+*.log
+logs/
+
+# Profiling
+*.prof
+*.lprof

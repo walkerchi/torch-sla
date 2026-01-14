@@ -1,0 +1,25 @@
+# Include C++ source files
+recursive-include csrc *.cpp *.cu *.h *.cuh
+
+# Include documentation
+include README.md
+include LICENSE
+include TODO.md
+
+# Include configuration files
+include pyproject.toml
+include setup.py
+
+# Exclude compiled files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.o
+global-exclude *.a
+
+# Exclude build directories
+prune build
+prune dist
+prune *.egg-info
+

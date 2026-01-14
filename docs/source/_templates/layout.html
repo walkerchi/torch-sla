@@ -1,0 +1,197 @@
+{% extends "furo/base.html" %}
+
+{% block extrahead %}
+{{ super() }}
+
+{# SEO Meta Tags #}
+<meta name="description" content="{{ description|default('torch-sla: Differentiable sparse linear algebra library for PyTorch with CUDA support.') }}">
+<meta name="keywords" content="{{ keywords|default('PyTorch, sparse matrix, linear algebra, CUDA, cuSOLVER, cuDSS, sparse solver, differentiable, autograd') }}">
+<meta name="author" content="{{ author|default('walker chi') }}">
+<meta name="robots" content="index, follow">
+<meta name="googlebot" content="index, follow">
+
+{# Open Graph / Facebook #}
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://walkerchi.github.io/torch-sla/">
+<meta property="og:title" content="{{ og_title|default('torch-sla: Torch Sparse Linear Algebra') }}">
+<meta property="og:description" content="{{ og_description|default('Differentiable sparse linear equation solver for PyTorch with multiple backends.') }}">
+<meta property="og:image" content="https://walkerchi.github.io/torch-sla/_static/logo.jpg">
+<meta property="og:site_name" content="torch-sla Documentation">
+<meta property="og:locale" content="en_US">
+
+{# Twitter Card #}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title|default('torch-sla: Torch Sparse Linear Algebra') }}">
+<meta name="twitter:description" content="{{ og_description|default('Differentiable sparse linear equation solver for PyTorch with multiple backends.') }}">
+<meta name="twitter:image" content="https://walkerchi.github.io/torch-sla/_static/logo.jpg">
+
+{# Additional SEO #}
+<link rel="canonical" href="https://walkerchi.github.io/torch-sla/">
+<meta name="theme-color" content="#9b59b6">
+
+{# JSON-LD Structured Data #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "torch-sla",
+    "alternateName": "Torch Sparse Linear Algebra",
+    "description": "Differentiable sparse linear algebra library for PyTorch with CUDA support. Solve sparse linear systems with automatic differentiation using multiple backends including SciPy, Eigen, cuSOLVER, and cuDSS.",
+    "url": "https://github.com/walkerchi/torch-sla",
+    "codeRepository": "https://github.com/walkerchi/torch-sla",
+    "programmingLanguage": ["Python", "C++", "CUDA"],
+    "runtimePlatform": "Python 3.8+",
+    "author": {
+        "@type": "Person",
+        "name": "walker chi"
+    },
+    "license": "https://opensource.org/licenses/MIT",
+    "keywords": [
+        "PyTorch",
+        "sparse matrix",
+        "linear algebra",
+        "CUDA",
+        "cuSOLVER",
+        "cuDSS",
+        "sparse solver",
+        "differentiable programming",
+        "automatic differentiation",
+        "scientific computing",
+        "finite element method",
+        "FEM",
+        "CFD",
+        "numerical methods"
+    ],
+    "applicationCategory": "Scientific Computing",
+    "operatingSystem": ["Linux", "Windows", "macOS"],
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+    }
+}
+</script>
+
+{# Software Application Schema #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "torch-sla Documentation",
+    "url": "https://walkerchi.github.io/torch-sla/",
+    "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://walkerchi.github.io/torch-sla/search.html?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+    }
+}
+</script>
+
+{# FAQ Schema for LLM/GEO optimization #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "What is torch-sla?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "torch-sla (Torch Sparse Linear Algebra) is a Python library that provides differentiable sparse linear equation solvers for PyTorch. It solves systems of the form Ax = b where A is a sparse matrix, with full support for automatic differentiation (autograd) and GPU acceleration via CUDA."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I solve a sparse linear system in PyTorch?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use torch-sla's SparseTensor class: from torch_sla import SparseTensor; A = SparseTensor(values, row, col, shape); x = A.solve(b). This works on both CPU and GPU, and supports gradient computation."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What sparse solvers does torch-sla support?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "torch-sla supports multiple backends: CPU solvers include SciPy (SuperLU, UMFPACK, CG, BiCGStab, GMRES) and Eigen (CG, BiCGStab). GPU solvers include cuSOLVER (QR, Cholesky, LU) and cuDSS (LU, Cholesky, LDLT). The library automatically selects the best solver based on hardware and matrix properties."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Can I compute gradients through sparse solve in PyTorch?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, torch-sla fully supports PyTorch autograd. You can set requires_grad=True on your sparse matrix values, solve the system, compute a loss, and call backward() to get gradients with respect to the matrix values and right-hand side."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I solve batched sparse systems in PyTorch?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "torch-sla supports batched solving for matrices with the same sparsity pattern. Create a SparseTensor with batched values of shape [batch_size, nnz] and solve all systems in parallel. For matrices with different patterns, use SparseTensorList."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I use torch-sla on GPU?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Simply call .cuda() on your SparseTensor: A_cuda = A.cuda(); x = A_cuda.solve(b.cuda()). The library automatically uses cuDSS or cuSOLVER for GPU-accelerated solving."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "What is the difference between torch-sla and scipy.sparse?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "torch-sla offers native PyTorch integration, GPU support via CUDA, full autograd gradient support, and batched solving. scipy.sparse is CPU-only, requires data copying to/from PyTorch, and doesn't support automatic differentiation."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "How do I install torch-sla?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Install via pip: pip install torch-sla. For GPU support, ensure you have CUDA installed and a compatible PyTorch version."
+            }
+        }
+    ]
+}
+</script>
+
+{# HowTo Schema for code examples #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to solve sparse linear systems in PyTorch",
+    "description": "Step-by-step guide to solving sparse linear equations Ax = b using torch-sla with PyTorch",
+    "step": [
+        {
+            "@type": "HowToStep",
+            "name": "Install torch-sla",
+            "text": "pip install torch-sla"
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Import the library",
+            "text": "from torch_sla import SparseTensor"
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Create sparse matrix",
+            "text": "A = SparseTensor(values, row_indices, col_indices, shape)"
+        },
+        {
+            "@type": "HowToStep",
+            "name": "Solve the system",
+            "text": "x = A.solve(b)"
+        }
+    ],
+    "totalTime": "PT5M"
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-cpu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install torch --index-url https://download.pytorch.org/whl/cpu
+        pip install -e ".[test]"
+
+    - name: Run CPU tests
+      run: |
+        pytest tests/ -v -k "cpu" --tb=short
+
+  test-cuda:
+    runs-on: ubuntu-latest
+    container:
+      image: pytorch/pytorch:2.1.0-cuda12.1-cudnn8-devel
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        pip install -e ".[test]"
+
+    - name: Run all tests
+      run: |
+        pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install linters
+      run: |
+        pip install black isort mypy
+
+    - name: Check formatting
+      run: |
+        black --check torch_sla/
+        isort --check-only torch_sla/
+
