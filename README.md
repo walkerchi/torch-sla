@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.jpg" alt="torch-sla logo" width="200">
+  <img src="https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/logo.jpg" alt="torch-sla logo" width="200">
 </p>
 
 <h1 align="center">torch-sla</h1>
@@ -9,9 +9,18 @@
 </p>
 
 <p align="center">
+  <a href="https://walkerchi.github.io/torch-sla/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github" alt="Documentation"></a>
   <a href="https://badge.fury.io/py/torch-sla"><img src="https://badge.fury.io/py/torch-sla.svg" alt="PyPI version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+"></a>
+</p>
+
+<p align="center">
+  <a href="https://walkerchi.github.io/torch-sla/introduction.html">📖 Introduction</a> •
+  <a href="https://walkerchi.github.io/torch-sla/installation.html">🔧 Installation</a> •
+  <a href="https://walkerchi.github.io/torch-sla/torch_sla.html">📚 API Reference</a> •
+  <a href="https://walkerchi.github.io/torch-sla/examples.html">💡 Examples</a> •
+  <a href="https://walkerchi.github.io/torch-sla/benchmarks.html">📊 Benchmarks</a>
 </p>
 
 ## Features
