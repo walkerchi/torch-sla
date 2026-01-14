@@ -86,7 +86,6 @@ Homepage = "https://pypi.org/project/torch-sla/"
 Documentation = "https://github.com/walkerchi/torch-sla#readme"
 Repository = "https://github.com/walkerchi/torch-sla"
 PyPI = "https://pypi.org/project/torch-sla/"
-Repository = "https://github.com/walkerchi/torch-sla"
 Issues = "https://github.com/walkerchi/torch-sla/issues"
 
 [tool.setuptools]
