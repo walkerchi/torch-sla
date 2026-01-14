@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/walkerchi/torch-sla"><img src="https://img.shields.io/badge/GitHub-repo-181717?logo=github" alt="GitHub"></a>
   <a href="https://walkerchi.github.io/torch-sla/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github" alt="Documentation"></a>
   <a href="https://badge.fury.io/py/torch-sla"><img src="https://badge.fury.io/py/torch-sla.svg" alt="PyPI version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -338,7 +339,7 @@ x = lu.solve(b)
 
 ### Performance Comparison
 
-![Solver Performance](assets/benchmarks/performance.png)
+![Solver Performance](https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/benchmarks/performance.png)
 
 | DOF | SciPy SuperLU | cuDSS Cholesky | PyTorch CG+Jacobi |
 |----:|-------------:|---------------:|------------------:|
@@ -352,7 +353,7 @@ x = lu.solve(b)
 
 ### Memory Usage
 
-![Memory Usage](assets/benchmarks/memory.png)
+![Memory Usage](https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/benchmarks/memory.png)
 
 | Method | Memory Scaling | Notes |
 |--------|---------------|-------|
@@ -362,7 +363,7 @@ x = lu.solve(b)
 
 ### Accuracy
 
-![Accuracy](assets/benchmarks/accuracy.png)
+![Accuracy](https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/benchmarks/accuracy.png)
 
 | Method | Precision | Notes |
 |--------|-----------|-------|
@@ -381,7 +382,7 @@ x = lu.solve(b)
 
 4x NVIDIA H200 GPUs with NCCL backend, 4x CPU processes with Gloo:
 
-![Distributed Benchmark](assets/benchmarks/distributed_benchmark.png)
+![Distributed Benchmark](https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/benchmarks/distributed_benchmark.png)
 
 **CUDA (4 GPU, NCCL)**:
 
