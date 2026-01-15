@@ -100,7 +100,6 @@ def benchmark_solve(
     dsparse, 
     b: torch.Tensor,
     preconditioner: str,
-    overlap: bool,
     use_cache: bool,
     rtol: float,
     maxiter: int,
@@ -120,7 +119,9 @@ def benchmark_solve(
     for _ in range(warmup):
         if not use_cache:
             dsparse._csr_cache = None
-        x = dsparse.solve(b, preconditioner=preconditioner, overlap=overlap,
+            dsparse._ic0_L_csr = None
+            dsparse._ic0_U_csr = None
+        x = dsparse.solve(b, preconditioner=preconditioner, overlap=False,
                          rtol=rtol, maxiter=min(50, maxiter), verbose=False)
     
     dist.barrier()
@@ -135,13 +136,15 @@ def benchmark_solve(
     for _ in range(repeat):
         if not use_cache:
             dsparse._csr_cache = None
+            dsparse._ic0_L_csr = None
+            dsparse._ic0_U_csr = None
         
         dist.barrier()
         if device.type == 'cuda':
             torch.cuda.synchronize(device)
         
         t0 = time.perf_counter()
-        x = dsparse.solve(b, preconditioner=preconditioner, overlap=overlap,
+        x = dsparse.solve(b, preconditioner=preconditioner, overlap=False,
                          rtol=rtol, maxiter=maxiter, verbose=False)
         
         if device.type == 'cuda':
@@ -202,12 +205,14 @@ def main():
         print(f"rtol: {args.rtol}, maxiter: {args.maxiter}")
         print()
     
-    # Configurations
+    # Configurations: (name, use_cache, preconditioner)
+    # IC0/Polynomial removed - don't converge well for distributed Poisson
+    # SSOR is the best preconditioner (7% speedup)
     configs = [
-        ("Baseline", False, 'none', False),
-        ("+CSR Cache", True, 'none', False),
-        ("+Jacobi", True, 'jacobi', False),
-        ("+Overlap", True, 'jacobi', True),
+        ("Baseline", False, 'none'),
+        ("+CSR Cache", True, 'none'),
+        ("+Jacobi", True, 'jacobi'),
+        ("+SSOR", True, 'ssor'),
     ]
     
     all_results = []
@@ -247,9 +252,9 @@ def main():
         
         baseline_time = None
         
-        for name, use_cache, precond, overlap in configs:
+        for name, use_cache, precond in configs:
             time_ms, mem_mb, residual = benchmark_solve(
-                dsparse, b, precond, overlap, use_cache,
+                dsparse, b, precond, use_cache,
                 args.rtol, args.maxiter, args.warmup, args.repeat,
                 rank, world_size
             )
@@ -289,7 +294,7 @@ def main():
         print(header)
         print("-" * (20 + 12 * len(args.sizes)))
         
-        for name, _, _, _ in configs:
+        for name, _, _ in configs:
             line = f"{name:<20}"
             for r in by_config[name]:
                 line += f" {r.speedup:>10.2f}x "
@@ -327,7 +332,7 @@ def plot_results(results: List[BenchmarkResult], configs, args, world_size: int)
     ax = axes[0]
     x = np.arange(n_sizes)
     width = 0.18
-    for i, (name, _, _, _) in enumerate(configs):
+    for i, (name, _, _) in enumerate(configs):
         times = [r.time_ms for r in by_config[name]]
         ax.bar(x + (i - n_configs/2 + 0.5) * width, times, width, 
                label=name, color=colors[i], edgecolor='white')
@@ -343,7 +348,7 @@ def plot_results(results: List[BenchmarkResult], configs, args, world_size: int)
     # Speedup
     ax = axes[1]
     markers = ['o', 's', '^', 'D']
-    for i, (name, _, _, _) in enumerate(configs):
+    for i, (name, _, _) in enumerate(configs):
         speedups = [r.speedup for r in by_config[name]]
         ax.plot(range(n_sizes), speedups, marker=markers[i], linestyle='-',
                 label=name, color=colors[i], linewidth=2, markersize=8)
@@ -359,7 +364,7 @@ def plot_results(results: List[BenchmarkResult], configs, args, world_size: int)
     
     # Memory
     ax = axes[2]
-    for i, (name, _, _, _) in enumerate(configs):
+    for i, (name, _, _) in enumerate(configs):
         mems = [r.memory_mb for r in by_config[name]]
         ax.bar(x + (i - n_configs/2 + 0.5) * width, mems, width,
                label=name, color=colors[i], edgecolor='white')

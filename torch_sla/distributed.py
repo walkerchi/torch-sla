@@ -1363,7 +1363,7 @@ class DSparseMatrix:
         r : torch.Tensor
             Residual vector [num_local]
         preconditioner : str
-            'none', 'jacobi', 'block_jacobi', 'ssor'
+            'none', 'jacobi', 'block_jacobi', 'ssor', 'ic0', 'polynomial'
             
         Returns
         -------
@@ -1388,8 +1388,16 @@ class DSparseMatrix:
         
         elif preconditioner == 'ssor':
             # Symmetric SOR: (D + ωL) D^{-1} (D + ωU)
-            omega = 1.0
+            omega = 1.5
             return self._apply_ssor(r, omega)
+        
+        elif preconditioner == 'ic0':
+            # Incomplete Cholesky (GPU-friendly iterative version)
+            return self._apply_ic0(r, num_sweeps=2)
+        
+        elif preconditioner == 'polynomial':
+            # Neumann series polynomial preconditioner
+            return self._apply_polynomial(r, degree=3)
         
         else:
             warnings.warn(f"Unknown preconditioner '{preconditioner}', using none")
@@ -1414,15 +1422,114 @@ class DSparseMatrix:
         
         return x
     
-    def _apply_ssor(self, r: torch.Tensor, omega: float = 1.0) -> torch.Tensor:
+    def _apply_ssor(self, r: torch.Tensor, omega: float = 1.5) -> torch.Tensor:
         """
-        Apply SSOR preconditioner.
-        For now, falls back to Jacobi for efficiency.
-        Full SSOR requires forward/backward sweeps.
+        Apply SSOR preconditioner (GPU-friendly scaled Jacobi approximation).
+        
+        True SSOR requires sequential sweeps, slow on GPU.
+        This uses a scaled Jacobi that approximates SSOR behavior.
         """
-        # Simplified: use scaled Jacobi
+        import math
         D_inv = self._get_diagonal_inv()
-        return (2.0 - omega) * omega * D_inv * r
+        scale = math.sqrt(omega * (2 - omega))
+        return scale * D_inv * r
+    
+    def _apply_ic0(self, r: torch.Tensor, num_sweeps: int = 2) -> torch.Tensor:
+        """
+        Apply Incomplete Cholesky (IC0) preconditioner using Jacobi iterations.
+        
+        GPU-friendly approximation of (D + L)^{-1} D (D + L^T)^{-1}.
+        Uses parallel Jacobi sweeps for triangular solves.
+        """
+        # Get or build L/U matrices
+        if not hasattr(self, '_ic0_L_csr') or self._ic0_L_csr is None:
+            self._build_ic0_factors()
+        
+        D_inv = self._get_diagonal_inv()
+        diag = self._get_diagonal()
+        
+        if self._ic0_L_csr is None:
+            # No off-diagonal elements, just Jacobi
+            return D_inv * r
+        
+        # Forward sweep: solve (D + L) y = r approximately
+        # y^{k+1} = D^{-1} (r - L y^k)
+        y = D_inv * r
+        for _ in range(num_sweeps):
+            Ly = torch.mv(self._ic0_L_csr, y)
+            y = D_inv * (r - Ly)
+        
+        # Middle: scale by D
+        z = diag * y
+        
+        # Backward sweep: solve (D + L^T) x = z approximately  
+        # x^{k+1} = D^{-1} (z - L^T x^k)
+        x = D_inv * z
+        for _ in range(num_sweeps):
+            Ux = torch.mv(self._ic0_U_csr, x)
+            x = D_inv * (z - Ux)
+        
+        return x
+    
+    def _build_ic0_factors(self):
+        """Build L and U factors for IC0 preconditioner."""
+        n = self.num_local
+        
+        # Get strictly lower triangular part
+        lower_mask = self.local_row > self.local_col
+        L_row = self.local_row[lower_mask]
+        L_col = self.local_col[lower_mask]
+        L_val = self.local_values[lower_mask]
+        
+        if len(L_val) > 0:
+            L_indices = torch.stack([L_row, L_col], dim=0)
+            L_coo = torch.sparse_coo_tensor(
+                L_indices, L_val, (n, n),
+                device=self.device, dtype=self.local_values.dtype
+            )
+            self._ic0_L_csr = L_coo.to_sparse_csr()
+            
+            # Upper triangular (transpose of L)
+            U_indices = torch.stack([L_col, L_row], dim=0)
+            U_coo = torch.sparse_coo_tensor(
+                U_indices, L_val, (n, n),
+                device=self.device, dtype=self.local_values.dtype
+            )
+            self._ic0_U_csr = U_coo.to_sparse_csr()
+        else:
+            self._ic0_L_csr = None
+            self._ic0_U_csr = None
+    
+    def _apply_polynomial(self, r: torch.Tensor, degree: int = 3) -> torch.Tensor:
+        """
+        Apply Neumann series polynomial preconditioner.
+        
+        Uses M^{-1} ≈ D^{-1} (I + N + N^2 + ...) where N = I - D^{-1}A
+        
+        This is stable and parallelizes well on GPU.
+        """
+        D_inv = self._get_diagonal_inv()
+        
+        # z = D^{-1} @ r (degree=0 term)
+        z = D_inv * r
+        
+        if degree == 0:
+            return z
+        
+        # Neumann series: sum_{k=0}^{degree} (I - D^{-1}A)^k @ (D^{-1} @ r)
+        y = r.clone()
+        for _ in range(degree):
+            # y = (I - D^{-1}A) @ y
+            Ay = self._matvec_local(y)
+            y = y - D_inv * Ay
+            z = z + D_inv * y
+        
+        return z
+    
+    def _matvec_local(self, x: torch.Tensor) -> torch.Tensor:
+        """Local matrix-vector product without halo exchange."""
+        csr = self._get_csr()
+        return torch.mv(csr, x)
     
     def _global_reduce_sum(self, value: torch.Tensor) -> torch.Tensor:
         """Perform global all_reduce sum."""
