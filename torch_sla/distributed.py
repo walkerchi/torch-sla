@@ -694,12 +694,236 @@ class DSparseMatrix:
         # Use cached CSR for efficiency
         return torch.mv(self._get_csr(), x)
     
+    def matvec_overlap(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Matrix-vector product with communication-computation overlap.
+        
+        This optimized version overlaps halo communication with computation:
+        1. Start async halo exchange
+        2. Compute interior part (rows that don't depend on halo)
+        3. Wait for halo exchange to complete
+        4. Compute boundary part (rows that depend on halo)
+        5. Combine results
+        
+        Note: This is only beneficial in true distributed settings where
+        there is actual network latency to hide. In single-process mode,
+        this falls back to regular matvec.
+        
+        Parameters
+        ----------
+        x : torch.Tensor
+            Local vector [num_local]
+            
+        Returns
+        -------
+        y : torch.Tensor
+            Result vector [num_local]
+        """
+        # In single-process mode, overlap has overhead with no benefit
+        if not DIST_AVAILABLE or not dist.is_initialized():
+            self.halo_exchange(x)
+            return self.matvec(x, exchange_halo=False)
+        
+        # Build interior/boundary decomposition if not cached
+        if not hasattr(self, '_interior_csr') or self._interior_csr is None:
+            self._build_interior_boundary_decomposition()
+        
+        # Check if overlap is worthwhile (need significant interior portion)
+        if self._overlap_stats.get('interior_ratio', 0) < 0.1:
+            # Not enough interior work to justify overlap overhead
+            self.halo_exchange(x)
+            return self.matvec(x, exchange_halo=False)
+        
+        # Start async halo exchange
+        comm_handle = self.halo_exchange_async(x)
+        
+        # Compute interior part while communication is in progress
+        # y_interior = A_interior @ x (only uses owned nodes, no halo)
+        y = torch.zeros(self.num_local, dtype=x.dtype, device=self.device)
+        if self._interior_csr is not None and self._interior_csr._nnz() > 0:
+            y.add_(torch.mv(self._interior_csr, x))
+        
+        # Wait for halo exchange to complete
+        if comm_handle is not None:
+            self._wait_halo_exchange(comm_handle, x)
+        
+        # Compute boundary part (needs halo values)
+        if self._boundary_csr is not None and self._boundary_csr._nnz() > 0:
+            y.add_(torch.mv(self._boundary_csr, x))
+        
+        return y
+    
+    def _build_interior_boundary_decomposition(self):
+        """
+        Decompose matrix into interior and boundary parts.
+        
+        Interior: All entries in rows that only reference owned nodes (col < num_owned)
+        Boundary: All entries in rows that reference at least one halo node (col >= num_owned)
+        
+        This allows computing interior rows while halo exchange is in progress.
+        """
+        num_owned = self.num_owned
+        
+        # For each entry, check if it references a halo node
+        entry_uses_halo = self.local_col >= num_owned
+        
+        # For each row, count how many entries use halo
+        # Use scatter_add to count halo references per row
+        row_halo_count = torch.zeros(self.num_local, dtype=torch.int32, device=self.device)
+        ones = torch.ones_like(self.local_row, dtype=torch.int32)
+        row_halo_count.scatter_add_(0, self.local_row[entry_uses_halo], ones[entry_uses_halo])
+        
+        # A row is "interior" if it has zero halo references
+        row_is_interior = row_halo_count == 0
+        
+        # Mark entries by their row type
+        interior_mask = row_is_interior[self.local_row]
+        boundary_mask = ~interior_mask
+        
+        # Only consider owned rows for interior (halo rows don't need computation)
+        interior_mask = interior_mask & (self.local_row < num_owned)
+        boundary_mask = boundary_mask & (self.local_row < num_owned)
+        
+        # Build interior CSR
+        if interior_mask.any():
+            interior_coo = torch.sparse_coo_tensor(
+                torch.stack([self.local_row[interior_mask], self.local_col[interior_mask]]),
+                self.local_values[interior_mask],
+                self.local_shape,
+                device=self.device
+            )
+            self._interior_csr = interior_coo.to_sparse_csr()
+        else:
+            self._interior_csr = None
+        
+        # Build boundary CSR
+        if boundary_mask.any():
+            boundary_coo = torch.sparse_coo_tensor(
+                torch.stack([self.local_row[boundary_mask], self.local_col[boundary_mask]]),
+                self.local_values[boundary_mask],
+                self.local_shape,
+                device=self.device
+            )
+            self._boundary_csr = boundary_coo.to_sparse_csr()
+        else:
+            self._boundary_csr = None
+        
+        # Cache statistics
+        total_nnz_owned = (self.local_row < num_owned).sum().item()
+        interior_nnz_count = interior_mask.sum().item()
+        boundary_nnz_count = boundary_mask.sum().item()
+        self._overlap_stats = {
+            'interior_nnz': interior_nnz_count,
+            'boundary_nnz': boundary_nnz_count,
+            'total_nnz_owned': total_nnz_owned,
+            'interior_ratio': interior_nnz_count / total_nnz_owned if total_nnz_owned > 0 else 0,
+            'interior_rows': row_is_interior[:num_owned].sum().item(),
+            'boundary_rows': (~row_is_interior[:num_owned]).sum().item(),
+        }
+    
+    def halo_exchange_async(self, x: torch.Tensor):
+        """
+        Start asynchronous halo exchange.
+        
+        Returns a handle that can be passed to _wait_halo_exchange().
+        """
+        if not DIST_AVAILABLE or not dist.is_initialized():
+            return None
+        
+        backend = dist.get_backend()
+        
+        # NCCL doesn't support true async in the same way, use streams
+        if backend == 'nccl' and x.is_cuda:
+            return self._halo_exchange_cuda_async(x)
+        else:
+            return self._halo_exchange_gloo_async(x)
+    
+    def _halo_exchange_cuda_async(self, x: torch.Tensor):
+        """Async halo exchange using CUDA streams."""
+        # Create communication stream if not exists
+        if not hasattr(self, '_comm_stream'):
+            self._comm_stream = torch.cuda.Stream(device=self.device)
+        
+        send_buffers = self._get_send_buffers(x.dtype)
+        recv_buffers = self._get_recv_buffers(x.dtype)
+        
+        # Record current stream
+        current_stream = torch.cuda.current_stream(self.device)
+        
+        # Fill send buffers on current stream
+        for neighbor_id in self.partition.neighbor_partitions:
+            send_idx = self._send_indices_cached.get(neighbor_id)
+            if send_idx is None:
+                send_idx = self.partition.send_indices[neighbor_id].to(self.device)
+                self._send_indices_cached[neighbor_id] = send_idx
+            send_buffers[neighbor_id].copy_(x[send_idx])
+        
+        # Synchronize before switching streams
+        self._comm_stream.wait_stream(current_stream)
+        
+        # Do communication on comm stream
+        with torch.cuda.stream(self._comm_stream):
+            for neighbor_id in sorted(self.partition.neighbor_partitions):
+                if self.partition.partition_id < neighbor_id:
+                    dist.send(send_buffers[neighbor_id], dst=neighbor_id)
+                    dist.recv(recv_buffers[neighbor_id], src=neighbor_id)
+                else:
+                    dist.recv(recv_buffers[neighbor_id], src=neighbor_id)
+                    dist.send(send_buffers[neighbor_id], dst=neighbor_id)
+        
+        return {'type': 'cuda', 'stream': self._comm_stream, 'recv_buffers': recv_buffers}
+    
+    def _halo_exchange_gloo_async(self, x: torch.Tensor):
+        """Async halo exchange using Gloo isend/irecv."""
+        send_buffers = self._get_send_buffers(x.dtype)
+        recv_buffers = self._get_recv_buffers(x.dtype)
+        
+        # Fill send buffers
+        for neighbor_id in self.partition.neighbor_partitions:
+            send_idx = self._send_indices_cached.get(neighbor_id)
+            if send_idx is None:
+                send_idx = self.partition.send_indices[neighbor_id].to(self.device)
+                self._send_indices_cached[neighbor_id] = send_idx
+            send_buffers[neighbor_id].copy_(x[send_idx])
+        
+        # Start async communication
+        requests = []
+        for neighbor_id in self.partition.neighbor_partitions:
+            req = dist.isend(send_buffers[neighbor_id], dst=neighbor_id)
+            requests.append(req)
+            req = dist.irecv(recv_buffers[neighbor_id], src=neighbor_id)
+            requests.append(req)
+        
+        return {'type': 'gloo', 'requests': requests, 'recv_buffers': recv_buffers}
+    
+    def _wait_halo_exchange(self, handle, x: torch.Tensor):
+        """Wait for async halo exchange to complete and update x."""
+        if handle is None:
+            return
+        
+        if handle['type'] == 'cuda':
+            # Synchronize with comm stream
+            torch.cuda.current_stream(self.device).wait_stream(handle['stream'])
+        elif handle['type'] == 'gloo':
+            # Wait for all requests
+            for req in handle['requests']:
+                req.wait()
+        
+        # Update halo values
+        recv_buffers = handle['recv_buffers']
+        for neighbor_id in self.partition.neighbor_partitions:
+            recv_idx = self._recv_indices_cached.get(neighbor_id)
+            if recv_idx is None:
+                recv_idx = self.partition.recv_indices[neighbor_id].to(self.device)
+                self._recv_indices_cached[neighbor_id] = recv_idx
+            x[recv_idx] = recv_buffers[neighbor_id]
+    
     def _get_csr(self) -> torch.Tensor:
         """Get cached CSR matrix (lazy initialization)."""
         if not hasattr(self, '_csr_cache') or self._csr_cache is None:
             A_coo = torch.sparse_coo_tensor(
-                torch.stack([self.local_row, self.local_col]),
-                self.local_values,
+            torch.stack([self.local_row, self.local_col]),
+            self.local_values,
                 self.local_shape,
                 device=self.device
             )
@@ -784,7 +1008,8 @@ class DSparseMatrix:
         rtol: float = 1e-6,
         maxiter: int = 1000,
         verbose: bool = False,
-        distributed: bool = True
+        distributed: bool = True,
+        overlap: bool = True
     ) -> torch.Tensor:
         """
         Solve linear system Ax = b.
@@ -810,6 +1035,11 @@ class DSparseMatrix:
             algorithms with all_reduce for global dot products.
             If False: Solve only the LOCAL subdomain problem (useful as
             preconditioner in domain decomposition methods).
+        overlap : bool, default=True
+            If True (default): Overlap communication with computation.
+            The matrix is decomposed into interior (no halo dependency) and
+            boundary (needs halo) parts. Interior computation runs while
+            halo exchange is in progress.
             
         Returns
         -------
@@ -826,9 +1056,12 @@ class DSparseMatrix:
         
         >>> # With different preconditioner
         >>> x = local_matrix.solve(b_owned, preconditioner='block_jacobi')
+        
+        >>> # Disable overlap (for debugging or when interior ratio is low)
+        >>> x = local_matrix.solve(b_owned, overlap=False)
         """
         if distributed:
-            return self._solve_distributed_pcg(b, preconditioner, atol, rtol, maxiter, verbose)
+            return self._solve_distributed_pcg(b, preconditioner, atol, rtol, maxiter, verbose, overlap)
         else:
             return self._solve_local(b, method, atol, maxiter, verbose)
     
@@ -1004,7 +1237,7 @@ class DSparseMatrix:
         verbose: bool
     ) -> torch.Tensor:
         """Legacy CG solver - use _solve_distributed_pcg instead."""
-        return self._solve_distributed_pcg(b_owned, 'none', atol, 1e-6, maxiter, verbose)
+        return self._solve_distributed_pcg(b_owned, 'none', atol, 1e-6, maxiter, verbose, overlap=True)
     
     def _solve_distributed_pcg(
         self,
@@ -1013,7 +1246,8 @@ class DSparseMatrix:
         atol: float,
         rtol: float,
         maxiter: int,
-        verbose: bool
+        verbose: bool,
+        overlap: bool = True
     ) -> torch.Tensor:
         """
         Distributed Preconditioned Conjugate Gradient solver.
@@ -1023,6 +1257,7 @@ class DSparseMatrix:
         2. Jacobi/block-Jacobi preconditioning
         3. Relative tolerance support
         4. Reduced memory allocations
+        5. Communication-computation overlap (when overlap=True)
         """
         num_owned = self.num_owned
         num_local = self.num_local
@@ -1059,12 +1294,19 @@ class DSparseMatrix:
         rs_local = torch.dot(r_local[:num_owned], r_local[:num_owned])
         rs_old = self._global_reduce_sum(rs_local)
         
+        # Print overlap info on first call
+        if verbose and rank == 0 and overlap:
+            if hasattr(self, '_overlap_stats'):
+                stats = self._overlap_stats
+                print(f"  Overlap enabled: interior_ratio = {stats['interior_ratio']:.1%}")
+        
         for i in range(maxiter):
-            # Halo exchange for p before matvec
-            self.halo_exchange(p_local)
-            
-            # Ap = A @ p (local matvec, cached CSR)
-            Ap_local = self.matvec(p_local, exchange_halo=False)
+            # Ap = A @ p with optional overlap
+            if overlap:
+                Ap_local = self.matvec_overlap(p_local)
+            else:
+                self.halo_exchange(p_local)
+                Ap_local = self.matvec(p_local, exchange_halo=False)
             
             # pAp = p^T @ A @ p (global reduction)
             pAp_local = torch.dot(p_local[:num_owned], Ap_local[:num_owned])
