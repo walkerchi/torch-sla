@@ -11,21 +11,21 @@ sys.path.insert(0, os.path.abspath('../../'))
 project = 'torch-sla'
 copyright = '2024, walker chi'
 author = 'walker chi'
-version = '0.1.0'
-release = '0.1.0'
+version = '0.1.2'
+release = '0.1.2'
 
 # -- SEO & Metadata ----------------------------------------------------------
 # SEO-optimized title with high-value keywords
-html_short_title = 'torch-sla - PyTorch Sparse Matrix Solver'
+html_short_title = 'torch-sla - PyTorch Sparse Linear Algebra'
 html_baseurl = 'https://walkerchi.github.io/torch-sla/'
 
 # Open Graph metadata for social sharing
 ogp_site_url = 'https://walkerchi.github.io/torch-sla/'
-ogp_site_name = 'torch-sla: PyTorch Sparse Matrix Solver'
+ogp_site_name = 'torch-sla: PyTorch Sparse Linear Algebra'
 ogp_image = 'https://walkerchi.github.io/torch-sla/_static/logo.jpg'
 ogp_description_length = 300
 ogp_type = 'website'
-ogp_description = 'torch-sla: Solve sparse linear systems in PyTorch with GPU acceleration. Differentiable sparse matrix solver with autograd support for torch.sparse tensors.'
+ogp_description = 'torch-sla: PyTorch Sparse Linear Algebra library with GPU acceleration. Differentiable sparse solvers with autograd support for torch.sparse tensors.'
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -80,18 +80,18 @@ html_theme_options = {
 
 # Logo and title - SEO optimized with high-value keywords
 html_logo = "_static/logo.jpg"
-html_title = "torch-sla: PyTorch Sparse Matrix Solver | GPU Sparse Linear Algebra"
+html_title = "torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated"
 html_favicon = "_static/logo.jpg"
 
 # Additional SEO meta tags - targeting common search queries
 html_context = {
     # Primary description targeting key search terms
-    'description': 'torch-sla: Solve sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd support. Works with torch.sparse tensors, COO/CSR formats. pip install torch-sla.',
+    'description': 'torch-sla: PyTorch Sparse Linear Algebra library. GPU-accelerated sparse solvers with autograd support. Works with torch.sparse tensors, COO/CSR formats. pip install torch-sla.',
     # Comprehensive keywords covering all search variations
-    'keywords': 'torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear solver pytorch, torch.sparse, sparse matrix solver, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse solver, autograd sparse, scipy sparse pytorch, sparse COO, sparse CSR, FEM pytorch, CFD pytorch, spsolve pytorch',
+    'keywords': 'torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear algebra pytorch, torch.sparse, sparse linear algebra, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse solver, autograd sparse, scipy sparse pytorch, sparse COO, sparse CSR, FEM pytorch, CFD pytorch, spsolve pytorch',
     'author': 'walker chi',
-    'og_title': 'torch-sla: PyTorch Sparse Matrix Solver with GPU Acceleration',
-    'og_description': 'Solve sparse linear systems Ax=b in PyTorch. GPU-accelerated with cuSOLVER/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
+    'og_title': 'torch-sla: PyTorch Sparse Linear Algebra with GPU Acceleration',
+    'og_description': 'PyTorch Sparse Linear Algebra library. Solve Ax=b with GPU acceleration via cuSOLVER/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
     'og_image': 'https://walkerchi.github.io/torch-sla/_static/logo.jpg',
     'twitter_card': 'summary_large_image',
     'google_site_verification': '',  # Add your Google Search Console verification code here

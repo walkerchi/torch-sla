@@ -1,17 +1,17 @@
 .. torch-sla documentation master file
 .. meta::
-   :description: torch-sla: Solve sparse linear systems in PyTorch. GPU-accelerated sparse matrix solver with autograd. Works with torch.sparse tensors. pip install torch-sla.
-   :keywords: torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear solver, torch.sparse, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse, autograd sparse, scipy sparse pytorch, spsolve pytorch, FEM pytorch
+   :description: torch-sla: PyTorch Sparse Linear Algebra library. GPU-accelerated sparse solvers with autograd. Works with torch.sparse tensors. pip install torch-sla.
+   :keywords: torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear algebra, torch.sparse, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse, autograd sparse, scipy sparse pytorch, spsolve pytorch, FEM pytorch
    :google-site-verification: 
    :robots: index, follow
 
 .. image:: _static/logo.jpg
-   :alt: torch-sla - PyTorch Sparse Matrix Solver with GPU Acceleration
+   :alt: torch-sla - PyTorch Sparse Linear Algebra with GPU Acceleration
    :align: center
    :width: 300px
 
-torch-sla: PyTorch Sparse Matrix Solver
-=======================================
+torch-sla: PyTorch Sparse Linear Algebra
+========================================
 
 .. raw:: html
 
