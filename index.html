@@ -1,23 +1,30 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head><meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Introduction" href="introduction.html" />
+<meta content="torch-sla: PyTorch Sparse Linear Algebra library. GPU-accelerated sparse solvers with autograd. Works with torch.sparse tensors. pip install torch-sla." name="description" />
+<meta content="torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear algebra, torch.sparse, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse, autograd sparse, scipy sparse pytorch, spsolve pytorch, FEM pytorch" name="keywords" />
+<meta content="index, follow" name="robots" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Introduction" href="introduction.html">
+        <link rel="canonical" href="https://walkerchi.github.io/torch-sla/index.html">
+        <link rel="prefetch" href="_static/logo.jpg" as="image">
 
-    <!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
-        <title>torch-sla 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="shortcut icon" href="_static/logo.jpg"><!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=69152257" />
     
     
 
 
 <style>
   body {
-    --color-code-background: #f8f8f8;
-  --color-code-foreground: black;
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
   
   }
   @media not print {
@@ -88,19 +95,6 @@
       <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
     </svg>
   </symbol>
-  <symbol id="svg-sun-half" viewBox="0 0 24 24">
-    <title>Auto light/dark mode</title>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M13 12h5" />
-      <path d="M13 15h4" />
-      <path d="M13 18h1" />
-      <path d="M13 9h4" />
-      <path d="M13 6h1" />
-    </svg>
-  </symbol>
   <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
     <title>Auto light/dark, in light mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -141,7 +135,7 @@
       <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
       <path d="M13.5 6.5l4 4" />
       <path d="M20 21l2 -2l-2 -2" />
-      <path d="M17 17l-2 2l2 2" /
+      <path d="M17 17l-2 2l2 2" />
     </svg>
   </symbol>
   <symbol id="svg-eye" viewBox="0 0 24 24">
@@ -157,14 +151,10 @@
   </symbol>
 </svg>
 
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
-<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
-<label class="overlay sidebar-overlay" for="__navigation">
-  <div class="visually-hidden">Hide navigation sidebar</div>
-</label>
-<label class="overlay toc-overlay" for="__toc">
-  <div class="visually-hidden">Hide table of contents sidebar</div>
-</label>
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
 
 <a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
@@ -174,26 +164,23 @@
   <header class="mobile-header">
     <div class="header-left">
       <label class="nav-overlay-icon" for="__navigation">
-        <div class="visually-hidden">Toggle site navigation sidebar</div>
-        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">torch-sla 0.0.1 documentation</div></a>
+      <a href="#"><div class="brand">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
-        <button class="theme-toggle">
-          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
           <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
           <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
-        <div class="visually-hidden">Toggle table of contents sidebar</div>
-        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
   </header>
@@ -201,9 +188,11 @@
     <div class="sidebar-container">
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo.jpg" alt="Logo"/>
+  </div>
   
-  
-  <span class="sidebar-brand-text">torch-sla 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -211,11 +200,13 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+  <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">torch_sla package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
 </ul>
 
 </div>
@@ -242,46 +233,518 @@
   </a>
 </div>
 <div class="theme-toggle-container theme-toggle-content">
-            <button class="theme-toggle">
-              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
               <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
-            <div class="visually-hidden">Toggle table of contents sidebar</div>
-            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="welcome-to-torch-sla-s-documentation">
-<h1>Welcome to torch-sla’s documentation!<a class="headerlink" href="#welcome-to-torch-sla-s-documentation" title="Link to this heading">¶</a></h1>
+          <a class="reference internal image-reference" href="_images/logo.jpg"><img alt="torch-sla - PyTorch Sparse Linear Algebra with GPU Acceleration" class="align-center" src="_images/logo.jpg" style="width: 300px;" />
+</a>
+<section id="torch-sla-pytorch-sparse-linear-algebra">
+<h1>torch-sla: PyTorch Sparse Linear Algebra<a class="headerlink" href="#torch-sla-pytorch-sparse-linear-algebra" title="Link to this heading">¶</a></h1>
+<p><strong>torch-sla</strong> (<span class="gradient-text">Torch Sparse Linear Algebra</span>) is a memory-efficient, differentiable sparse linear equation solver library for PyTorch with multiple backends. Perfect for scientific computing, FEM, CFD, and machine learning applications requiring sparse matrix operations with automatic differentiation.</p><p align="center">
+  <a href="https://github.com/walkerchi/torch-sla"><img src="https://img.shields.io/badge/GitHub-torch--sla-blue?logo=github" alt="GitHub"></a>
+  <a href="https://pypi.org/project/torch-sla/"><img src="https://img.shields.io/pypi/v/torch-sla?color=green" alt="PyPI"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p><section id="why-torch-sla">
+<h2>Why torch-sla?<a class="headerlink" href="#why-torch-sla" title="Link to this heading">¶</a></h2>
+<ul class="feature-list">
+  <li>🚀 <span class="gradient-text">High Performance</span>: CUDA-accelerated solvers via cuSOLVER and cuDSS</li>
+  <li>💾 <span class="gradient-text">Memory Efficient</span>: Store only non-zero elements, enabling solving of systems with millions of unknowns</li>
+  <li>🔄 <span class="gradient-text">Differentiable</span>: Full gradient support through <code>torch.autograd</code></li>
+  <li>📦 <span class="gradient-text">Batch Processing</span>: Solve thousands of systems in parallel</li>
+  <li>🌐 <span class="gradient-text">Distributed</span>: Domain decomposition with halo exchange for large-scale problems</li>
+  <li>🔧 <span class="gradient-text">Flexible</span>: Multiple backends and solver methods</li>
+</ul></section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h2>
+<ul class="feature-list">
+  <li><span class="gradient-text">Memory efficient</span>: Only stores non-zero elements — a 1M×1M matrix with 1% density uses ~80MB instead of ~8TB</li>
+  <li><span class="gradient-text">Full gradient support</span> via torch.autograd for end-to-end differentiable pipelines</li>
+  <li><span class="gradient-text">Multiple backends</span>: <a href="https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html">SciPy</a>, <a href="https://eigen.tuxfamily.org/">Eigen</a>, <a href="https://docs.nvidia.com/cuda/cusolver/">cuSOLVER</a>, <a href="https://docs.nvidia.com/cuda/cudss/">cuDSS</a></li>
+  <li><span class="gradient-text">Batch solving</span>: Same-layout and different-layout sparse matrices</li>
+  <li><span class="gradient-text">Distributed solving</span>: Domain decomposition with halo exchange</li>
+  <li><span class="gradient-text">169M+ DOF tested</span>: Scales to very large problems with near-linear complexity</li>
+</ul></section>
+<section id="quick-start">
+<h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h2>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>torch-sla
+</pre></div>
+</div>
+</section>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="c1"># Create a sparse matrix in COO format</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Solve Ax = b</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="cuda-acceleration">
+<h3>CUDA Acceleration<a class="headerlink" href="#cuda-acceleration" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Move to GPU for CUDA-accelerated solving</span>
+<span class="n">A_cuda</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">b_cuda</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">)</span>  <span class="c1"># Uses cuDSS or cuSOLVER automatically</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="use-cases">
+<h2>Use Cases<a class="headerlink" href="#use-cases" title="Link to this heading">¶</a></h2>
+<p>torch-sla is ideal for:</p>
+<ul class="simple">
+<li><p><strong>Finite Element Method (FEM)</strong>: Solve large sparse systems from FEM discretization</p></li>
+<li><p><strong>Computational Fluid Dynamics (CFD)</strong>: Efficient sparse solvers for Navier-Stokes</p></li>
+<li><p><strong>Physics-Informed Neural Networks (PINNs)</strong>: Differentiable sparse operations for physics constraints</p></li>
+<li><p><strong>Graph Neural Networks</strong>: Sparse message passing and Laplacian operations</p></li>
+<li><p><strong>Optimization</strong>: Gradient-based optimization involving sparse linear systems</p></li>
+</ul>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#using-pip">Using pip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#recommended-backends">Recommended Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#core-classes">Core Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#backends">Backends</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#benchmark-results">Benchmark Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#performance-tips">Performance Tips</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">torch_sla package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#torch-sla-linear-solve-module">torch_sla.linear_solve module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#module-contents">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#using-pip">Using pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#optional-dependencies">Optional Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#backend-requirements">Backend Requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#sparsetensor">SparseTensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#sparsetensorlist">SparseTensorList</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torch_sla.html#dsparsetensor">DSparseTensor</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#visualization">Visualization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#i-o-operations">I/O Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#batched-solve">Batched Solve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#distributed-solve">Distributed Solve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#iterative-solvers">Iterative Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#cuda-usage">CUDA Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#advanced-examples">Advanced Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#jupyter-notebook-examples">Jupyter Notebook Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#test-environment">Test Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#solver-performance-comparison">Solver Performance Comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#large-scale-benchmarks">Large-Scale Benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#matrix-multiplication-benchmarks">Matrix Multiplication Benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#suitesparse-matrix-collection">SuiteSparse Matrix Collection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#distributed-solve-multi-gpu">Distributed Solve (Multi-GPU)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#backend-comparison-summary">Backend Comparison Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#recommendations">Recommendations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#running-benchmarks">Running Benchmarks</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h1>
+</section>
+<hr class="docutils" />
+<section id="frequently-asked-questions-faq">
+<h1>Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Link to this heading">¶</a></h1>
+<section id="what-is-torch-sla">
+<h2>What is torch-sla?<a class="headerlink" href="#what-is-torch-sla" title="Link to this heading">¶</a></h2>
+<p>torch-sla (Torch Sparse Linear Algebra) is a Python library that provides differentiable sparse linear equation solvers for PyTorch. It solves systems of the form Ax = b where A is a sparse matrix, with full support for automatic differentiation (autograd) and GPU acceleration via CUDA.</p>
+</section>
+<section id="how-do-i-solve-a-sparse-linear-system-in-pytorch">
+<h2>How do I solve a sparse linear system in PyTorch?<a class="headerlink" href="#how-do-i-solve-a-sparse-linear-system-in-pytorch" title="Link to this heading">¶</a></h2>
+<p>Use torch-sla’s <code class="docutils literal notranslate"><span class="pre">SparseTensor</span></code> class:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="c1"># Create sparse matrix from COO format (values, row indices, column indices)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Solve Ax = b</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This works on both CPU and GPU, and supports gradient computation.</p>
+</section>
+<section id="what-sparse-solvers-does-torch-sla-support">
+<h2>What sparse solvers does torch-sla support?<a class="headerlink" href="#what-sparse-solvers-does-torch-sla-support" title="Link to this heading">¶</a></h2>
+<p>torch-sla supports multiple backends:</p>
+<ul class="simple">
+<li><p><strong>CPU</strong>: SciPy (SuperLU, UMFPACK, CG, BiCGStab, GMRES), Eigen (CG, BiCGStab)</p></li>
+<li><p><strong>GPU</strong>: cuSOLVER (QR, Cholesky, LU), cuDSS (LU, Cholesky, LDLT)</p></li>
+</ul>
+<p>The library automatically selects the best solver based on your hardware and matrix properties.</p>
+</section>
+<section id="can-i-compute-gradients-through-sparse-solve">
+<h2>Can I compute gradients through sparse solve?<a class="headerlink" href="#can-i-compute-gradients-through-sparse-solve" title="Link to this heading">¶</a></h2>
+<p>Yes. torch-sla fully supports PyTorch autograd:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">...</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># Computes gradients w.r.t. val and b</span>
+</pre></div>
+</div>
+</section>
+<section id="how-do-i-solve-batched-sparse-systems">
+<h2>How do I solve batched sparse systems?<a class="headerlink" href="#how-do-i-solve-batched-sparse-systems" title="Link to this heading">¶</a></h2>
+<p>torch-sla supports batched solving for matrices with the same sparsity pattern:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Batched values: [batch_size, nnz]</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val_batch</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_batch</span><span class="p">)</span>  <span class="c1"># Solves all systems in parallel</span>
+</pre></div>
+</div>
+<p>For matrices with different patterns, use <code class="docutils literal notranslate"><span class="pre">SparseTensorList</span></code>.</p>
+</section>
+<section id="how-do-i-use-torch-sla-on-gpu">
+<h2>How do I use torch-sla on GPU?<a class="headerlink" href="#how-do-i-use-torch-sla-on-gpu" title="Link to this heading">¶</a></h2>
+<p>Simply move your tensors to CUDA:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">A_cuda</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cuda</span><span class="p">())</span>  <span class="c1"># Uses cuDSS or cuSOLVER</span>
+</pre></div>
+</div>
+</section>
+<section id="what-is-the-difference-between-sparsetensor-and-dsparsetensor">
+<h2>What is the difference between SparseTensor and DSparseTensor?<a class="headerlink" href="#what-is-the-difference-between-sparsetensor-and-dsparsetensor" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SparseTensor</span></code>: Single sparse matrix (optionally batched), for standard solving</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DSparseTensor</span></code>: Distributed sparse tensor with domain decomposition, for large-scale parallel computing with halo exchange</p></li>
+</ul>
+</section>
+</section>
+<section id="comparison-with-alternatives">
+<h1>Comparison with Alternatives<a class="headerlink" href="#comparison-with-alternatives" title="Link to this heading">¶</a></h1>
+<section id="torch-sla-vs-scipy-sparse-linalg">
+<h2>torch-sla vs scipy.sparse.linalg<a class="headerlink" href="#torch-sla-vs-scipy-sparse-linalg" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given comparison-table docutils container">
+<table class="comparison-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p><strong>torch-sla</strong> ✅</p></th>
+<th class="head"><p>scipy.sparse.linalg</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PyTorch Integration</p></td>
+<td><p>✅ <strong>Native tensors</strong></p></td>
+<td><p>❌ Requires numpy copy</p></td>
+</tr>
+<tr class="row-odd"><td><p>GPU Acceleration</p></td>
+<td><p>✅ <strong>CUDA (cuDSS, cuSOLVER)</strong></p></td>
+<td><p>❌ CPU only</p></td>
+</tr>
+<tr class="row-even"><td><p>Autograd Gradients</p></td>
+<td><p>✅ <strong>Full support (adjoint)</strong></p></td>
+<td><p>❌ No gradients</p></td>
+</tr>
+<tr class="row-odd"><td><p>Batched Solve</p></td>
+<td><p>✅ <strong>Parallel batch solve</strong></p></td>
+<td><p>❌ Loop required</p></td>
+</tr>
+<tr class="row-even"><td><p>Large Scale (&gt;2M DOF)</p></td>
+<td><p>✅ <strong>169M DOF tested</strong></p></td>
+<td><p>⚠️ Memory limited</p></td>
+</tr>
+<tr class="row-odd"><td><p>Distributed Computing</p></td>
+<td><p>✅ <strong>DSparseTensor</strong></p></td>
+<td><p>❌ Not supported</p></td>
+</tr>
+<tr class="row-even"><td><p>Eigenvalue/SVD</p></td>
+<td><p>✅ <strong>Differentiable</strong></p></td>
+<td><p>⚠️ No gradients</p></td>
+</tr>
+<tr class="row-odd"><td><p>Nonlinear Solve</p></td>
+<td><p>✅ <strong>Newton/Anderson</strong></p></td>
+<td><p>❌ Not included</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="torch-sla-vs-torch-linalg-solve">
+<h2>torch-sla vs torch.linalg.solve<a class="headerlink" href="#torch-sla-vs-torch-linalg-solve" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given comparison-table docutils container">
+<table class="comparison-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p><strong>torch-sla</strong> ✅</p></th>
+<th class="head"><p>torch.linalg.solve</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Matrix Type</p></td>
+<td><p>✅ <strong>Sparse (COO/CSR)</strong></p></td>
+<td><p>❌ Dense only</p></td>
+</tr>
+<tr class="row-odd"><td><p>Memory (1M×1M, 1% density)</p></td>
+<td><p>✅ <strong>~80 MB</strong></p></td>
+<td><p>❌ ~8 TB (impossible)</p></td>
+</tr>
+<tr class="row-even"><td><p>Max Problem Size</p></td>
+<td><p>✅ <strong>169M+ DOF</strong></p></td>
+<td><p>❌ ~50K (GPU memory)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Specialized Solvers</p></td>
+<td><p>✅ <strong>LU, Cholesky, CG, BiCGStab</strong></p></td>
+<td><p>⚠️ Dense LU only</p></td>
+</tr>
+<tr class="row-even"><td><p>Batched Operations</p></td>
+<td><p>✅ <strong>Same/different patterns</strong></p></td>
+<td><p>⚠️ Same shape only</p></td>
+</tr>
+<tr class="row-odd"><td><p>GPU Support</p></td>
+<td><p>✅ <strong>cuDSS, cuSOLVER, PyTorch</strong></p></td>
+<td><p>✅ Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Autograd</p></td>
+<td><p>✅ <strong>O(1) graph nodes</strong></p></td>
+<td><p>✅ Yes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="torch-sla-vs-pytorch-geometric-pyg">
+<h2>torch-sla vs PyTorch Geometric (PyG)<a class="headerlink" href="#torch-sla-vs-pytorch-geometric-pyg" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given comparison-table docutils container">
+<table class="comparison-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p><strong>torch-sla</strong> ✅</p></th>
+<th class="head"><p>PyTorch Geometric</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Primary Focus</p></td>
+<td><p>✅ <strong>Sparse Linear Algebra</strong></p></td>
+<td><p>Graph Neural Networks</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linear System Solve (Ax=b)</p></td>
+<td><p>✅ <strong>Direct + Iterative</strong></p></td>
+<td><p>❌ Not supported</p></td>
+</tr>
+<tr class="row-even"><td><p>Eigenvalue Decomposition</p></td>
+<td><p>✅ <strong>Differentiable eigsh/eigs</strong></p></td>
+<td><p>❌ Not included</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sparse Matrix Ops</p></td>
+<td><p>✅ <strong>Full suite (solve, norm, eigs)</strong></p></td>
+<td><p>⚠️ SpMM, SpMV only</p></td>
+</tr>
+<tr class="row-even"><td><p>FEM/CFD Applications</p></td>
+<td><p>✅ <strong>Designed for</strong></p></td>
+<td><p>⚠️ Not primary use</p></td>
+</tr>
+<tr class="row-odd"><td><p>Message Passing</p></td>
+<td><p>❌ Not included</p></td>
+<td><p>✅ <strong>Core feature</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>GNN Layers</p></td>
+<td><p>❌ Not included</p></td>
+<td><p>✅ <strong>Core feature</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Complementary Usage</strong>: torch-sla and PyG work well together — use PyG for graph learning and torch-sla for solving linear systems on graph Laplacians.</p>
+</section>
+<section id="torch-sla-vs-nvidia-amgx">
+<h2>torch-sla vs NVIDIA AmgX<a class="headerlink" href="#torch-sla-vs-nvidia-amgx" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given comparison-table docutils container">
+<table class="comparison-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p><strong>torch-sla</strong> ✅</p></th>
+<th class="head"><p>NVIDIA AmgX</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Installation</p></td>
+<td><p>✅ <strong>pip install torch-sla</strong></p></td>
+<td><p>❌ Complex build process</p></td>
+</tr>
+<tr class="row-odd"><td><p>PyTorch Integration</p></td>
+<td><p>✅ <strong>Native</strong></p></td>
+<td><p>❌ Requires wrapper</p></td>
+</tr>
+<tr class="row-even"><td><p>Autograd Support</p></td>
+<td><p>✅ <strong>Full gradient flow</strong></p></td>
+<td><p>❌ No gradients</p></td>
+</tr>
+<tr class="row-odd"><td><p>Python API</p></td>
+<td><p>✅ <strong>Pythonic</strong></p></td>
+<td><p>⚠️ C++ focused</p></td>
+</tr>
+<tr class="row-even"><td><p>Multigrid (AMG)</p></td>
+<td><p>❌ Not yet</p></td>
+<td><p>✅ <strong>Core feature</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Preconditioners</p></td>
+<td><p>⚠️ Jacobi</p></td>
+<td><p>✅ <strong>ILU, AMG, etc.</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Documentation</p></td>
+<td><p>✅ <strong>Comprehensive</strong></p></td>
+<td><p>⚠️ Limited examples</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="torch-sla-vs-petsc">
+<h2>torch-sla vs PETSc<a class="headerlink" href="#torch-sla-vs-petsc" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given comparison-table docutils container">
+<table class="comparison-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p><strong>torch-sla</strong> ✅</p></th>
+<th class="head"><p>PETSc</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Installation</p></td>
+<td><p>✅ <strong>pip install</strong></p></td>
+<td><p>❌ Complex (MPI, compilers)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Learning Curve</p></td>
+<td><p>✅ <strong>Simple Python API</strong></p></td>
+<td><p>❌ Steep (C/Fortran heritage)</p></td>
+</tr>
+<tr class="row-even"><td><p>PyTorch Integration</p></td>
+<td><p>✅ <strong>Native tensors</strong></p></td>
+<td><p>❌ Requires petsc4py + copies</p></td>
+</tr>
+<tr class="row-odd"><td><p>Autograd</p></td>
+<td><p>✅ <strong>Full support</strong></p></td>
+<td><p>❌ No gradients</p></td>
+</tr>
+<tr class="row-even"><td><p>Solver Variety</p></td>
+<td><p>⚠️ Core methods</p></td>
+<td><p>✅ <strong>Extensive (KSP, SNES)</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>MPI Distributed</p></td>
+<td><p>⚠️ DSparseTensor (shared memory)</p></td>
+<td><p>✅ <strong>Full MPI support</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Production Scale</p></td>
+<td><p>⚠️ 169M DOF tested</p></td>
+<td><p>✅ <strong>Exascale proven</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="summary-when-to-use-torch-sla">
+<h2>Summary: When to Use torch-sla<a class="headerlink" href="#summary-when-to-use-torch-sla" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Use torch-sla When</p></th>
+<th class="head"><p>Consider Alternatives When</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>✅ You need <strong>PyTorch integration</strong></p></td>
+<td><p>You’re not using PyTorch</p></td>
+</tr>
+<tr class="row-odd"><td><p>✅ You need <strong>gradient flow</strong> through solve</p></td>
+<td><p>Gradients not needed</p></td>
+</tr>
+<tr class="row-even"><td><p>✅ Problem size <strong>&lt; 169M DOF</strong></p></td>
+<td><p>Exascale problems (use PETSc)</p></td>
+</tr>
+<tr class="row-odd"><td><p>✅ You want <strong>simple pip install</strong></p></td>
+<td><p>You need AMG preconditioners (AmgX)</p></td>
+</tr>
+<tr class="row-even"><td><p>✅ <strong>Batched</strong> sparse systems</p></td>
+<td><p>Complex preconditioning (PETSc)</p></td>
+</tr>
+<tr class="row-odd"><td><p>✅ <strong>GPU acceleration</strong> with minimal setup</p></td>
+<td><p>Full MPI distributed (PETSc)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="indices-and-search">
+<h1>Indices and Search<a class="headerlink" href="#indices-and-search" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
+<p>torch-sla is released under the MIT License. See <a class="reference external" href="https://github.com/walkerchi/torch-sla/blob/main/LICENSE">LICENSE</a> for details.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h2>
+<p>If you use torch-sla in your research, please cite:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@software</span><span class="p">{</span><span class="nl">torch_sla</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{torch-sla: Torch Sparse Linear Algebra}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Walker Chi}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{https://github.com/walkerchi/torch-sla}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -305,27 +768,85 @@
             <div class="copyright">
                 Copyright &#169; 2024, walker chi
             </div>
-            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
-            
+            Made with 
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             
           </div>
           <div class="right-details">
-            
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/walkerchi/torch-sla" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">torch-sla: PyTorch Sparse Linear Algebra</a><ul>
+<li><a class="reference internal" href="#why-torch-sla">Why torch-sla?</a></li>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#quick-start">Quick Start</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li><a class="reference internal" href="#cuda-acceleration">CUDA Acceleration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#use-cases">Use Cases</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#frequently-asked-questions-faq">Frequently Asked Questions (FAQ)</a><ul>
+<li><a class="reference internal" href="#what-is-torch-sla">What is torch-sla?</a></li>
+<li><a class="reference internal" href="#how-do-i-solve-a-sparse-linear-system-in-pytorch">How do I solve a sparse linear system in PyTorch?</a></li>
+<li><a class="reference internal" href="#what-sparse-solvers-does-torch-sla-support">What sparse solvers does torch-sla support?</a></li>
+<li><a class="reference internal" href="#can-i-compute-gradients-through-sparse-solve">Can I compute gradients through sparse solve?</a></li>
+<li><a class="reference internal" href="#how-do-i-solve-batched-sparse-systems">How do I solve batched sparse systems?</a></li>
+<li><a class="reference internal" href="#how-do-i-use-torch-sla-on-gpu">How do I use torch-sla on GPU?</a></li>
+<li><a class="reference internal" href="#what-is-the-difference-between-sparsetensor-and-dsparsetensor">What is the difference between SparseTensor and DSparseTensor?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#comparison-with-alternatives">Comparison with Alternatives</a><ul>
+<li><a class="reference internal" href="#torch-sla-vs-scipy-sparse-linalg">torch-sla vs scipy.sparse.linalg</a></li>
+<li><a class="reference internal" href="#torch-sla-vs-torch-linalg-solve">torch-sla vs torch.linalg.solve</a></li>
+<li><a class="reference internal" href="#torch-sla-vs-pytorch-geometric-pyg">torch-sla vs PyTorch Geometric (PyG)</a></li>
+<li><a class="reference internal" href="#torch-sla-vs-nvidia-amgx">torch-sla vs NVIDIA AmgX</a></li>
+<li><a class="reference internal" href="#torch-sla-vs-petsc">torch-sla vs PETSc</a></li>
+<li><a class="reference internal" href="#summary-when-to-use-torch-sla">Summary: When to Use torch-sla</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-search">Indices and Search</a><ul>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#citation">Citation</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="_static/documentation_options.js?v=b14783f5"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/scripts/furo.js?v=4e2eecee"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

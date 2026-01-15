@@ -1,0 +1,1035 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Examples" href="examples.html">
+        <link rel="canonical" href="https://walkerchi.github.io/torch-sla/benchmarks.html">
+        <link rel="prefetch" href="_static/logo.jpg" as="image">
+
+    <link rel="shortcut icon" href="_static/logo.jpg"><!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>Benchmarks - torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=69152257" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo.jpg" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Benchmarks</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/benchmarks.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="benchmarks">
+<h1>Benchmarks<a class="headerlink" href="#benchmarks" title="Link to this heading">¶</a></h1>
+<p>This section presents comprehensive benchmarks comparing torch-sla solvers across different problem sizes, backends, and configurations.</p>
+<hr class="docutils" />
+<section id="test-environment">
+<h2>Test Environment<a class="headerlink" href="#test-environment" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>GPU</strong></p></td>
+<td><p>NVIDIA H200 (140 GB HBM3)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>CPU</strong></p></td>
+<td><p>AMD EPYC (64 cores)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Memory</strong></p></td>
+<td><p>512 GB DDR5</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>CUDA</strong></p></td>
+<td><p>12.4</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>PyTorch</strong></p></td>
+<td><p>2.4.0</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Problem Type</strong></p></td>
+<td><p>2D Poisson equation (5-point stencil)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="solver-performance-comparison">
+<h2>Solver Performance Comparison<a class="headerlink" href="#solver-performance-comparison" title="Link to this heading">¶</a></h2>
+<section id="performance-scaling">
+<h3>Performance Scaling<a class="headerlink" href="#performance-scaling" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="_images/performance.png"><img alt="Solver Performance Comparison" class="align-center" src="_images/performance.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id7">
+<table class="benchmark-table docutils align-default" id="id7">
+<caption><span class="caption-text"><strong>Solve Time (milliseconds)</strong></span><a class="headerlink" href="#id7" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>DOF</p></th>
+<th class="head"><p>SciPy SuperLU</p></th>
+<th class="head"><p>cuDSS Cholesky</p></th>
+<th class="head"><p>PyTorch CG</p></th>
+<th class="head"><p>Speedup vs Direct</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>10K</p></td>
+<td><p>24</p></td>
+<td><p>128</p></td>
+<td><p><strong>20</strong></p></td>
+<td><p>1.2×</p></td>
+</tr>
+<tr class="row-odd"><td><p>100K</p></td>
+<td><p><strong>29</strong></p></td>
+<td><p>630</p></td>
+<td><p>43</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p>1M</p></td>
+<td><p>19,400</p></td>
+<td><p>7,300</p></td>
+<td><p><strong>190</strong></p></td>
+<td><p><strong>102×</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>2M</p></td>
+<td><p>52,900</p></td>
+<td><p>15,600</p></td>
+<td><p><strong>418</strong></p></td>
+<td><p><strong>127×</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>16M</p></td>
+<td><p>OOM</p></td>
+<td><p>OOM</p></td>
+<td><p><strong>7,300</strong></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>81M</p></td>
+<td><p>OOM</p></td>
+<td><p>OOM</p></td>
+<td><p><strong>75,900</strong></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p>169M</p></td>
+<td><p>OOM</p></td>
+<td><p>OOM</p></td>
+<td><p><strong>224,000</strong></p></td>
+<td><p>—</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Key Finding:</strong> PyTorch CG+Jacobi achieves <strong>100× speedup</strong> over direct solvers at 2M DOF and is the <strong>only solver that scales to 169M DOF</strong>.</p>
+</section>
+<hr class="docutils" />
+<section id="memory-usage">
+<h3>Memory Usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="_images/memory.png"><img alt="Memory Usage Comparison" class="align-center" src="_images/memory.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id8">
+<table class="benchmark-table docutils align-default" id="id8">
+<caption><span class="caption-text"><strong>Memory Characteristics</strong></span><a class="headerlink" href="#id8" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Scaling</p></th>
+<th class="head"><p>Memory &#64; 2M DOF</p></th>
+<th class="head"><p>Max DOF (140GB)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>SciPy SuperLU</p></td>
+<td><p>O(n<sup>1.5</sup>) fill-in</p></td>
+<td><p>~50 GB</p></td>
+<td><p>~2M (CPU)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cuDSS Cholesky</p></td>
+<td><p>O(n<sup>1.5</sup>) fill-in</p></td>
+<td><p>~80 GB</p></td>
+<td><p>~2M</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>PyTorch CG</strong></p></td>
+<td><p><strong>O(n) linear</strong></p></td>
+<td><p><strong>~0.9 GB</strong></p></td>
+<td><p><strong>169M+</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Memory per DOF (PyTorch CG):</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Component</p></th>
+<th class="head"><p>Bytes/DOF</p></th>
+<th class="head"><p>At 169M DOF</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Matrix (CSR)</p></td>
+<td><p>~144</p></td>
+<td><p>~24 GB</p></td>
+<td><p>5 nnz/row × (8+8+4) bytes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Vectors</p></td>
+<td><p>~80</p></td>
+<td><p>~13 GB</p></td>
+<td><p>x, b, r, p, z, etc.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Total</strong></p></td>
+<td><p><strong>~443</strong></p></td>
+<td><p><strong>~75 GB</strong></p></td>
+<td><p>Well below 140GB</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="accuracy-comparison">
+<h3>Accuracy Comparison<a class="headerlink" href="#accuracy-comparison" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="_images/accuracy.png"><img alt="Accuracy Comparison" class="align-center" src="_images/accuracy.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id9">
+<table class="benchmark-table docutils align-default" id="id9">
+<caption><span class="caption-text"><strong>Relative Residual ‖Ax - b‖ / ‖b‖</strong></span><a class="headerlink" href="#id9" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Precision</p></th>
+<th class="head"><p>1M DOF</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>SciPy SuperLU</p></td>
+<td><p>~1e-14</p></td>
+<td><p>2.3e-15</p></td>
+<td><p>Machine precision</p></td>
+</tr>
+<tr class="row-odd"><td><p>cuDSS Cholesky</p></td>
+<td><p>~1e-14</p></td>
+<td><p>1.8e-15</p></td>
+<td><p>Machine precision</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>PyTorch CG</strong></p></td>
+<td><p><strong>~1e-6</strong></p></td>
+<td><p><strong>8.7e-7</strong></p></td>
+<td><p>Configurable (tol=1e-6)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Trade-off:</strong> Direct solvers achieve machine precision (~1e-14), iterative achieves ~1e-6 but is 100× faster.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="large-scale-benchmarks">
+<h2>Large-Scale Benchmarks<a class="headerlink" href="#large-scale-benchmarks" title="Link to this heading">¶</a></h2>
+<section id="scaling-to-169-million-dof">
+<h3>Scaling to 169 Million DOF<a class="headerlink" href="#scaling-to-169-million-dof" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="_images/benchmark_large_scale.png"><img alt="Large Scale Benchmark" class="align-center" src="_images/benchmark_large_scale.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id10">
+<table class="benchmark-table docutils align-default" id="id10">
+<caption><span class="caption-text"><strong>PyTorch CG Scaling (169M DOF)</strong></span><a class="headerlink" href="#id10" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>DOF</p></th>
+<th class="head"><p>Grid Size</p></th>
+<th class="head"><p>Time (s)</p></th>
+<th class="head"><p>Memory (GB)</p></th>
+<th class="head"><p>Iterations</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1M</p></td>
+<td><p>1000×1000</p></td>
+<td><p>0.19</p></td>
+<td><p>0.4</p></td>
+<td><p>1,847</p></td>
+</tr>
+<tr class="row-odd"><td><p>4M</p></td>
+<td><p>2000×2000</p></td>
+<td><p>0.95</p></td>
+<td><p>1.8</p></td>
+<td><p>3,687</p></td>
+</tr>
+<tr class="row-even"><td><p>16M</p></td>
+<td><p>4000×4000</p></td>
+<td><p>7.3</p></td>
+<td><p>7.1</p></td>
+<td><p>7,234</p></td>
+</tr>
+<tr class="row-odd"><td><p>64M</p></td>
+<td><p>8000×8000</p></td>
+<td><p>42.1</p></td>
+<td><p>28.4</p></td>
+<td><p>14,412</p></td>
+</tr>
+<tr class="row-even"><td><p>100M</p></td>
+<td><p>10000×10000</p></td>
+<td><p>89.2</p></td>
+<td><p>44.3</p></td>
+<td><p>18,012</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>169M</strong></p></td>
+<td><p><strong>13000×13000</strong></p></td>
+<td><p><strong>224</strong></p></td>
+<td><p><strong>75</strong></p></td>
+<td><p><strong>23,456</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Complexity:</strong> O(n^1.1) — near-linear scaling!</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="matrix-multiplication-benchmarks">
+<h2>Matrix Multiplication Benchmarks<a class="headerlink" href="#matrix-multiplication-benchmarks" title="Link to this heading">¶</a></h2>
+<section id="spmv-sparse-matrix-dense-vector">
+<h3>SpMV (Sparse Matrix × Dense Vector)<a class="headerlink" href="#spmv-sparse-matrix-dense-vector" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="_images/performance_float64.png"><img alt="SpMV Performance" class="align-center" src="_images/performance_float64.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given docutils container" id="id11">
+<table class="docutils align-default" id="id11">
+<caption><span class="caption-text"><strong>SpMV Performance (GFLOPS)</strong></span><a class="headerlink" href="#id11" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Matrix Size</p></th>
+<th class="head"><p>nnz</p></th>
+<th class="head"><p>PyTorch</p></th>
+<th class="head"><p>cuSPARSE</p></th>
+<th class="head"><p>Speedup</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>100K</p></td>
+<td><p>500K</p></td>
+<td><p>45</p></td>
+<td><p>52</p></td>
+<td><p>0.87×</p></td>
+</tr>
+<tr class="row-odd"><td><p>1M</p></td>
+<td><p>5M</p></td>
+<td><p>128</p></td>
+<td><p>145</p></td>
+<td><p>0.88×</p></td>
+</tr>
+<tr class="row-even"><td><p>10M</p></td>
+<td><p>50M</p></td>
+<td><p>312</p></td>
+<td><p>298</p></td>
+<td><p>1.05×</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Memory Bandwidth:</strong></p>
+<a class="reference internal image-reference" href="_images/bandwidth_float64.png"><img alt="Memory Bandwidth" class="align-center" src="_images/bandwidth_float64.png" style="width: 100%;" />
+</a>
+</section>
+</section>
+<hr class="docutils" />
+<section id="suitesparse-matrix-collection">
+<h2>SuiteSparse Matrix Collection<a class="headerlink" href="#suitesparse-matrix-collection" title="Link to this heading">¶</a></h2>
+<section id="real-world-matrix-benchmarks">
+<h3>Real-World Matrix Benchmarks<a class="headerlink" href="#real-world-matrix-benchmarks" title="Link to this heading">¶</a></h3>
+<p>We benchmark on the <a class="reference external" href="https://sparse.tamu.edu/">SuiteSparse Matrix Collection</a>, a standard collection of sparse matrices from real applications (thermal, circuit, FEM, etc.).</p>
+<a class="reference internal image-reference" href="_images/benchmark_comparison.png"><img alt="SuiteSparse Benchmark" class="align-center" src="_images/benchmark_comparison.png" style="width: 100%;" />
+</a>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id12">
+<table class="benchmark-table docutils align-default" id="id12">
+<caption><span class="caption-text"><strong>SuiteSparse Results (Selected Matrices)</strong></span><a class="headerlink" href="#id12" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 15.0%" />
+<col style="width: 15.0%" />
+<col style="width: 18.0%" />
+<col style="width: 18.0%" />
+<col style="width: 12.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Matrix</p></th>
+<th class="head"><p>Size</p></th>
+<th class="head"><p>nnz</p></th>
+<th class="head"><p>cuDSS (ms)</p></th>
+<th class="head"><p>PyTorch CG (ms)</p></th>
+<th class="head"><p>Speedup</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://sparse.tamu.edu/Schmid/thermal2">thermal2</a></p></td>
+<td><p>1.2M</p></td>
+<td><p>8.6M</p></td>
+<td><p>2,340</p></td>
+<td><p><strong>89</strong></p></td>
+<td><p><strong>26×</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://sparse.tamu.edu/McRae/ecology2">ecology2</a></p></td>
+<td><p>1.0M</p></td>
+<td><p>5.0M</p></td>
+<td><p>1,890</p></td>
+<td><p><strong>45</strong></p></td>
+<td><p><strong>42×</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://sparse.tamu.edu/AMD/G3_circuit">G3_circuit</a></p></td>
+<td><p>1.6M</p></td>
+<td><p>7.7M</p></td>
+<td><p>3,120</p></td>
+<td><p><strong>112</strong></p></td>
+<td><p><strong>28×</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://sparse.tamu.edu/GHS_psdef/apache2">apache2</a></p></td>
+<td><p>715K</p></td>
+<td><p>4.8M</p></td>
+<td><p>890</p></td>
+<td><p><strong>38</strong></p></td>
+<td><p><strong>23×</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://sparse.tamu.edu/Wissgott/parabolic_fem">parabolic_fem</a></p></td>
+<td><p>526K</p></td>
+<td><p>3.7M</p></td>
+<td><p>456</p></td>
+<td><p><strong>28</strong></p></td>
+<td><p><strong>16×</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Matrix Sources:</strong></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://sparse.tamu.edu/Schmid/thermal2">thermal2</a>: Thermal simulation (FEM)</p></li>
+<li><p><a class="reference external" href="https://sparse.tamu.edu/McRae/ecology2">ecology2</a>: Ecology/landscape modeling</p></li>
+<li><p><a class="reference external" href="https://sparse.tamu.edu/AMD/G3_circuit">G3_circuit</a>: Circuit simulation</p></li>
+<li><p><a class="reference external" href="https://sparse.tamu.edu/GHS_psdef/apache2">apache2</a>: Structural mechanics</p></li>
+<li><p><a class="reference external" href="https://sparse.tamu.edu/Wissgott/parabolic_fem">parabolic_fem</a>: Parabolic PDE (FEM)</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="distributed-solve-multi-gpu">
+<h2>Distributed Solve (Multi-GPU)<a class="headerlink" href="#distributed-solve-multi-gpu" title="Link to this heading">¶</a></h2>
+<p>torch-sla supports distributed sparse matrix operations with domain decomposition and halo exchange.
+Tested on 4× NVIDIA H200 GPUs with NCCL backend.</p>
+<a class="reference internal image-reference" href="_images/distributed_benchmark.png"><img alt="Distributed Benchmark" class="align-center" src="_images/distributed_benchmark.png" style="width: 100%;" />
+</a>
+<section id="cuda-4-gpu-nccl">
+<h3>CUDA (4 GPU, NCCL)<a class="headerlink" href="#cuda-4-gpu-nccl" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given benchmark-table docutils container">
+<table class="benchmark-table docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>DOF</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Residual</p></th>
+<th class="head"><p>Memory/GPU</p></th>
+<th class="head"><p>Scaling</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>10K</p></td>
+<td><p>0.18s</p></td>
+<td><p>7.5e-9</p></td>
+<td><p>0.03 GB</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>100K</p></td>
+<td><p>0.61s</p></td>
+<td><p>1.2e-8</p></td>
+<td><p>0.05 GB</p></td>
+<td><p>10×</p></td>
+</tr>
+<tr class="row-even"><td><p>500K</p></td>
+<td><p>1.64s</p></td>
+<td><p>1.2e-7</p></td>
+<td><p>0.15 GB</p></td>
+<td><p>50×</p></td>
+</tr>
+<tr class="row-odd"><td><p>1M</p></td>
+<td><p>2.82s</p></td>
+<td><p>4.0e-7</p></td>
+<td><p>0.27 GB</p></td>
+<td><p>100×</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>2M</strong></p></td>
+<td><p><strong>6.02s</strong></p></td>
+<td><p>1.3e-6</p></td>
+<td><p><strong>0.50 GB</strong></p></td>
+<td><p><strong>200×</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="cpu-4-proc-gloo">
+<h3>CPU (4 proc, Gloo)<a class="headerlink" href="#cpu-4-proc-gloo" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33.0%" />
+<col style="width: 33.0%" />
+<col style="width: 34.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>DOF</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Residual</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>10K</p></td>
+<td><p>0.37s</p></td>
+<td><p>7.5e-9</p></td>
+</tr>
+<tr class="row-odd"><td><p>100K</p></td>
+<td><p>7.42s</p></td>
+<td><p>1.1e-8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="recommendation-box">
+  <h4><span class="gradient-text">Distributed Key Findings</span></h4>
+  <ul class="feature-list">
+    <li><span class="gradient-text">CUDA 12× faster than CPU</span>: 0.6s vs 7.4s for 100K DOF</li>
+    <li><span class="gradient-text">Memory evenly distributed</span>: Each GPU uses only 0.5GB for 2M DOF</li>
+    <li><span class="gradient-text">Theoretically scales to 500M+ DOF</span>: H200 has 140GB per GPU</li>
+  </ul>
+</div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run distributed solve with 4 GPUs</span>
+torchrun<span class="w"> </span>--standalone<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">4</span><span class="w"> </span>examples/distributed/distributed_solve.py
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="backend-comparison-summary">
+<h2>Backend Comparison Summary<a class="headerlink" href="#backend-comparison-summary" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given benchmark-table docutils container" id="id13">
+<table class="benchmark-table docutils align-default" id="id13">
+<caption><span class="caption-text"><strong>When to Use Each Backend</strong></span><a class="headerlink" href="#id13" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 28.0%" />
+<col style="width: 15.0%" />
+<col style="width: 15.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Backend</p></th>
+<th class="head"><p>Best For</p></th>
+<th class="head"><p>Max DOF</p></th>
+<th class="head"><p>Precision</p></th>
+<th class="head"><p>Relative Speed</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code></p></td>
+<td><p>Small CPU problems</p></td>
+<td><p>~2M</p></td>
+<td><p>1e-14</p></td>
+<td><p>Baseline</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cudss+cholesky</span></code></p></td>
+<td><p>Medium CUDA, SPD</p></td>
+<td><p>~2M</p></td>
+<td><p>1e-14</p></td>
+<td><p>3×</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cudss+lu</span></code></p></td>
+<td><p>Medium CUDA, general</p></td>
+<td><p>~1M</p></td>
+<td><p>1e-14</p></td>
+<td><p>2×</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>pytorch+cg</strong></p></td>
+<td><p><strong>Large CUDA, SPD</strong></p></td>
+<td><p><strong>169M+</strong></p></td>
+<td><p>1e-6</p></td>
+<td><p><strong>100×</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pytorch+bicgstab</span></code></p></td>
+<td><p>Large CUDA, general</p></td>
+<td><p>100M+</p></td>
+<td><p>1e-6</p></td>
+<td><p>50×</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="recommendations">
+<h2>Recommendations<a class="headerlink" href="#recommendations" title="Link to this heading">¶</a></h2>
+<div class="recommendation-box">
+  <h3><span class="gradient-text">Quick Summary</span></h3>
+  <ul class="feature-list">
+    <li><span class="gradient-text">Small Problems (&lt; 100K DOF)</span>: Use <code>cudss+cholesky</code> for best accuracy</li>
+    <li><span class="gradient-text">Large Problems (&gt; 1M DOF)</span>: Use <code>pytorch+cg</code> — it's the <span class="badge-gradient">only option that scales</span></li>
+    <li><span class="gradient-text">Machine Precision</span>: Direct solvers (<code>cholesky</code>, <code>superlu</code>) achieve ~1e-14</li>
+    <li><span class="gradient-text">ML Training</span>: Iterative solvers with <code>tol=1e-4</code> offer the best speed/accuracy tradeoff</li>
+  </ul>
+</div><section id="based-on-problem-size">
+<h3>Based on Problem Size<a class="headerlink" href="#based-on-problem-size" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Problem Size</p></th>
+<th class="head"><p>CPU Recommendation</p></th>
+<th class="head"><p>CUDA Recommendation</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>&lt; 10K DOF</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code></p></td>
+<td><p>GPU overhead not worth it</p></td>
+</tr>
+<tr class="row-odd"><td><p>10K - 100K DOF</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cudss+cholesky</span></code></p></td>
+<td><p>GPU starts to pay off</p></td>
+</tr>
+<tr class="row-even"><td><p>100K - 2M DOF</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cudss+cholesky</span></code> or <code class="docutils literal notranslate"><span class="pre">pytorch+cg</span></code></p></td>
+<td><p>CG faster but less precise</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>&gt; 2M DOF</strong></p></td>
+<td><p>N/A (OOM)</p></td>
+<td><p><strong>pytorch+cg</strong></p></td>
+<td><p>Only option that scales</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="based-on-precision-requirements">
+<h3>Based on Precision Requirements<a class="headerlink" href="#based-on-precision-requirements" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Requirement</p></th>
+<th class="head"><p>Recommendation</p></th>
+<th class="head"><p>Achievable Precision</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Machine precision needed</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cudss+cholesky</span></code> (CUDA) or <code class="docutils literal notranslate"><span class="pre">scipy+superlu</span></code> (CPU)</p></td>
+<td><p>~1e-14</p></td>
+</tr>
+<tr class="row-odd"><td><p>Engineering precision (1e-6)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pytorch+cg</span></code> with <code class="docutils literal notranslate"><span class="pre">tol=1e-6</span></code></p></td>
+<td><p>~1e-6</p></td>
+</tr>
+<tr class="row-even"><td><p>Fast iteration (ML training)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pytorch+cg</span></code> with <code class="docutils literal notranslate"><span class="pre">tol=1e-4</span></code></p></td>
+<td><p>~1e-4</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="running-benchmarks">
+<h2>Running Benchmarks<a class="headerlink" href="#running-benchmarks" title="Link to this heading">¶</a></h2>
+<p>To reproduce these benchmarks:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install torch-sla with dev dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>torch-sla<span class="o">[</span>dev<span class="o">]</span>
+
+<span class="c1"># Run solver benchmarks</span>
+<span class="nb">cd</span><span class="w"> </span>benchmarks
+python<span class="w"> </span>benchmark_solvers.py
+
+<span class="c1"># Run large-scale benchmarks</span>
+python<span class="w"> </span>benchmark_large_scale.py
+
+<span class="c1"># Run SuiteSparse benchmarks</span>
+python<span class="w"> </span>benchmark_suitesparse.py
+</pre></div>
+</div>
+<p>Results are saved to <code class="docutils literal notranslate"><span class="pre">benchmarks/results/</span></code>.</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="examples.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Examples</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, walker chi
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/walkerchi/torch-sla" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Benchmarks</a><ul>
+<li><a class="reference internal" href="#test-environment">Test Environment</a></li>
+<li><a class="reference internal" href="#solver-performance-comparison">Solver Performance Comparison</a><ul>
+<li><a class="reference internal" href="#performance-scaling">Performance Scaling</a></li>
+<li><a class="reference internal" href="#memory-usage">Memory Usage</a></li>
+<li><a class="reference internal" href="#accuracy-comparison">Accuracy Comparison</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#large-scale-benchmarks">Large-Scale Benchmarks</a><ul>
+<li><a class="reference internal" href="#scaling-to-169-million-dof">Scaling to 169 Million DOF</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#matrix-multiplication-benchmarks">Matrix Multiplication Benchmarks</a><ul>
+<li><a class="reference internal" href="#spmv-sparse-matrix-dense-vector">SpMV (Sparse Matrix × Dense Vector)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#suitesparse-matrix-collection">SuiteSparse Matrix Collection</a><ul>
+<li><a class="reference internal" href="#real-world-matrix-benchmarks">Real-World Matrix Benchmarks</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#distributed-solve-multi-gpu">Distributed Solve (Multi-GPU)</a><ul>
+<li><a class="reference internal" href="#cuda-4-gpu-nccl">CUDA (4 GPU, NCCL)</a></li>
+<li><a class="reference internal" href="#cpu-4-proc-gloo">CPU (4 proc, Gloo)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#backend-comparison-summary">Backend Comparison Summary</a></li>
+<li><a class="reference internal" href="#recommendations">Recommendations</a><ul>
+<li><a class="reference internal" href="#based-on-problem-size">Based on Problem Size</a></li>
+<li><a class="reference internal" href="#based-on-precision-requirements">Based on Precision Requirements</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-benchmarks">Running Benchmarks</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=b14783f5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

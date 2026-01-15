@@ -1,0 +1,1468 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Benchmarks" href="benchmarks.html"><link rel="prev" title="API Reference" href="torch_sla.html">
+        <link rel="canonical" href="https://walkerchi.github.io/torch-sla/examples.html">
+        <link rel="prefetch" href="_static/logo.jpg" as="image">
+
+    <link rel="shortcut icon" href="_static/logo.jpg"><!-- Generated with Sphinx 7.4.7 and Furo 2025.12.19 -->
+        <title>Examples - torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=69152257" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo.jpg" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Documentation:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="torch_sla.html">API Reference</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/examples.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h1>
+<p>This section provides practical examples for using torch-sla.</p>
+<div class="recommendation-box">
+  <h3><span class="gradient-text">Quick Navigation</span></h3>
+  <ul class="feature-list">
+    <li><span class="gradient-text">Visualization</span>: <code>spy()</code> for sparsity pattern analysis</li>
+    <li><span class="gradient-text">I/O Operations</span>: Matrix Market & SafeTensors format support</li>
+    <li><span class="gradient-text">Linear Solve</span>: Direct & iterative solvers with gradients</li>
+    <li><span class="gradient-text">Matrix Decompositions</span>: SVD, Eigenvalue, LU factorization</li>
+    <li><span class="gradient-text">Advanced</span>: Nonlinear solve, distributed computing</li>
+  </ul>
+</div><hr class="docutils" />
+<section id="visualization">
+<h2>Visualization<a class="headerlink" href="#visualization" title="Link to this heading">¶</a></h2>
+<section id="spy-plot-sparsity-pattern">
+<h3>Spy Plot (Sparsity Pattern)<a class="headerlink" href="#spy-plot-sparsity-pattern" title="Link to this heading">¶</a></h3>
+<p>Visualize the sparsity pattern of a sparse matrix using the <code class="docutils literal notranslate"><span class="pre">.spy()</span></code> method.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="c1"># Create a 2D Poisson matrix (5-point stencil)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">n</span> <span class="o">+</span> <span class="n">j</span>
+        <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">4.0</span><span class="p">);</span> <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">);</span> <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">);</span> <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">);</span> <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="o">-</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">);</span> <span class="n">row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="o">+</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">col</span><span class="p">),</span> <span class="p">(</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="p">))</span>
+
+<span class="c1"># Visualize sparsity pattern</span>
+<span class="n">A</span><span class="o">.</span><span class="n">spy</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;2D Poisson (5-point stencil)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Output Examples:</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="_images/spy_poisson_10x10.png"><img alt="_images/spy_poisson_10x10.png" src="_images/spy_poisson_10x10.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>2D Poisson (10×10)</strong> - 100 DOF, 5-point stencil with grid lines</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="_images/spy_poisson_50x50.png"><img alt="_images/spy_poisson_50x50.png" src="_images/spy_poisson_50x50.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>2D Poisson (50×50)</strong> - 2,500 DOF, band structure visible</span><a class="headerlink" href="#id2" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+<tr class="row-even"><td><figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="_images/spy_tridiag_30x30.png"><img alt="_images/spy_tridiag_30x30.png" src="_images/spy_tridiag_30x30.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Tridiagonal (30×30)</strong> - Classic 1D Poisson pattern</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="_images/spy_random_100x100.png"><img alt="_images/spy_random_100x100.png" src="_images/spy_random_100x100.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Random Sparse (100×100)</strong> - 800 random non-zeros</span><a class="headerlink" href="#id4" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each non-zero element is rendered as a colored pixel with intensity proportional to its absolute value. Zero elements are white.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="i-o-operations">
+<h2>I/O Operations<a class="headerlink" href="#i-o-operations" title="Link to this heading">¶</a></h2>
+<section id="matrix-market-format">
+<h3>Matrix Market Format<a class="headerlink" href="#matrix-market-format" title="Link to this heading">¶</a></h3>
+<p>Save and load sparse matrices in the standard Matrix Market (.mtx) format.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span><span class="p">,</span> <span class="n">save_matrix_market</span><span class="p">,</span> <span class="n">load_matrix_market</span>
+
+<span class="c1"># Create a sparse matrix</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+
+<span class="c1"># Save to Matrix Market format</span>
+<span class="n">save_matrix_market</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="s2">&quot;matrix.mtx&quot;</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;My sparse matrix&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load from Matrix Market format</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">load_matrix_market</span><span class="p">(</span><span class="s2">&quot;matrix.mtx&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="c1"># Verify</span>
+<span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">to_dense</span><span class="p">(),</span> <span class="n">B</span><span class="o">.</span><span class="n">to_dense</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><strong>File format (.mtx):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">MatrixMarket</span> <span class="n">matrix</span> <span class="n">coordinate</span> <span class="n">real</span> <span class="n">general</span>
+<span class="o">%</span> <span class="n">My</span> <span class="n">sparse</span> <span class="n">matrix</span>
+<span class="mi">100</span> <span class="mi">100</span> <span class="mi">500</span>
+<span class="mi">1</span> <span class="mi">1</span> <span class="mf">4.0</span>
+<span class="mi">1</span> <span class="mi">2</span> <span class="o">-</span><span class="mf">1.0</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="safetensors-format">
+<h3>SafeTensors Format<a class="headerlink" href="#safetensors-format" title="Link to this heading">¶</a></h3>
+<p>Save and load using the efficient safetensors format.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Save</span>
+<span class="n">A</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;matrix.safetensors&quot;</span><span class="p">)</span>
+
+<span class="c1"># Load</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;matrix.safetensors&quot;</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="c1"># Save distributed (for multi-GPU)</span>
+<span class="n">A</span><span class="o">.</span><span class="n">save_distributed</span><span class="p">(</span><span class="s2">&quot;matrix_dist/&quot;</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
+<section id="basic-sparse-linear-solve">
+<h3>Basic Sparse Linear Solve<a class="headerlink" href="#basic-sparse-linear-solve" title="Link to this heading">¶</a></h3>
+<p>Solve a sparse linear system <span class="math notranslate nohighlight">\(Ax = b\)</span> using <code class="docutils literal notranslate"><span class="pre">SparseTensor</span></code>.</p>
+<p><strong>Linear System:</strong></p>
+<p>Given a sparse matrix <span class="math notranslate nohighlight">\(A \in \mathbb{R}^{n \times n}\)</span> and right-hand side <span class="math notranslate nohighlight">\(b \in \mathbb{R}^n\)</span>, find <span class="math notranslate nohighlight">\(x \in \mathbb{R}^n\)</span> such that:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[Ax = b \quad \Leftrightarrow \quad x = A^{-1} b\]</div>
+</div>
+<p><strong>Solver Methods:</strong></p>
+<ul class="simple">
+<li><p><strong>Direct solvers</strong> (LU, Cholesky): Exact solution, <span class="math notranslate nohighlight">\(O(n^{1.5})\)</span> for sparse</p></li>
+<li><p><strong>Iterative solvers</strong> (CG, BiCGStab): Approximate solution, <span class="math notranslate nohighlight">\(O(k \cdot \text{nnz})\)</span> where <span class="math notranslate nohighlight">\(k\)</span> is iterations</p></li>
+</ul>
+<p><strong>Problem:</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}A = \begin{pmatrix}
+4 &amp; -1 &amp; 0 \\
+-1 &amp; 4 &amp; -1 \\
+0 &amp; -1 &amp; 4
+\end{pmatrix}, \quad
+b = \begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix}\end{split}\]</div>
+</div>
+<p>This is a 3×3 symmetric positive definite (SPD) tridiagonal matrix from 1D Poisson discretization.</p>
+<p><strong>COO Format:</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Row</p></th>
+<th class="head"><p>Col</p></th>
+<th class="head"><p>Value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>4.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>-1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>-1.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>4.0</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>1</p></td>
+<td><p>2</p></td>
+<td><p>-1.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>2</p></td>
+<td><p>1</p></td>
+<td><p>-1.0</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p>4.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Solution:</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}x = A^{-1}b = \begin{pmatrix} 0.4643 \\ 0.8571 \\ 0.9643 \end{pmatrix}\end{split}\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="property-detection">
+<h3>Property Detection<a class="headerlink" href="#property-detection" title="Link to this heading">¶</a></h3>
+<p>Detect matrix properties for optimal solver selection.</p>
+<p><strong>Symmetry:</strong> <span class="math notranslate nohighlight">\(A = A^T\)</span></p>
+<p><strong>Positive Definiteness:</strong> All eigenvalues <span class="math notranslate nohighlight">\(\lambda_i &gt; 0\)</span></p>
+<p>For the tridiagonal matrix: <span class="math notranslate nohighlight">\(\lambda_1 \approx 2.59, \lambda_2 = 4.0, \lambda_3 \approx 5.41\)</span> (all positive → SPD)</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">is_sym</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">is_symmetric</span><span class="p">()</span>              <span class="c1"># tensor(True)</span>
+<span class="n">is_pd</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">is_positive_definite</span><span class="p">()</span>       <span class="c1"># tensor(True)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="gradient-computation">
+<h3>Gradient Computation<a class="headerlink" href="#gradient-computation" title="Link to this heading">¶</a></h3>
+<p>Compute gradients through sparse solve using implicit differentiation.</p>
+<p><strong>Implicit Differentiation:</strong></p>
+<p>Given <span class="math notranslate nohighlight">\(x = A^{-1} b\)</span>, for a loss function <span class="math notranslate nohighlight">\(L(x)\)</span>, we want <span class="math notranslate nohighlight">\(\frac{\partial L}{\partial A}\)</span> and <span class="math notranslate nohighlight">\(\frac{\partial L}{\partial b}\)</span>.</p>
+<p>From <span class="math notranslate nohighlight">\(Ax = b\)</span>, differentiate both sides:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[dA \cdot x + A \cdot dx = db\]</div>
+</div>
+<p>Solving for <span class="math notranslate nohighlight">\(dx\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[dx = A^{-1}(db - dA \cdot x)\]</div>
+</div>
+<p><strong>Adjoint Method:</strong></p>
+<p>Define adjoint variable <span class="math notranslate nohighlight">\(\lambda = A^{-T} \frac{\partial L}{\partial x}\)</span>, then:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial L}{\partial A_{ij}} = -\lambda_i \cdot x_j, \quad
+\frac{\partial L}{\partial b} = \lambda\]</div>
+</div>
+<p><strong>Gradient formulas (summary):</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial L}{\partial A} = -\lambda x^T, \quad
+\frac{\partial L}{\partial b} = A^{-T} \frac{\partial L}{\partial x}\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">spsolve</span>
+
+<span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span>
+                   <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+<span class="c1"># val.grad, b.grad now contain gradients</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="specify-backend-and-method">
+<h3>Specify Backend and Method<a class="headerlink" href="#specify-backend-and-method" title="Link to this heading">¶</a></h3>
+<p>Choose solver backend and method explicitly.</p>
+<p><strong>Available Options:</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 21.4%" />
+<col style="width: 21.4%" />
+<col style="width: 57.1%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Backend</p></th>
+<th class="head"><p>Device</p></th>
+<th class="head"><p>Methods</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scipy</span></code></p></td>
+<td><p>CPU</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">superlu</span></code>, <code class="docutils literal notranslate"><span class="pre">umfpack</span></code>, <code class="docutils literal notranslate"><span class="pre">cg</span></code>, <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code>, <code class="docutils literal notranslate"><span class="pre">gmres</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eigen</span></code></p></td>
+<td><p>CPU</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cg</span></code>, <code class="docutils literal notranslate"><span class="pre">bicgstab</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cusolver</span></code></p></td>
+<td><p>CUDA</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">qr</span></code>, <code class="docutils literal notranslate"><span class="pre">cholesky</span></code>, <code class="docutils literal notranslate"><span class="pre">lu</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cudss</span></code></p></td>
+<td><p>CUDA</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lu</span></code>, <code class="docutils literal notranslate"><span class="pre">cholesky</span></code>, <code class="docutils literal notranslate"><span class="pre">ldlt</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x1</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;scipy&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;superlu&#39;</span><span class="p">)</span>    <span class="c1"># Direct</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;scipy&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cg&#39;</span><span class="p">)</span>         <span class="c1"># Iterative (SPD)</span>
+<span class="n">x3</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;scipy&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bicgstab&#39;</span><span class="p">)</span>   <span class="c1"># Iterative (general)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="matrix-operations">
+<h3>Matrix Operations<a class="headerlink" href="#matrix-operations" title="Link to this heading">¶</a></h3>
+<p>Compute norms and eigenvalues.</p>
+<p><strong>Frobenius Norm:</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\|A\|_F = \sqrt{\sum_{i,j} |a_{ij}|^2} = \sqrt{52} \approx 7.21\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">norm</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="s1">&#39;fro&#39;</span><span class="p">)</span>                              <span class="c1"># ≈ 7.21</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;LM&#39;</span><span class="p">)</span>  <span class="c1"># Top-2 eigenvalues</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="batched-solve">
+<h2>Batched Solve<a class="headerlink" href="#batched-solve" title="Link to this heading">¶</a></h2>
+<section id="batched-sparsetensor">
+<h3>Batched SparseTensor<a class="headerlink" href="#batched-sparsetensor" title="Link to this heading">¶</a></h3>
+<p>Solve multiple systems with same sparsity pattern but different values.</p>
+<p><strong>Problem:</strong> Solve 4 systems with scaled matrices</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A^{(0)} = A, \quad A^{(1)} = 1.1A, \quad A^{(2)} = 1.2A, \quad A^{(3)} = 1.3A\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+<span class="n">row</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">val_batch</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+    <span class="n">val_batch</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val_batch</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>  <span class="c1"># x.shape: [4, 3]</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="multi-dimensional-batch">
+<h3>Multi-Dimensional Batch<a class="headerlink" href="#multi-dimensional-batch" title="Link to this heading">¶</a></h3>
+<p>Handle shapes like <code class="docutils literal notranslate"><span class="pre">[B1,</span> <span class="pre">B2,</span> <span class="pre">M,</span> <span class="pre">N]</span></code>.</p>
+<p><strong>Example:</strong> 2 materials × 3 temperatures = 6 systems</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">B1</span><span class="p">,</span> <span class="n">B2</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span>
+<span class="n">val_batch</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">B1</span><span class="p">,</span> <span class="n">B2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val_batch</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">B1</span><span class="p">,</span> <span class="n">B2</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">B1</span><span class="p">,</span> <span class="n">B2</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>  <span class="c1"># x.shape: [2, 3, 8]</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="solve-batch-for-repeated-solves">
+<h3>solve_batch for Repeated Solves<a class="headerlink" href="#solve-batch-for-repeated-solves" title="Link to this heading">¶</a></h3>
+<p>Efficient batch solve with same structure but different values.</p>
+<p><strong>Use Case:</strong> Time-stepping with fixed sparsity pattern</p>
+<p><strong>LU Decomposition:</strong> <span class="math notranslate nohighlight">\(A = LU\)</span>, then solve <span class="math notranslate nohighlight">\(Ly = b\)</span>, <span class="math notranslate nohighlight">\(Ux = y\)</span></p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+<span class="n">val_batch</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">val</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)])</span>  <span class="c1"># [100, nnz]</span>
+<span class="n">b_batch</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x_batch</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">solve_batch</span><span class="p">(</span><span class="n">val_batch</span><span class="p">,</span> <span class="n">b_batch</span><span class="p">)</span>  <span class="c1"># [100, n]</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="sparsetensorlist">
+<h3>SparseTensorList<a class="headerlink" href="#sparsetensorlist" title="Link to this heading">¶</a></h3>
+<p>Handle matrices with different sparsity patterns.</p>
+<p><strong>Use Case:</strong> FEM meshes with different element counts</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span><span class="p">,</span> <span class="n">SparseTensorList</span>
+
+<span class="n">A1</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val1</span><span class="p">,</span> <span class="n">row1</span><span class="p">,</span> <span class="n">col1</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">A2</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val2</span><span class="p">,</span> <span class="n">row2</span><span class="p">,</span> <span class="n">col2</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">A3</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val3</span><span class="p">,</span> <span class="n">row3</span><span class="p">,</span> <span class="n">col3</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+
+<span class="n">matrices</span> <span class="o">=</span> <span class="n">SparseTensorList</span><span class="p">([</span><span class="n">A1</span><span class="p">,</span> <span class="n">A2</span><span class="p">,</span> <span class="n">A3</span><span class="p">])</span>
+
+<span class="n">b_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">15</span><span class="p">)]</span>
+<span class="n">x_list</span> <span class="o">=</span> <span class="n">matrices</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="distributed-solve">
+<h2>Distributed Solve<a class="headerlink" href="#distributed-solve" title="Link to this heading">¶</a></h2>
+<section id="basic-dsparsetensor">
+<h3>Basic DSparseTensor<a class="headerlink" href="#basic-dsparsetensor" title="Link to this heading">¶</a></h3>
+<p>Create distributed sparse tensor with domain decomposition.</p>
+<p><strong>Domain Decomposition:</strong> Split 16-node grid into 2 domains</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\text{Domain 0: } \{0,...,7\}, \quad \text{Domain 1: } \{8,...,15\}\]</div>
+</div>
+<p>Each domain has <strong>owned nodes</strong> and <strong>halo/ghost nodes</strong> from neighbors.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSparseTensor</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">DSparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">num_partitions</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="c1"># p.num_owned, p.num_halo, p.num_local</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="d-poisson-example">
+<h3>2D Poisson Example<a class="headerlink" href="#d-poisson-example" title="Link to this heading">¶</a></h3>
+<p>Create 2D Poisson matrix with 5-point stencil.</p>
+<p><strong>Stencil:</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\frac{1}{h^2} \begin{pmatrix} &amp; -1 &amp; \\ -1 &amp; 4 &amp; -1 \\ &amp; -1 &amp; \end{pmatrix}\end{split}\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSparseTensor</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_2d_poisson</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">nx</span> <span class="o">*</span> <span class="n">ny</span>
+    <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">vals</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">nx</span> <span class="o">+</span> <span class="n">j</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span> <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">nx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span> <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span> <span class="o">-</span> <span class="n">nx</span><span class="p">);</span> <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ny</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">);</span> <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="n">nx</span><span class="p">);</span> <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">rows</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">cols</span><span class="p">),</span> <span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+
+<span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span> <span class="o">=</span> <span class="n">create_2d_poisson</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">DSparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="scatter-and-gather">
+<h3>Scatter and Gather<a class="headerlink" href="#scatter-and-gather" title="Link to this heading">¶</a></h3>
+<p>Distribute global vectors to partitions and gather back.</p>
+<p><strong>Diagram:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Global:  [x0, x1, x2, x3, x4, x5, x6, x7]
+                  ↓ scatter
+Local:   [x0, x1, x2, x3, x6]  (P0 + halo)
+         [x4, x5, x6, x7, x3]  (P1 + halo)
+                  ↓ gather
+Global:  [x0, x1, x2, x3, x4, x5, x6, x7]
+</pre></div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSparseTensor</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">DSparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">x_global</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+<span class="n">x_local</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">scatter_local</span><span class="p">(</span><span class="n">x_global</span><span class="p">)</span>
+<span class="n">x_gathered</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">gather_global</span><span class="p">(</span><span class="n">x_local</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="halo-exchange">
+<h3>Halo Exchange<a class="headerlink" href="#halo-exchange" title="Link to this heading">¶</a></h3>
+<p>Exchange ghost node values between neighboring partitions.</p>
+<p><strong>References:</strong></p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Domain_decomposition_methods">Domain Decomposition Methods - Wikipedia</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Stencil_code">Stencil Code - Wikipedia</a></p></li>
+<li><p><a class="reference external" href="https://wgropp.cs.illinois.edu/courses/cs598-s15/lectures/lecture25.pdf">Halo Exchange Lecture - UIUC CS598</a></p></li>
+</ul>
+<p><strong>1D Decomposition Diagram:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Partition 0: Owned [0,1,2,3], Halo [4] ← from P1
+Partition 1: Owned [4,5,6,7], Halo [3] ← from P0
+</pre></div>
+</div>
+<p><strong>Exchange Process:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Before: P0=[x0,x1,x2,x3,?], P1=[x4,x5,x6,x7,?]
+                     ↓ halo_exchange_local()
+After:  P0=[x0,x1,x2,x3,x4], P1=[x4,x5,x6,x7,x3]
+</pre></div>
+</div>
+<p><strong>Why needed:</strong> For <span class="math notranslate nohighlight">\(y_3 = \sum_j A_{3,j} x_j\)</span>, node 3 needs <span class="math notranslate nohighlight">\(x_4\)</span> from P1.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">DSparseTensor</span>
+
+<span class="n">D</span> <span class="o">=</span> <span class="n">DSparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">num_partitions</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">num_local</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">D</span><span class="o">.</span><span class="n">num_partitions</span><span class="p">)]</span>
+
+<span class="n">D</span><span class="o">.</span><span class="n">halo_exchange_local</span><span class="p">(</span><span class="n">x_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="iterative-solvers">
+<h2>Iterative Solvers<a class="headerlink" href="#iterative-solvers" title="Link to this heading">¶</a></h2>
+<section id="pytorch-cg-solver">
+<h3>PyTorch CG Solver<a class="headerlink" href="#pytorch-cg-solver" title="Link to this heading">¶</a></h3>
+<p>For large-scale problems (&gt; 100K DOF), iterative methods are much faster than direct solvers.</p>
+<p><strong>Conjugate Gradient (CG) Algorithm:</strong></p>
+<p>For symmetric positive definite (SPD) matrix <span class="math notranslate nohighlight">\(A\)</span>, CG minimizes:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\phi(x) = \frac{1}{2} x^T A x - b^T x\]</div>
+</div>
+<p>The minimum is achieved at <span class="math notranslate nohighlight">\(x^* = A^{-1} b\)</span>.</p>
+<p><strong>CG Iteration:</strong></p>
+<p>Starting from <span class="math notranslate nohighlight">\(x_0\)</span>, with residual <span class="math notranslate nohighlight">\(r_0 = b - Ax_0\)</span> and search direction <span class="math notranslate nohighlight">\(p_0 = r_0\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}\alpha_k &amp;= \frac{r_k^T r_k}{p_k^T A p_k} \\
+x_{k+1} &amp;= x_k + \alpha_k p_k \\
+r_{k+1} &amp;= r_k - \alpha_k A p_k \\
+\beta_k &amp;= \frac{r_{k+1}^T r_{k+1}}{r_k^T r_k} \\
+p_{k+1} &amp;= r_{k+1} + \beta_k p_k\end{split}\]</div>
+</div>
+<p><strong>Convergence:</strong></p>
+<p>CG converges in at most <span class="math notranslate nohighlight">\(n\)</span> iterations (exact arithmetic). With condition number <span class="math notranslate nohighlight">\(\kappa = \lambda_{\max}/\lambda_{\min}\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\|x_k - x^*\|_A \leq 2 \left( \frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1} \right)^k \|x_0 - x^*\|_A\]</div>
+</div>
+<p><strong>Preconditioning:</strong></p>
+<p>Preconditioned CG (PCG) solves <span class="math notranslate nohighlight">\(M^{-1} A x = M^{-1} b\)</span> where <span class="math notranslate nohighlight">\(M \approx A\)</span>:</p>
+<ul class="simple">
+<li><p>Jacobi: <span class="math notranslate nohighlight">\(M = \text{diag}(A)\)</span> — simple, effective</p></li>
+<li><p>Incomplete Cholesky: <span class="math notranslate nohighlight">\(M = \tilde{L} \tilde{L}^T\)</span> — better for ill-conditioned</p></li>
+</ul>
+<p><strong>Convergence Example:</strong></p>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="_images/cg_convergence.png"><img alt="_images/cg_convergence.png" src="_images/cg_convergence.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">CG convergence for 2D Poisson problems of various sizes. Larger problems require more iterations due to worse conditioning.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>Performance Comparison (1M DOF, NVIDIA H200):</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28.6%" />
+<col style="width: 21.4%" />
+<col style="width: 21.4%" />
+<col style="width: 28.6%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Memory</p></th>
+<th class="head"><p>Best For</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pytorch+cg</span></code></p></td>
+<td><p><strong>0.5s</strong> ✅</p></td>
+<td><p>~500 MB</p></td>
+<td><p>&gt; 100K DOF, SPD</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cudss+cholesky</span></code></p></td>
+<td><p>7.8s</p></td>
+<td><p>~300 MB</p></td>
+<td><p>&lt; 100K DOF, high precision</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">spsolve</span>
+
+<span class="c1"># For large SPD systems, use PyTorch CG</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;pytorch&#39;</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cg&#39;</span><span class="p">,</span>
+            <span class="n">preconditioner</span><span class="o">=</span><span class="s1">&#39;jacobi&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="preconditioners">
+<h3>Preconditioners<a class="headerlink" href="#preconditioners" title="Link to this heading">¶</a></h3>
+<p>Available preconditioners for iterative solvers:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 53.3%" />
+<col style="width: 26.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Best For</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">jacobi</span></code></p></td>
+<td><p>Diagonal scaling (default)</p></td>
+<td><p>General use, fastest</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ssor</span></code></p></td>
+<td><p>Symmetric SOR (ω=1.5)</p></td>
+<td><p>Slow convergence problems</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">polynomial</span></code></p></td>
+<td><p>Neumann series (degree=2)</p></td>
+<td><p>GPU-parallel</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ic0</span></code></p></td>
+<td><p>Incomplete Cholesky</p></td>
+<td><p>Very ill-conditioned</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">amg</span></code></p></td>
+<td><p>Algebraic Multigrid</p></td>
+<td><p>Float32, Poisson-like</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Recommendation:</strong></p>
+<ul class="simple">
+<li><p><strong>Float64</strong>: Use <code class="docutils literal notranslate"><span class="pre">jacobi</span></code> (simplest, fastest due to fewer iterations)</p></li>
+<li><p><strong>Float32</strong>: Use <code class="docutils literal notranslate"><span class="pre">amg</span></code> (reduces iterations, compensates for precision loss)</p></li>
+</ul>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Jacobi (default, recommended for float64)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;pytorch&#39;</span><span class="p">,</span> <span class="n">preconditioner</span><span class="o">=</span><span class="s1">&#39;jacobi&#39;</span><span class="p">)</span>
+
+<span class="c1"># AMG (recommended for float32)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;pytorch&#39;</span><span class="p">,</span> <span class="n">preconditioner</span><span class="o">=</span><span class="s1">&#39;amg&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="mixed-precision">
+<h3>Mixed Precision<a class="headerlink" href="#mixed-precision" title="Link to this heading">¶</a></h3>
+<p>For memory-constrained scenarios, use mixed precision:
+- Matrix stored in Float32 (memory efficient)
+- Accumulation in Float64 (high precision)</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">spsolve</span><span class="p">(</span><span class="n">val_f32</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">b_f32</span><span class="p">,</span>
+            <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;pytorch&#39;</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cg&#39;</span><span class="p">,</span>
+            <span class="n">mixed_precision</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Returns float64 solution</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="cuda-usage">
+<h2>CUDA Usage<a class="headerlink" href="#cuda-usage" title="Link to this heading">¶</a></h2>
+<section id="move-to-cuda">
+<h3>Move to CUDA<a class="headerlink" href="#move-to-cuda" title="Link to this heading">¶</a></h3>
+<p>Transfer to GPU for CUDA-accelerated solving.</p>
+<p><strong>Performance:</strong> cuDSS/cuSOLVER can be 10-100× faster for large systems.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+<span class="n">A_cuda</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">cuda</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="backend-selection-on-cuda">
+<h3>Backend Selection on CUDA<a class="headerlink" href="#backend-selection-on-cuda" title="Link to this heading">¶</a></h3>
+<p><strong>Auto Selection:</strong> cuDSS (preferred) → cuSOLVER (fallback)</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;cudss&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lu&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;cudss&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cholesky&#39;</span><span class="p">)</span>  <span class="c1"># For SPD</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">A_cuda</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_cuda</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;cusolver&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;qr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="advanced-examples">
+<h2>Advanced Examples<a class="headerlink" href="#advanced-examples" title="Link to this heading">¶</a></h2>
+<section id="nonlinear-solve-with-adjoint-gradients">
+<h3>Nonlinear Solve with Adjoint Gradients<a class="headerlink" href="#nonlinear-solve-with-adjoint-gradients" title="Link to this heading">¶</a></h3>
+<p>Solve nonlinear equations <span class="math notranslate nohighlight">\(F(u, \theta) = 0\)</span> with automatic differentiation using the adjoint method.</p>
+<p><strong>Problem Formulation:</strong></p>
+<p>Given a nonlinear residual function <span class="math notranslate nohighlight">\(F: \mathbb{R}^n \times \mathbb{R}^p \to \mathbb{R}^n\)</span>, find <span class="math notranslate nohighlight">\(u^*\)</span> such that:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[F(u^*, \theta) = 0\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(\theta\)</span> are parameters (e.g., forcing term, material properties).</p>
+<p><strong>Newton-Raphson Method:</strong></p>
+<p>Starting from initial guess <span class="math notranslate nohighlight">\(u_0\)</span>, iterate:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[u_{k+1} = u_k - J_F^{-1}(u_k) F(u_k)\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(J_F = \frac{\partial F}{\partial u}\)</span> is the Jacobian matrix.</p>
+<p><strong>Adjoint Method for Gradients:</strong></p>
+<p>For a loss function <span class="math notranslate nohighlight">\(L(u^*)\)</span>, the gradient w.r.t. parameters is:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial L}{\partial \theta} = -\lambda^T \frac{\partial F}{\partial \theta}\]</div>
+</div>
+<p>where the adjoint variable <span class="math notranslate nohighlight">\(\lambda\)</span> satisfies:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[J_F^T \lambda = \frac{\partial L}{\partial u}\]</div>
+</div>
+<p>This is memory-efficient: O(1) instead of O(iterations) graph nodes.</p>
+<p><strong>Example:</strong> Nonlinear diffusion <span class="math notranslate nohighlight">\(Au + u^2 = f\)</span></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="c1"># Create stiffness matrix</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+<span class="c1"># Define nonlinear residual: F(u) = Au + u² - f</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">residual</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">A</span> <span class="o">@</span> <span class="n">u</span> <span class="o">+</span> <span class="n">u</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">f</span>
+
+<span class="c1"># Parameters with gradients</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">u0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># Solve with Newton-Raphson</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">nonlinear_solve</span><span class="p">(</span><span class="n">residual</span><span class="p">,</span> <span class="n">u0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;newton&#39;</span><span class="p">)</span>
+
+<span class="c1"># Gradients via adjoint method (memory efficient)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>  <span class="c1"># ∂L/∂f</span>
+</pre></div>
+</div>
+<p><strong>Methods:</strong></p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 25.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Update Rule</p></th>
+<th class="head"><p>Convergence</p></th>
+<th class="head"><p>Best For</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">newton</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_{k+1} = u_k - J^{-1} F(u_k)\)</span></p></td>
+<td><p>Quadratic (fast)</p></td>
+<td><p>General nonlinear</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">picard</span></code></p></td>
+<td><p><span class="math notranslate nohighlight">\(u_{k+1} = G(u_k)\)</span> (fixed-point)</p></td>
+<td><p>Linear (slow)</p></td>
+<td><p>Mildly nonlinear</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">anderson</span></code></p></td>
+<td><p>Accelerated fixed-point with history</p></td>
+<td><p>Superlinear</p></td>
+<td><p>Memory-constrained</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="eigenvalue-decomposition">
+<h3>Eigenvalue Decomposition<a class="headerlink" href="#eigenvalue-decomposition" title="Link to this heading">¶</a></h3>
+<p>Compute eigenvalues and eigenvectors of sparse matrices.</p>
+<p><strong>Eigenvalue Problem:</strong></p>
+<p>For a matrix <span class="math notranslate nohighlight">\(A \in \mathbb{R}^{n \times n}\)</span>, find eigenvalues <span class="math notranslate nohighlight">\(\lambda_i\)</span> and eigenvectors <span class="math notranslate nohighlight">\(v_i\)</span> such that:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A v_i = \lambda_i v_i\]</div>
+</div>
+<p><strong>Symmetric Case (eigsh):</strong></p>
+<p>For symmetric matrices <span class="math notranslate nohighlight">\(A = A^T\)</span>, eigenvalues are real and eigenvectors are orthonormal:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A = V \Lambda V^T, \quad V^T V = I\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(\Lambda = \text{diag}(\lambda_1, \ldots, \lambda_n)\)</span>.</p>
+<p><strong>Algorithms:</strong></p>
+<ul class="simple">
+<li><p><strong>ARPACK/LOBPCG</strong>: Iterative methods for sparse matrices, compute top-k eigenvalues</p></li>
+<li><p><strong>Shift-invert</strong>: For interior eigenvalues</p></li>
+</ul>
+<p><strong>Gradient Formula:</strong></p>
+<p>For a simple eigenvalue <span class="math notranslate nohighlight">\(\lambda_i\)</span> with eigenvector <span class="math notranslate nohighlight">\(v_i\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\frac{\partial \lambda_i}{\partial A_{jk}} = v_i[j] \cdot v_i[k]\]</div>
+</div>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+<span class="c1"># Largest eigenvalues (ARPACK/LOBPCG)</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;LM&#39;</span><span class="p">)</span>
+
+<span class="c1"># Smallest eigenvalues</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;SM&#39;</span><span class="p">)</span>
+
+<span class="c1"># For non-symmetric matrices</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">eigs</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Example Output:</strong></p>
+<figure class="align-center" id="id6">
+<a class="reference internal image-reference" href="_images/eigenvalue_spectrum.png"><img alt="_images/eigenvalue_spectrum.png" src="_images/eigenvalue_spectrum.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Eigenvalue spectrum of 1D Laplacian (n=50). Red points show the 6 smallest eigenvalues computed by <code class="docutils literal notranslate"><span class="pre">eigsh()</span></code>.</span><a class="headerlink" href="#id6" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>Gradient support:</strong> Eigenvalue decomposition is differentiable!</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">eigenvalues</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>  <span class="c1"># Gradients flow to val</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="svd-singular-value-decomposition">
+<h3>SVD (Singular Value Decomposition)<a class="headerlink" href="#svd-singular-value-decomposition" title="Link to this heading">¶</a></h3>
+<p>Compute truncated SVD for sparse matrices.</p>
+<p><strong>SVD Definition:</strong></p>
+<p>For a matrix <span class="math notranslate nohighlight">\(A \in \mathbb{R}^{m \times n}\)</span>, the SVD is:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A = U \Sigma V^T\]</div>
+</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(U \in \mathbb{R}^{m \times r}\)</span>: Left singular vectors (orthonormal columns)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Sigma = \text{diag}(\sigma_1, \ldots, \sigma_r)\)</span>: Singular values (<span class="math notranslate nohighlight">\(\sigma_1 \geq \sigma_2 \geq \ldots \geq 0\)</span>)</p></li>
+<li><p><span class="math notranslate nohighlight">\(V \in \mathbb{R}^{n \times r}\)</span>: Right singular vectors (orthonormal columns)</p></li>
+</ul>
+<p><strong>Truncated SVD (rank-k approximation):</strong></p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[A_k = U_k \Sigma_k V_k^T = \sum_{i=1}^{k} \sigma_i u_i v_i^T\]</div>
+</div>
+<p>This is the best rank-k approximation in Frobenius norm (Eckart-Young theorem):</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\|A - A_k\|_F = \sqrt{\sum_{i=k+1}^{r} \sigma_i^2}\]</div>
+</div>
+<p><strong>Relation to Eigenvalues:</strong></p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\sigma_i^2\)</span> are eigenvalues of <span class="math notranslate nohighlight">\(A^T A\)</span> (or <span class="math notranslate nohighlight">\(A A^T\)</span>)</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_i\)</span> are eigenvectors of <span class="math notranslate nohighlight">\(A^T A\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(u_i\)</span> are eigenvectors of <span class="math notranslate nohighlight">\(A A^T\)</span></p></li>
+</ul>
+<p><strong>Applications:</strong></p>
+<ul class="simple">
+<li><p><strong>Dimensionality reduction</strong>: PCA via SVD</p></li>
+<li><p><strong>Low-rank approximation</strong>: Matrix compression</p></li>
+<li><p><strong>Pseudoinverse</strong>: <span class="math notranslate nohighlight">\(A^+ = V \Sigma^{-1} U^T\)</span></p></li>
+</ul>
+<p><strong>Example Output:</strong></p>
+<figure class="align-center" id="id7">
+<a class="reference internal image-reference" href="_images/svd_lowrank.png"><img alt="_images/svd_lowrank.png" src="_images/svd_lowrank.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Left: Singular value spectrum showing rapid decay after true rank. Right: Approximation error decreases as rank increases.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+<span class="c1"># Compute top-k singular values/vectors</span>
+<span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">Vt</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Low-rank approximation</span>
+<span class="n">A_approx</span> <span class="o">=</span> <span class="n">U</span> <span class="o">@</span> <span class="n">torch</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">S</span><span class="p">)</span> <span class="o">@</span> <span class="n">Vt</span>
+
+<span class="c1"># Relative approximation error</span>
+<span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">to_dense</span><span class="p">()</span> <span class="o">-</span> <span class="n">A_approx</span><span class="p">)</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span> <span class="o">/</span> <span class="n">A</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="s1">&#39;fro&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="lu-factorization-for-repeated-solves">
+<h3>LU Factorization for Repeated Solves<a class="headerlink" href="#lu-factorization-for-repeated-solves" title="Link to this heading">¶</a></h3>
+<p>Cache LU factorization for efficient repeated solves with the same matrix.</p>
+<p><strong>LU Decomposition:</strong></p>
+<p>For a matrix <span class="math notranslate nohighlight">\(A\)</span>, find lower triangular <span class="math notranslate nohighlight">\(L\)</span> and upper triangular <span class="math notranslate nohighlight">\(U\)</span> such that:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[PA = LU\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(P\)</span> is a permutation matrix (for numerical stability).</p>
+<p><strong>Solving with LU:</strong></p>
+<p>To solve <span class="math notranslate nohighlight">\(Ax = b\)</span>:</p>
+<ol class="arabic simple">
+<li><p>Factorize once: <span class="math notranslate nohighlight">\(PA = LU\)</span> — Cost: <span class="math notranslate nohighlight">\(O(n^3)\)</span> or <span class="math notranslate nohighlight">\(O(\text{nnz}^{1.5})\)</span> for sparse</p></li>
+<li><p>Forward substitution: <span class="math notranslate nohighlight">\(Ly = Pb\)</span> — Cost: <span class="math notranslate nohighlight">\(O(n^2)\)</span> or <span class="math notranslate nohighlight">\(O(\text{nnz})\)</span> for sparse</p></li>
+<li><p>Back substitution: <span class="math notranslate nohighlight">\(Ux = y\)</span> — Cost: <span class="math notranslate nohighlight">\(O(n^2)\)</span> or <span class="math notranslate nohighlight">\(O(\text{nnz})\)</span> for sparse</p></li>
+</ol>
+<p><strong>Complexity Savings:</strong></p>
+<p>For <span class="math notranslate nohighlight">\(k\)</span> solves with same matrix:</p>
+<ul class="simple">
+<li><p>Without caching: <span class="math notranslate nohighlight">\(O(k \cdot n^{1.5})\)</span> (sparse direct)</p></li>
+<li><p>With LU caching: <span class="math notranslate nohighlight">\(O(n^{1.5} + k \cdot n)\)</span> — up to <span class="math notranslate nohighlight">\(\sqrt{n}\)</span> faster!</p></li>
+</ul>
+<p><strong>Use Case:</strong> Time-stepping with fixed stiffness matrix</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+
+<span class="c1"># Factorize once (expensive)</span>
+<span class="n">lu</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">lu</span><span class="p">()</span>
+
+<span class="c1"># Solve multiple RHS efficiently (cheap)</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">b_t</span> <span class="o">=</span> <span class="n">compute_rhs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">x_t</span> <span class="o">=</span> <span class="n">lu</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b_t</span><span class="p">)</span>  <span class="c1"># Fast solve using cached LU</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="graph-neural-network-example">
+<h3>Graph Neural Network Example<a class="headerlink" href="#graph-neural-network-example" title="Link to this heading">¶</a></h3>
+<p>Use torch-sla for graph Laplacian operations in GNNs.</p>
+<p><strong>Code:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch_sla</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseTensor</span>
+
+<span class="c1"># Create adjacency matrix from edge list</span>
+<span class="n">edge_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">edge_weight</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="p">(</span><span class="n">edge_weight</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">edge_index</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># Compute degree matrix</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Normalized Laplacian: L = I - D^(-1/2) A D^(-1/2)</span>
+<span class="n">D_inv_sqrt</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">A_norm</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">D_inv_sqrt</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">D_inv_sqrt</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">SparseTensor</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">A_norm</span>
+
+<span class="c1"># Solve Laplacian system</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="jupyter-notebook-examples">
+<h2>Jupyter Notebook Examples<a class="headerlink" href="#jupyter-notebook-examples" title="Link to this heading">¶</a></h2>
+<p>Interactive examples are available as Jupyter notebooks in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> directory:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Notebook</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">basic_usage.ipynb</span></code></p></td>
+<td><p>Basic solve, property detection, visualization</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">batched_solve.ipynb</span></code></p></td>
+<td><p>Batched operations and SparseTensorList</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gcn_example.ipynb</span></code></p></td>
+<td><p>Graph neural network with sparse Laplacian</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nonlinear_solve.ipynb</span></code></p></td>
+<td><p>Nonlinear equations with adjoint gradients</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">visualization.ipynb</span></code></p></td>
+<td><p>Spy plots and sparsity visualization</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">persistence.ipynb</span></code></p></td>
+<td><p>Save/load with safetensors and Matrix Market</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">suitesparse_demo.ipynb</span></code></p></td>
+<td><p>Loading matrices from <a class="reference external" href="https://sparse.tamu.edu/">SuiteSparse Collection</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">distributed/</span></code></p></td>
+<td><p>Distributed computing examples (matvec, solve, eigsh)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="benchmarks.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Benchmarks</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="torch_sla.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">API Reference</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, walker chi
+            </div>
+            Made with 
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/walkerchi/torch-sla" aria-label="GitHub">
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#visualization">Visualization</a><ul>
+<li><a class="reference internal" href="#spy-plot-sparsity-pattern">Spy Plot (Sparsity Pattern)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#i-o-operations">I/O Operations</a><ul>
+<li><a class="reference internal" href="#matrix-market-format">Matrix Market Format</a></li>
+<li><a class="reference internal" href="#safetensors-format">SafeTensors Format</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li><a class="reference internal" href="#basic-sparse-linear-solve">Basic Sparse Linear Solve</a></li>
+<li><a class="reference internal" href="#property-detection">Property Detection</a></li>
+<li><a class="reference internal" href="#gradient-computation">Gradient Computation</a></li>
+<li><a class="reference internal" href="#specify-backend-and-method">Specify Backend and Method</a></li>
+<li><a class="reference internal" href="#matrix-operations">Matrix Operations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#batched-solve">Batched Solve</a><ul>
+<li><a class="reference internal" href="#batched-sparsetensor">Batched SparseTensor</a></li>
+<li><a class="reference internal" href="#multi-dimensional-batch">Multi-Dimensional Batch</a></li>
+<li><a class="reference internal" href="#solve-batch-for-repeated-solves">solve_batch for Repeated Solves</a></li>
+<li><a class="reference internal" href="#sparsetensorlist">SparseTensorList</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#distributed-solve">Distributed Solve</a><ul>
+<li><a class="reference internal" href="#basic-dsparsetensor">Basic DSparseTensor</a></li>
+<li><a class="reference internal" href="#d-poisson-example">2D Poisson Example</a></li>
+<li><a class="reference internal" href="#scatter-and-gather">Scatter and Gather</a></li>
+<li><a class="reference internal" href="#halo-exchange">Halo Exchange</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#iterative-solvers">Iterative Solvers</a><ul>
+<li><a class="reference internal" href="#pytorch-cg-solver">PyTorch CG Solver</a></li>
+<li><a class="reference internal" href="#preconditioners">Preconditioners</a></li>
+<li><a class="reference internal" href="#mixed-precision">Mixed Precision</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cuda-usage">CUDA Usage</a><ul>
+<li><a class="reference internal" href="#move-to-cuda">Move to CUDA</a></li>
+<li><a class="reference internal" href="#backend-selection-on-cuda">Backend Selection on CUDA</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-examples">Advanced Examples</a><ul>
+<li><a class="reference internal" href="#nonlinear-solve-with-adjoint-gradients">Nonlinear Solve with Adjoint Gradients</a></li>
+<li><a class="reference internal" href="#eigenvalue-decomposition">Eigenvalue Decomposition</a></li>
+<li><a class="reference internal" href="#svd-singular-value-decomposition">SVD (Singular Value Decomposition)</a></li>
+<li><a class="reference internal" href="#lu-factorization-for-repeated-solves">LU Factorization for Repeated Solves</a></li>
+<li><a class="reference internal" href="#graph-neural-network-example">Graph Neural Network Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#jupyter-notebook-examples">Jupyter Notebook Examples</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=b14783f5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
