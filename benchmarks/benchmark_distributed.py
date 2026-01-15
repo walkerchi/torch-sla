@@ -120,15 +120,21 @@ def benchmark_distributed(args):
     if args.dofs:
         dofs = [int(d) for d in args.dofs.split(',')]
     elif args.device == 'cuda':
-        # CUDA: try larger scales
-        dofs = [10000, 100000, 1000000, 4000000, 10000000, 25000000, 50000000]
+        # CUDA: scale up to 10M DOF (tested stable)
+        dofs = [10000, 100000, 1000000, 4000000, 10000000]
     else:
         # CPU: smaller scales
-        dofs = [1000, 10000, 100000, 500000, 1000000]
+        dofs = [10000, 100000, 500000, 1000000]
+    
+    total_dofs = len(dofs)
+    if rank == 0:
+        print(f"\nTesting {total_dofs} problem sizes: {dofs}")
+        print("-" * 70)
     
     results = []
+    cumulative_time = 0.0
     
-    for target_dof in dofs:
+    for idx, target_dof in enumerate(dofs):
         # Create matrix on CPU first, then move
         val, row, col, shape, actual_dof = create_poisson_2d(target_dof, device='cpu')
         n = shape[0]
@@ -216,12 +222,19 @@ def benchmark_distributed(args):
             
             residual = global_res_sq.sqrt().item()
             
+            cumulative_time += elapsed
+            
             if rank == 0:
+                progress = (idx + 1) / total_dofs * 100
                 if peak_mem > 0:
-                    mem_str = f", mem/GPU=[" + ",".join(f"{m:.2f}" for m in all_mems) + "]GB"
+                    mem_str = f", mem={peak_mem:.2f}GB/GPU"
                 else:
                     mem_str = ""
-                print(f"DOF={actual_dof:>10,}, time={elapsed:.3f}s, res={residual:.2e}{mem_str}")
+                # Estimate remaining time
+                avg_time_per_dof = cumulative_time / (idx + 1)
+                remaining = (total_dofs - idx - 1) * avg_time_per_dof
+                eta_str = f", ETA={remaining:.0f}s" if remaining > 0 else ""
+                print(f"[{idx+1}/{total_dofs}] DOF={actual_dof:>10,}, time={elapsed:.3f}s, res={residual:.2e}{mem_str}{eta_str}")
             
             results.append({
                 'dof': actual_dof,
