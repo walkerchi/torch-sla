@@ -41,39 +41,47 @@ def get_args():
 
 
 def create_poisson_2d(n: int, device: str = 'cpu'):
-    """Create 2D Poisson matrix (5-point stencil)."""
+    """Create 2D Poisson matrix (5-point stencil) - vectorized version."""
     grid = int(n ** 0.5)
     actual_n = grid * grid
     
-    rows, cols, vals = [], [], []
+    # Create all node indices
+    idx = torch.arange(actual_n, dtype=torch.int64)
+    i = idx // grid  # row in grid
+    j = idx % grid   # col in grid
     
-    for i in range(grid):
-        for j in range(grid):
-            idx = i * grid + j
-            rows.append(idx)
-            cols.append(idx)
-            vals.append(4.0)
-            
-            if j > 0:
-                rows.append(idx)
-                cols.append(idx - 1)
-                vals.append(-1.0)
-            if j < grid - 1:
-                rows.append(idx)
-                cols.append(idx + 1)
-                vals.append(-1.0)
-            if i > 0:
-                rows.append(idx)
-                cols.append(idx - grid)
-                vals.append(-1.0)
-            if i < grid - 1:
-                rows.append(idx)
-                cols.append(idx + grid)
-                vals.append(-1.0)
+    # Diagonal entries (all nodes)
+    row_list = [idx]
+    col_list = [idx]
+    val_list = [torch.full((actual_n,), 4.0, dtype=torch.float64)]
     
-    row = torch.tensor(rows, dtype=torch.int64, device=device)
-    col = torch.tensor(cols, dtype=torch.int64, device=device)
-    val = torch.tensor(vals, dtype=torch.float64, device=device)
+    # Left neighbor (j > 0)
+    mask = j > 0
+    row_list.append(idx[mask])
+    col_list.append(idx[mask] - 1)
+    val_list.append(torch.full((mask.sum().item(),), -1.0, dtype=torch.float64))
+    
+    # Right neighbor (j < grid-1)
+    mask = j < grid - 1
+    row_list.append(idx[mask])
+    col_list.append(idx[mask] + 1)
+    val_list.append(torch.full((mask.sum().item(),), -1.0, dtype=torch.float64))
+    
+    # Top neighbor (i > 0)
+    mask = i > 0
+    row_list.append(idx[mask])
+    col_list.append(idx[mask] - grid)
+    val_list.append(torch.full((mask.sum().item(),), -1.0, dtype=torch.float64))
+    
+    # Bottom neighbor (i < grid-1)
+    mask = i < grid - 1
+    row_list.append(idx[mask])
+    col_list.append(idx[mask] + grid)
+    val_list.append(torch.full((mask.sum().item(),), -1.0, dtype=torch.float64))
+    
+    row = torch.cat(row_list)
+    col = torch.cat(col_list)
+    val = torch.cat(val_list)
     
     return val, row, col, (actual_n, actual_n), actual_n
 

@@ -98,13 +98,10 @@ def partition_graph_metis(
 
 
 def partition_simple(num_nodes: int, num_parts: int) -> torch.Tensor:
-    """Simple 1D partitioning (fallback when METIS not available)"""
+    """Simple 1D partitioning (fallback when METIS not available) - vectorized."""
     nodes_per_part = (num_nodes + num_parts - 1) // num_parts
-    partition_ids = torch.zeros(num_nodes, dtype=torch.int64)
-    
-    for i in range(num_nodes):
-        partition_ids[i] = min(i // nodes_per_part, num_parts - 1)
-    
+    idx = torch.arange(num_nodes, dtype=torch.int64)
+    partition_ids = torch.clamp(idx // nodes_per_part, max=num_parts - 1)
     return partition_ids
 
 
@@ -196,7 +193,7 @@ def find_halo_nodes(
     partition_id: int
 ) -> Tuple[torch.Tensor, Dict[int, torch.Tensor]]:
     """
-    Find halo/ghost nodes for a partition.
+    Find halo/ghost nodes for a partition (vectorized version).
     
     Halo nodes are nodes owned by other partitions but connected to this partition's nodes.
     
@@ -207,39 +204,41 @@ def find_halo_nodes(
     send_map : Dict[int, torch.Tensor]
         For each neighbor, which of our owned nodes to send
     """
+    # Vectorized ownership check
     owned_mask = partition_ids == partition_id
-    owned_nodes = owned_mask.nonzero().squeeze(-1)
-    owned_set = set(owned_nodes.tolist())
-    
-    # Find edges crossing partition boundary
-    halo_set = set()
-    neighbor_nodes = {}  # neighbor_id -> set of nodes to send
     
     row_cpu = row.cpu()
     col_cpu = col.cpu()
     
-    for r, c in zip(row_cpu.tolist(), col_cpu.tolist()):
-        r_owned = r in owned_set
-        c_owned = c in owned_set
-        
-        if r_owned and not c_owned:
-            # c is a halo node
-            halo_set.add(c)
-            neighbor_id = partition_ids[c].item()
-            if neighbor_id not in neighbor_nodes:
-                neighbor_nodes[neighbor_id] = set()
-            neighbor_nodes[neighbor_id].add(r)  # We need to send r to this neighbor
-        
-        if c_owned and not r_owned:
-            # r is a halo node
-            halo_set.add(r)
-            neighbor_id = partition_ids[r].item()
-            if neighbor_id not in neighbor_nodes:
-                neighbor_nodes[neighbor_id] = set()
-            neighbor_nodes[neighbor_id].add(c)
+    row_owned = owned_mask[row_cpu]
+    col_owned = owned_mask[col_cpu]
     
-    halo_nodes = torch.tensor(sorted(halo_set), dtype=torch.int64)
-    send_map = {k: torch.tensor(sorted(v), dtype=torch.int64) for k, v in neighbor_nodes.items()}
+    # Case 1: row owned, col not owned -> col is halo
+    mask1 = row_owned & ~col_owned
+    halo_from_col = col_cpu[mask1]
+    send_to_neighbor_col = row_cpu[mask1]  # owned nodes to send
+    neighbor_ids_col = partition_ids[halo_from_col]
+    
+    # Case 2: col owned, row not owned -> row is halo
+    mask2 = col_owned & ~row_owned
+    halo_from_row = row_cpu[mask2]
+    send_to_neighbor_row = col_cpu[mask2]  # owned nodes to send
+    neighbor_ids_row = partition_ids[halo_from_row]
+    
+    # Combine halo nodes
+    all_halo = torch.cat([halo_from_col, halo_from_row])
+    halo_nodes = torch.unique(all_halo, sorted=True)
+    
+    # Build send_map: for each neighbor, which owned nodes to send
+    all_neighbors = torch.cat([neighbor_ids_col, neighbor_ids_row])
+    all_send_nodes = torch.cat([send_to_neighbor_col, send_to_neighbor_row])
+    
+    send_map = {}
+    unique_neighbors = torch.unique(all_neighbors)
+    for neighbor_id in unique_neighbors.tolist():
+        mask = all_neighbors == neighbor_id
+        nodes_to_send = torch.unique(all_send_nodes[mask], sorted=True)
+        send_map[neighbor_id] = nodes_to_send
     
     return halo_nodes, send_map
 
@@ -443,45 +442,38 @@ class DSparseMatrix:
         local_nodes = torch.cat([owned_nodes, halo_nodes])
         num_local = len(local_nodes)
         
-        # Build global-to-local mapping
+        # Build global-to-local mapping (vectorized)
         global_to_local = torch.full((num_nodes,), -1, dtype=torch.int64)
-        for local_idx, global_idx in enumerate(local_nodes):
-            global_to_local[global_idx] = local_idx
+        global_to_local[local_nodes] = torch.arange(num_local, dtype=torch.int64)
         
-        # Extract local matrix entries
+        # Extract local matrix entries (vectorized)
         row_cpu = row.cpu()
         col_cpu = col.cpu()
         val_cpu = values.cpu()
         
-        local_rows = []
-        local_cols = []
-        local_vals = []
+        # Map global indices to local
+        local_row_mapped = global_to_local[row_cpu]
+        local_col_mapped = global_to_local[col_cpu]
         
-        for r, c, v in zip(row_cpu.tolist(), col_cpu.tolist(), val_cpu.tolist()):
-            local_r = global_to_local[r].item()
-            local_c = global_to_local[c].item()
-            
-            if local_r >= 0 and local_c >= 0:
-                local_rows.append(local_r)
-                local_cols.append(local_c)
-                local_vals.append(v)
+        # Filter to entries where both row and col are local
+        valid_mask = (local_row_mapped >= 0) & (local_col_mapped >= 0)
+        local_row = local_row_mapped[valid_mask]
+        local_col = local_col_mapped[valid_mask]
+        local_values = val_cpu[valid_mask]
         
-        local_row = torch.tensor(local_rows, dtype=torch.int64)
-        local_col = torch.tensor(local_cols, dtype=torch.int64)
-        local_values = torch.tensor(local_vals, dtype=values.dtype)
-        
-        # Build recv_indices (where to place received halo data)
+        # Build recv_indices (vectorized)
         recv_indices = {}
         halo_offset = len(owned_nodes)
-        halo_list = halo_nodes.tolist()
+        
+        # Create halo node to local index mapping
+        halo_to_local = torch.full((num_nodes,), -1, dtype=torch.int64)
+        halo_to_local[halo_nodes] = torch.arange(len(halo_nodes), dtype=torch.int64) + halo_offset
         
         for neighbor_id in send_map.keys():
-            neighbor_owned = (partition_ids == neighbor_id).nonzero().squeeze(-1).tolist()
-            recv_idx = []
-            for node in neighbor_owned:
-                if node in halo_list:
-                    recv_idx.append(halo_offset + halo_list.index(node))
-            recv_indices[neighbor_id] = torch.tensor(recv_idx, dtype=torch.int64)
+            neighbor_owned = (partition_ids == neighbor_id).nonzero().squeeze(-1)
+            # Find which of neighbor's owned nodes are in our halo
+            local_idx = halo_to_local[neighbor_owned]
+            recv_indices[neighbor_id] = local_idx[local_idx >= 0]
         
         # Convert send_map from global node IDs to local indices
         # send_map currently contains global node IDs, but halo_exchange needs local indices
