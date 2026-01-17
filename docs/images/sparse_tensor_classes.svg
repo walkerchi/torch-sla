@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+    </marker>
+    <marker id="arrowhead-rev" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+      <polygon points="10 0, 0 3.5, 10 7" fill="#666"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="600" height="400" fill="#ffffff"/>
+  
+  <!-- Axis labels -->
+  <text x="300" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">List (with isolated graph priors)</text>
+  <text x="100" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">Single</text>
+  
+  <text x="20" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333" transform="rotate(-90, 20, 120)">Local</text>
+  <text x="20" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333" transform="rotate(-90, 20, 300)">Distributed</text>
+  
+  <!-- SparseTensor (top-left) -->
+  <rect x="60" y="60" width="160" height="80" rx="10" ry="10" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
+  <text x="140" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1976d2">SparseTensor</text>
+  
+  <!-- SparseTensorList (top-right) -->
+  <rect x="340" y="60" width="200" height="80" rx="10" ry="10" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+  <text x="440" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#388e3c">SparseTensorList</text>
+  
+  <!-- DSparseTensor (bottom-left) -->
+  <rect x="60" y="260" width="160" height="80" rx="10" ry="10" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
+  <text x="140" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#f57c00">DSparseTensor</text>
+  
+  <!-- DSparseTensorList (bottom-right) -->
+  <rect x="340" y="260" width="200" height="80" rx="10" ry="10" fill="#fce4ec" stroke="#c2185b" stroke-width="2"/>
+  <text x="440" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#c2185b">DSparseTensorList</text>
+  
+  <!-- Horizontal arrows (top) -->
+  <line x1="225" y1="90" x2="335" y2="90" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="335" y1="110" x2="225" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="280" y="82" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">to_connected_components()</text>
+  <text x="280" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">to_block_diagonal()</text>
+  
+  <!-- Horizontal arrows (bottom) -->
+  <line x1="225" y1="290" x2="335" y2="290" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="335" y1="310" x2="225" y2="310" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="280" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">to_list()</text>
+  <text x="280" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">to_block_diagonal()</text>
+  
+  <!-- Vertical arrows (left) -->
+  <line x1="120" y1="145" x2="120" y2="255" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="160" y1="255" x2="160" y2="145" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="90" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666" transform="rotate(-90, 90, 205)">partition()</text>
+  <text x="190" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666" transform="rotate(-90, 190, 205)">gather()</text>
+  
+  <!-- Vertical arrows (right) -->
+  <line x1="420" y1="145" x2="420" y2="255" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="460" y1="255" x2="460" y2="145" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="390" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666" transform="rotate(-90, 390, 205)">partition()</text>
+  <text x="490" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666" transform="rotate(-90, 490, 205)">gather()</text>
+  
+  <!-- Legend -->
+  <rect x="60" y="360" width="480" height="30" rx="5" ry="5" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+  <text x="300" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">
+    Horizontal: Single ↔ List (isolated graph priors)  |  Vertical: Local ↔ Distributed
+  </text>
+</svg>
+

@@ -63,13 +63,11 @@ pip install -e ".[dev]"
 import torch
 from torch_sla import SparseTensor
 
-# Create sparse matrix in COO format
-val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
-
-# Create SparseTensor
-A = SparseTensor(val, row, col, (3, 3))
+# Create sparse matrix from dense (for small matrices)
+dense = torch.tensor([[4.0, -1.0,  0.0],
+                      [-1.0, 4.0, -1.0],
+                      [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+A = SparseTensor.from_dense(dense)
 
 # Solve Ax = b
 b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
@@ -211,6 +209,7 @@ print(b.grad)    # Gradient w.r.t. RHS
 | Operation | CPU | CUDA | Notes |
 |-----------|-----|------|-------|
 | `solve()` | ✓ | ✓ | Adjoint method, O(1) graph nodes |
+| `det()` | ✓ | ✓ | Adjoint method, ∂det/∂A = det(A)·(A⁻¹)ᵀ |
 | `eigsh()` / `eigs()` | ✓ | ✓ | Adjoint method, O(1) graph nodes |
 | `svd()` | ✓ | ✓ | Power iteration, differentiable |
 | `nonlinear_solve()` | ✓ | ✓ | Adjoint, params only |
@@ -221,12 +220,13 @@ print(b.grad)    # Gradient w.r.t. RHS
 | `norm()`, `sum()`, `mean()` | ✓ | ✓ | Standard autograd |
 | `to_dense()` | ✓ | ✓ | Standard autograd |
 
-#### DSparseMatrix (Multi-GPU)
+#### DSparseTensor (Multi-GPU)
 
 | Operation | CPU (Gloo) | CUDA (NCCL) | Notes |
 |-----------|------------|-------------|-------|
 | `matvec()` | ✓ | ✓ | Halo exchange + local SpMV |
 | `solve()` | ✓ | ✓ | Distributed CG (default `distributed=True`) |
+| `det()` | ✓ | ✓ | Gathers all partitions, then computes (with warning) |
 | `eigsh()` | ✓ | ✓ | Distributed LOBPCG |
 | `halo_exchange()` | ✓ | ✓ | P2P communication with neighbors |
 
@@ -314,10 +314,19 @@ print(f.grad)  # ∂L/∂f via implicit differentiation
 ## Matrix Operations
 
 ```python
-A = SparseTensor(val, row, col, shape)
+# Create sparse matrix from dense (for small matrices)
+dense = torch.tensor([[4.0, -1.0,  0.0],
+                      [-1.0, 4.0, -1.0],
+                      [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+A = SparseTensor.from_dense(dense)
 
 # Norms
 norm = A.norm('fro')  # Frobenius norm
+
+# Determinant (with gradient support)
+det = A.det()  # ∂det/∂A = det(A)·(A⁻¹)ᵀ
+# Note: CPU is faster for sparse matrices (CUDA uses dense conversion)
+# For CUDA tensors: A_cuda.cpu().det() is ~3x faster than A_cuda.det()
 
 # Eigenvalues
 eigenvalues, eigenvectors = A.eigsh(k=6)
@@ -414,9 +423,29 @@ torchrun --standalone --nproc_per_node=4 examples/distributed/distributed_solve.
 ### Core Classes
 
 - `SparseTensor` - Wrapper with batched solve, norm, eigs, svd methods
-- `SparseTensorList` - List of SparseTensors with different structures
+- `SparseTensorList` - List of SparseTensors with batched operations and isolated graph priors
 - `DSparseTensor` - Distributed sparse tensor with halo exchange
+- `DSparseTensorList` - Distributed list for batched graph operations across GPUs
 - `LUFactorization` - LU factorization for repeated solves
+
+#### Class Hierarchy
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/sparse_tensor_classes_dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/sparse_tensor_classes.svg">
+    <img alt="Sparse Tensor Class Hierarchy" src="docs/images/sparse_tensor_classes.svg" width="600">
+  </picture>
+</p>
+
+| | **Single Matrix** | **List** (isolated graph priors) |
+|---|---|---|
+| **Local** | `SparseTensor` | `SparseTensorList` |
+| **Distributed** | `DSparseTensor` | `DSparseTensorList` |
+
+**Conversions:**
+- Horizontal: `to_block_diagonal()` / `to_connected_components()` / `to_list()`
+- Vertical: `partition()` / `gather()`
 
 ### Main Functions
 
@@ -440,6 +469,13 @@ torchrun --standalone --nproc_per_node=4 examples/distributed/distributed_solve.
 5. **Use pytorch+cg** for very large problems (> 2M DOF)
 6. **Avoid cuSOLVER** - slower than cudss, no float32 support
 7. **Use LU factorization** for repeated solves with same matrix
+8. **Determinant computation**:
+   - **Use CPU for sparse matrices** - CUDA requires dense conversion (much slower)
+   - For CUDA tensors, use `.cpu().det().cuda()` for better performance
+   - Use float64 for numerical stability
+   - Avoid for very large matrices (det values can overflow)
+   - For distributed matrices, be aware of data gather overhead
+   - Singular matrices may cause LU decomposition to fail
 
 ## Requirements
 
@@ -448,6 +484,43 @@ torchrun --standalone --nproc_per_node=4 examples/distributed/distributed_solve.
 - SciPy (recommended for CPU)
 - CUDA Toolkit (for GPU backends)
 - nvidia-cudss-cu12 (optional, for cuDSS backend)
+
+## Performance Tips
+
+### Determinant Computation
+
+```python
+# ❌ Slow for sparse matrices
+det = A_cuda.det()  # 2.5 ms
+
+# ✅ Fast - use CPU even for CUDA tensors
+det = A_cuda.cpu().det()  # 1.3 ms (1.9x faster!)
+```
+
+**Why?** cuSOLVER/cuDSS don't expose sparse determinant, requiring O(n²) dense conversion. CPU sparse LU is O(nnz^1.5), much faster for sparse matrices.
+
+### Linear Solve
+
+- **Small matrices (< 1000)**: Use CPU with SciPy backend
+- **Large matrices (> 1000)**: Use CUDA with cuDSS backend
+- **Iterative methods**: Use `method='cg'` or `method='bicgstab'` for large systems
+
+See `benchmarks/README.md` for detailed performance analysis.
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development workflow
+- Code conventions
+- Testing guidelines
+- Benchmark standards
+
+Quick conventions:
+- Benchmarks: `benchmarks/benchmark_<feature>.py` → `results/benchmark_<feature>/`
+- Examples: `examples/<feature>.py`
+- Tests: `tests/test_<module>.py`
+
+See [TODO.md](TODO.md) for the development roadmap.
 
 ## License
 
