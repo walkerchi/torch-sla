@@ -48,6 +48,30 @@ try:
 except ImportError:
     DIST_AVAILABLE = False
 
+# DTensor support (PyTorch 2.0+)
+try:
+    from torch.distributed.tensor import DTensor
+    from torch.distributed.tensor.placement_types import Shard, Replicate
+    DTENSOR_AVAILABLE = True
+except ImportError:
+    try:
+        # Older import path (PyTorch 2.0-2.1)
+        from torch.distributed._tensor import DTensor
+        from torch.distributed._tensor.placement_types import Shard, Replicate
+        DTENSOR_AVAILABLE = True
+    except ImportError:
+        DTENSOR_AVAILABLE = False
+        DTensor = None
+        Shard = None
+        Replicate = None
+
+
+def _is_dtensor(x) -> bool:
+    """Check if x is a DTensor instance."""
+    if not DTENSOR_AVAILABLE or DTensor is None:
+        return False
+    return isinstance(x, DTensor)
+
 
 @dataclass
 class Partition:
@@ -1775,6 +1799,41 @@ class DSparseMatrix:
             dist.gather(owned_vals, dst=0)
             return None
     
+    def det(self) -> torch.Tensor:
+        """
+        Compute determinant of the distributed sparse matrix.
+        
+        NOTE: DSparseMatrix represents a single partition. To compute the
+        determinant of the full global matrix, you need to use DSparseTensor
+        which manages all partitions, or manually gather all partitions.
+        
+        This method raises an error to guide users to the correct approach.
+        
+        Raises
+        ------
+        NotImplementedError
+            DSparseMatrix is a single partition. Use DSparseTensor.det() instead.
+            
+        Examples
+        --------
+        >>> # Correct way: Use DSparseTensor
+        >>> from torch_sla import DSparseTensor
+        >>> D = DSparseTensor(val, row, col, shape, num_partitions=4)
+        >>> det = D.det()  # This works
+        >>>
+        >>> # If you have individual DSparseMatrix partitions, you need to
+        >>> # reconstruct the global matrix first
+        """
+        raise NotImplementedError(
+            "DSparseMatrix represents a single partition of a distributed matrix. "
+            "To compute the determinant of the full global matrix, use DSparseTensor.det() instead, "
+            "which manages all partitions and can gather the full matrix for determinant computation.\n\n"
+            "Example:\n"
+            "  from torch_sla import DSparseTensor\n"
+            "  D = DSparseTensor(val, row, col, shape, num_partitions=4)\n"
+            "  det = D.det()  # Gathers all partitions and computes determinant"
+        )
+    
     def __repr__(self) -> str:
         return (f"DSparseMatrix(partition={self.partition.partition_id}/{self.num_partitions}, "
                 f"local={self.num_local} ({self.num_owned}+{self.num_halo}), "
@@ -2524,12 +2583,12 @@ class DSparseTensor:
     
     def solve_distributed(
         self,
-        b_global: torch.Tensor,
+        b_global: Union[torch.Tensor, "DTensor"],
         method: str = 'cg',
         atol: float = 1e-10,
         maxiter: int = 1000,
         verbose: bool = False
-    ) -> torch.Tensor:
+    ) -> Union[torch.Tensor, "DTensor"]:
         """
         Distributed solve: find x such that A @ x = b using all partitions.
         
@@ -2538,8 +2597,10 @@ class DSparseTensor:
         
         Parameters
         ----------
-        b_global : torch.Tensor
-            Global RHS vector [N]
+        b_global : torch.Tensor or DTensor
+            Global RHS vector [N].
+            - If torch.Tensor: treated as global vector
+            - If DTensor: automatically handles distributed input/output
         method : str
             Solver method: 'cg' (Conjugate Gradient)
         atol : float
@@ -2551,14 +2612,128 @@ class DSparseTensor:
             
         Returns
         -------
-        torch.Tensor
-            Global solution vector [N]
+        torch.Tensor or DTensor
+            Global solution vector [N].
+            Returns DTensor if input is DTensor, otherwise torch.Tensor.
             
         Example
         -------
         >>> D = A.partition(num_partitions=4)
         >>> x = D.solve_distributed(b)  # Distributed CG solve
         >>> residual = torch.norm(A @ x - b)
+        
+        >>> # With DTensor input
+        >>> from torch.distributed.tensor import DTensor, Replicate
+        >>> b_dt = DTensor.from_local(b_local, mesh, [Replicate()])
+        >>> x_dt = D.solve_distributed(b_dt)  # Returns DTensor
+        """
+        # Check for DTensor input
+        if _is_dtensor(b_global):
+            return self._solve_distributed_dtensor(b_global, method, atol, maxiter, verbose)
+        
+        N = self._shape[0]
+        dtype = b_global.dtype
+        device = self._device
+        
+        # Initialize x = 0
+        x_global = torch.zeros(N, dtype=dtype, device=device)
+        
+        # Scatter b to local
+        b_local = self.scatter_local(b_global)
+        
+        # Distributed CG
+        if method == 'cg':
+            x_global = self._distributed_cg(x_global, b_global, atol, maxiter, verbose)
+        else:
+            raise ValueError(f"Unknown method: {method}. Supported: 'cg'")
+        
+        return x_global
+    
+    def _solve_distributed_dtensor(
+        self,
+        b_dtensor: "DTensor",
+        method: str,
+        atol: float,
+        maxiter: int,
+        verbose: bool
+    ) -> "DTensor":
+        """
+        Distributed solve with DTensor input.
+        
+        Handles DTensor layout conversion and result wrapping.
+        
+        Parameters
+        ----------
+        b_dtensor : DTensor
+            Right-hand side as DTensor
+        method : str
+            Solver method
+        atol : float
+            Absolute tolerance
+        maxiter : int
+            Maximum iterations
+        verbose : bool
+            Print convergence info
+            
+        Returns
+        -------
+        DTensor
+            Solution as DTensor with same placement as input
+        """
+        if not DTENSOR_AVAILABLE:
+            raise RuntimeError("DTensor support requires PyTorch 2.0+")
+        
+        # Get DTensor metadata
+        device_mesh = b_dtensor.device_mesh
+        placements = b_dtensor.placements
+        original_placements = tuple(placements)
+        
+        # Check if input is replicated
+        is_replicated = all(isinstance(p, Replicate) for p in placements)
+        
+        if is_replicated:
+            # Input is replicated - extract and solve
+            b_local = b_dtensor.to_local()
+            x_local = self._solve_distributed_tensor(b_local, method, atol, maxiter, verbose)
+            # Wrap result as replicated DTensor
+            return DTensor.from_local(x_local, device_mesh, [Replicate()])
+        
+        # Input is sharded - redistribute to replicated for solve
+        replicate_placements = [Replicate() for _ in placements]
+        b_replicated = b_dtensor.redistribute(device_mesh, replicate_placements)
+        b_full = b_replicated.to_local()
+        
+        # Solve with full vector
+        x_full = self._solve_distributed_tensor(b_full, method, atol, maxiter, verbose)
+        
+        # Wrap as replicated DTensor
+        x_replicated = DTensor.from_local(x_full, device_mesh, [Replicate()])
+        
+        # Redistribute back to original placement if it was sharded
+        if not is_replicated:
+            output_placements = []
+            for p in original_placements:
+                if isinstance(p, Shard):
+                    output_placements.append(Shard(p.dim))
+                else:
+                    output_placements.append(Replicate())
+            
+            return x_replicated.redistribute(device_mesh, output_placements)
+        
+        return x_replicated
+    
+    def _solve_distributed_tensor(
+        self,
+        b_global: torch.Tensor,
+        method: str,
+        atol: float,
+        maxiter: int,
+        verbose: bool
+    ) -> torch.Tensor:
+        """
+        Internal solve implementation for torch.Tensor input.
+        
+        Separated from solve_distributed to allow DTensor wrapper to call it.
         """
         N = self._shape[0]
         dtype = b_global.dtype
@@ -2731,6 +2906,124 @@ class DSparseTensor:
     
     # Alias for convenience
     gather = to_sparse_tensor
+    
+    # =========================================================================
+    # DTensor Utilities
+    # =========================================================================
+    
+    def scatter_to_dtensor(
+        self,
+        x_global: torch.Tensor,
+        device_mesh: "DeviceMesh",
+        shard_dim: int = 0
+    ) -> "DTensor":
+        """
+        Convert a global tensor to a sharded DTensor aligned with matrix partitioning.
+        
+        This creates a DTensor where each rank holds the portion of the vector
+        corresponding to its owned nodes in the matrix partitioning.
+        
+        Parameters
+        ----------
+        x_global : torch.Tensor
+            Global vector of shape [N]
+        device_mesh : DeviceMesh
+            PyTorch DeviceMesh for distribution
+        shard_dim : int
+            Dimension to shard (default 0 for vectors)
+            
+        Returns
+        -------
+        DTensor
+            Sharded DTensor with local data for this rank
+            
+        Example
+        -------
+        >>> mesh = init_device_mesh("cuda", (4,))
+        >>> x_global = torch.randn(N)
+        >>> x_dt = D.scatter_to_dtensor(x_global, mesh)
+        """
+        if not DTENSOR_AVAILABLE:
+            raise RuntimeError("DTensor support requires PyTorch 2.0+")
+        
+        # Create sharded DTensor
+        # Each rank gets the portion corresponding to its partition
+        placements = [Shard(shard_dim)]
+        return DTensor.from_local(
+            x_global,  # Will be redistributed by DTensor
+            device_mesh,
+            placements
+        )
+    
+    def gather_from_dtensor(
+        self,
+        x_dtensor: "DTensor"
+    ) -> torch.Tensor:
+        """
+        Convert a DTensor to a global tensor.
+        
+        Parameters
+        ----------
+        x_dtensor : DTensor
+            Distributed tensor
+            
+        Returns
+        -------
+        torch.Tensor
+            Full global tensor
+            
+        Example
+        -------
+        >>> x_global = D.gather_from_dtensor(x_dt)
+        """
+        if not DTENSOR_AVAILABLE:
+            raise RuntimeError("DTensor support requires PyTorch 2.0+")
+        
+        return x_dtensor.full_tensor()
+    
+    def to_dtensor(
+        self,
+        x: torch.Tensor,
+        device_mesh: "DeviceMesh",
+        replicate: bool = True
+    ) -> "DTensor":
+        """
+        Convert a tensor to DTensor with specified placement.
+        
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor
+        device_mesh : DeviceMesh
+            PyTorch DeviceMesh
+        replicate : bool
+            If True, create a replicated DTensor (same data on all ranks).
+            If False, create a sharded DTensor (data is split).
+            
+        Returns
+        -------
+        DTensor
+            Resulting DTensor
+            
+        Example
+        -------
+        >>> mesh = init_device_mesh("cuda", (4,))
+        >>> x_dt = D.to_dtensor(x, mesh, replicate=True)
+        """
+        if not DTENSOR_AVAILABLE:
+            raise RuntimeError("DTensor support requires PyTorch 2.0+")
+        
+        if replicate:
+            placements = [Replicate()]
+        else:
+            placements = [Shard(0)]
+        
+        return DTensor.from_local(x, device_mesh, placements)
+    
+    @property
+    def supports_dtensor(self) -> bool:
+        """Check if DTensor operations are available."""
+        return DTENSOR_AVAILABLE
     
     # =========================================================================
     # Distributed Algorithms (True Distributed, No Gather)
@@ -3102,6 +3395,75 @@ class DSparseTensor:
             warnings.warn(f"ord={ord} requires data gather. Using to_sparse_tensor().")
             return self.to_sparse_tensor().condition_number(ord=ord)
     
+    def det(self) -> torch.Tensor:
+        """
+        Compute determinant of the distributed sparse matrix.
+        
+        WARNING: This operation requires gathering the full matrix to compute
+        the determinant, as determinant is a global property that cannot be
+        computed in a truly distributed manner without full matrix information.
+        
+        The determinant is computed by:
+        1. Gathering all partitions into a global SparseTensor
+        2. Computing the determinant using LU decomposition (CPU) or 
+           torch.linalg.det (CUDA)
+        
+        Returns
+        -------
+        torch.Tensor
+            Determinant value (scalar tensor).
+            
+        Raises
+        ------
+        ValueError
+            If matrix is not square
+            
+        Notes
+        -----
+        - Only square matrices have determinants
+        - This method gathers all data, so use with caution for large matrices
+        - Supports gradient computation via autograd
+        - For very large matrices, consider using log-determinant or other
+          approximations instead
+        
+        Examples
+        --------
+        >>> import torch
+        >>> from torch_sla import DSparseTensor
+        >>> 
+        >>> # Create distributed sparse matrix
+        >>> val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0])
+        >>> row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
+        >>> col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+        >>> D = DSparseTensor(val, row, col, (3, 3), num_partitions=2)
+        >>> 
+        >>> # Compute determinant (gathers to single node)
+        >>> det = D.det()
+        >>> print(det)
+        >>>
+        >>> # With gradient support
+        >>> val = val.requires_grad_(True)
+        >>> D = DSparseTensor(val, row, col, (3, 3), num_partitions=2)
+        >>> det = D.det()
+        >>> det.backward()
+        >>> print(val.grad)  # Gradient w.r.t. matrix values
+        """
+        M, N = self._shape
+        
+        if M != N:
+            raise ValueError(f"Matrix must be square for determinant, got shape ({M}, {N})")
+        
+        # Warn user about data gather
+        warnings.warn(
+            "det() requires gathering all partitions to compute the determinant. "
+            "This is a global operation that cannot be computed in a truly distributed manner. "
+            "For large matrices, this may be memory-intensive."
+        )
+        
+        # Gather to global SparseTensor and compute determinant
+        A_global = self.to_sparse_tensor()
+        return A_global.det()
+    
     def T(self) -> "DSparseTensor":
         """
         Transpose the distributed sparse tensor.
@@ -3348,7 +3710,7 @@ class DSparseTensor:
     # Matrix Operations
     # =========================================================================
     
-    def __matmul__(self, x: torch.Tensor) -> torch.Tensor:
+    def __matmul__(self, x: Union[torch.Tensor, "DTensor"]) -> Union[torch.Tensor, "DTensor"]:
         """
         Distributed matrix-vector multiplication: y = D @ x
         
@@ -3357,18 +3719,26 @@ class DSparseTensor:
         
         Parameters
         ----------
-        x : torch.Tensor
-            Global vector of shape (N,) where N = shape[1]
+        x : torch.Tensor or DTensor
+            Global vector of shape (N,) where N = shape[1].
+            - If torch.Tensor: treated as global vector (same on all ranks or single-node)
+            - If DTensor: automatically handles distributed input/output
             
         Returns
         -------
-        torch.Tensor
-            Global result vector of shape (M,) where M = shape[0]
+        torch.Tensor or DTensor
+            Global result vector of shape (M,) where M = shape[0].
+            Returns DTensor if input is DTensor, otherwise torch.Tensor.
             
         Example
         -------
         >>> D = A.partition(num_partitions=4)
         >>> y = D @ x  # Equivalent to A @ x
+        
+        >>> # With DTensor input
+        >>> from torch.distributed.tensor import DTensor, Replicate
+        >>> x_dt = DTensor.from_local(x_local, mesh, [Replicate()])
+        >>> y_dt = D @ x_dt  # Returns DTensor
         
         Notes
         -----
@@ -3376,8 +3746,85 @@ class DSparseTensor:
         
         For single-node simulation with gradient support, uses global COO matvec.
         For true MPI distributed execution without gradients, uses partition-based matvec.
+        
+        **DTensor Support:**
+        
+        When input is a DTensor:
+        - Replicated DTensor: extracts local tensor and computes as global
+        - Sharded DTensor: redistributes to Replicate, computes, then reshards
         """
+        # Check for DTensor input
+        if _is_dtensor(x):
+            return self._matmul_dtensor(x)
+        
         return self._distributed_matvec(x)
+    
+    def _matmul_dtensor(self, x: "DTensor") -> "DTensor":
+        """
+        Matrix-vector multiplication with DTensor input.
+        
+        Handles DTensor layout conversion and result wrapping.
+        
+        Parameters
+        ----------
+        x : DTensor
+            Distributed tensor input
+            
+        Returns
+        -------
+        DTensor
+            Result as DTensor with same placement as input
+        """
+        if not DTENSOR_AVAILABLE:
+            raise RuntimeError("DTensor support requires PyTorch 2.0+")
+        
+        # Get DTensor metadata
+        device_mesh = x.device_mesh
+        placements = x.placements
+        
+        # Store original placement for output
+        original_placements = tuple(placements)
+        
+        # Check if input is replicated (easiest case)
+        is_replicated = all(isinstance(p, Replicate) for p in placements)
+        
+        if is_replicated:
+            # Input is replicated on all ranks - just extract and compute
+            x_local = x.to_local()
+            y_local = self._distributed_matvec(x_local)
+            # Wrap result as replicated DTensor
+            return DTensor.from_local(y_local, device_mesh, [Replicate()])
+        
+        # Input is sharded - need to handle redistribution
+        # For sparse matvec, we typically need the full vector on each rank
+        # (because sparse matrix rows may reference any column)
+        
+        # Redistribute to replicated
+        replicate_placements = [Replicate() for _ in placements]
+        x_replicated = x.redistribute(device_mesh, replicate_placements)
+        x_full = x_replicated.to_local()
+        
+        # Compute matvec with full vector
+        y_full = self._distributed_matvec(x_full)
+        
+        # Wrap as replicated DTensor first
+        y_replicated = DTensor.from_local(y_full, device_mesh, [Replicate()])
+        
+        # Redistribute back to original placement if it was sharded
+        if not is_replicated:
+            # For output, we shard along the row dimension (dim 0)
+            # which corresponds to the matrix row partitioning
+            output_placements = []
+            for p in original_placements:
+                if isinstance(p, Shard):
+                    # Preserve shard dimension for output
+                    output_placements.append(Shard(p.dim))
+                else:
+                    output_placements.append(Replicate())
+            
+            return y_replicated.redistribute(device_mesh, output_placements)
+        
+        return y_replicated
     
     # =========================================================================
     # Representation
