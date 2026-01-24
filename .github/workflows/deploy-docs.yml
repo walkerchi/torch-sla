@@ -34,9 +34,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install sphinx furo sphinx-sitemap
-        # Install torch-sla in editable mode for autodoc to work
+        # Install torch-sla dependencies first
         pip install torch numpy scipy
+        # Install torch-sla in editable mode for autodoc to work
         pip install -e . --no-build-isolation || pip install -e .
+        # Verify torch-sla is importable (critical for autodoc)
+        python -c "import torch_sla; print(f'torch-sla {torch_sla.__version__} imported successfully')"
 
     - name: Build documentation
       run: |
