@@ -34,7 +34,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install sphinx furo sphinx-sitemap
-        # Install torch-sla in editable mode (autodoc uses mocks for dependencies)
+        # Install compatible versions of dependencies for autodoc to work
+        pip install "numpy<2" scipy torch --index-url https://download.pytorch.org/whl/cpu
+        # Install torch-sla in editable mode
         pip install -e . --no-deps --no-build-isolation || pip install -e . --no-deps
 
     - name: Build documentation
