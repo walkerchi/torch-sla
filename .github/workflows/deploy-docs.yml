@@ -40,10 +40,31 @@ jobs:
         # Install torch-sla in editable mode
         pip install -e . --no-deps --no-build-isolation || pip install -e . --no-deps
 
+    - name: Verify torch_sla import
+      run: |
+        python -c "
+import sys
+sys.path.insert(0, '.')
+# Mock scipy like conf.py does
+from unittest.mock import MagicMock
+sys.modules['scipy'] = MagicMock()
+sys.modules['scipy.sparse'] = MagicMock()
+sys.modules['scipy.sparse.linalg'] = MagicMock()
+import torch_sla
+print(f'torch_sla imported: {torch_sla}')
+print(f'SparseTensor: {torch_sla.SparseTensor}')
+print(f'SparseTensor methods: {[m for m in dir(torch_sla.SparseTensor) if not m.startswith(\"_\")][:10]}')
+"
+
     - name: Build documentation
       run: |
         cd docs
         make html
+        # Verify build output
+        echo "torch_sla.html size:" && wc -c build/html/torch_sla.html
+        echo "Line count:" && wc -l build/html/torch_sla.html
+        # Check for autodoc content
+        grep -c "dl class=\"py" build/html/torch_sla.html || echo "No py classes found"
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
