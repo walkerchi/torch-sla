@@ -8,25 +8,18 @@ import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Autodoc configuration ---------------------------------------------------
-# Mock imports for modules that may not be available during docs build
-# This ensures autodoc works even if torch/scipy/etc are not installed
-autodoc_mock_imports = []
-
-# Try to import torch_sla, if it fails, we need to mock the dependencies
-try:
-    import torch
-except ImportError:
-    autodoc_mock_imports.extend(['torch', 'torch.autograd', 'torch.utils', 'torch.utils.cpp_extension'])
-
-try:
-    import scipy
-except ImportError:
-    autodoc_mock_imports.extend(['scipy', 'scipy.sparse', 'scipy.sparse.linalg'])
-
-try:
-    import numpy
-except ImportError:
-    autodoc_mock_imports.append('numpy')
+# Mock all dependencies unconditionally for docs build
+# This ensures autodoc works regardless of installation state or version conflicts
+autodoc_mock_imports = [
+    'torch',
+    'torch.autograd',
+    'torch.utils',
+    'torch.utils.cpp_extension',
+    'scipy',
+    'scipy.sparse',
+    'scipy.sparse.linalg',
+    'numpy',
+]
 
 # -- Project information -----------------------------------------------------
 project = 'torch-sla'
