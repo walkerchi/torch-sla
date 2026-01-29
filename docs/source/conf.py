@@ -109,7 +109,7 @@ html_theme_options = {
 
 # Logo and title - SEO optimized with high-value keywords
 html_logo = "_static/logo.jpg"
-html_title = "torch-sla: PyTorch Sparse Linear Algebra | GPU Accelerated"
+html_title = "torch-sla: PyTorch Sparse Linear Algebra"
 html_favicon = "_static/logo.jpg"
 
 # Additional SEO meta tags - targeting common search queries
