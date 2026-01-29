@@ -109,7 +109,7 @@ torch-sla 非常适合:
 
    introduction
    installation
-   api
+   torch_sla
    examples
    benchmarks
 
