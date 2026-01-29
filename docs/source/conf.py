@@ -18,8 +18,8 @@ autodoc_mock_imports = [
 
 # -- Project information -----------------------------------------------------
 project = 'torch-sla'
-copyright = '2024, walker chi'
-author = 'walker chi'
+copyright = '2024-2026, Walker Chi'
+author = 'Walker Chi'
 version = '0.1.2'
 release = '0.1.2'
 
@@ -60,19 +60,31 @@ intersphinx_mapping = {
 templates_path = ['_templates']
 exclude_patterns = ['setup.py', '__init__.py']
 
-# Language settings
+# -- Language settings -------------------------------------------------------
 language = 'en'
+locale_dirs = ['locale/']
+gettext_compact = False
+gettext_uuid = True
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = 'furo'
 html_static_path = ['_static']
 html_css_files = ['custom.css']
+html_js_files = []
 autodoc_member_order = 'bysource'
 
 # Furo theme options with SEO enhancements
 html_theme_options = {
     "sidebar_hide_name": False,
     "navigation_with_keys": True,
+    "light_css_variables": {
+        "color-brand-primary": "#64288C",
+        "color-brand-content": "#F15213",
+    },
+    "dark_css_variables": {
+        "color-brand-primary": "#EE9525",
+        "color-brand-content": "#8E53A2",
+    },
     "footer_icons": [
         {
             "name": "GitHub",
@@ -80,6 +92,16 @@ html_theme_options = {
             "html": """
                 <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            """,
+            "class": "",
+        },
+        {
+            "name": "arXiv",
+            "url": "https://arxiv.org/abs/2601.13994",
+            "html": """
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                    <path d="M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm2 4v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"/>
                 </svg>
             """,
             "class": "",
@@ -98,17 +120,23 @@ html_context = {
     'description': 'torch-sla: PyTorch Sparse Linear Algebra library. GPU-accelerated sparse solvers with autograd support. Works with torch.sparse tensors, COO/CSR formats. pip install torch-sla.',
     # Comprehensive keywords covering all search variations
     'keywords': 'torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear algebra pytorch, torch.sparse, sparse linear algebra, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse solver, autograd sparse, scipy sparse pytorch, sparse COO, sparse CSR, FEM pytorch, CFD pytorch, spsolve pytorch',
-    'author': 'walker chi',
+    'author': 'Walker Chi',
     'og_title': 'torch-sla: PyTorch Sparse Linear Algebra with GPU Acceleration',
     'og_description': 'PyTorch Sparse Linear Algebra library. Solve Ax=b with GPU acceleration via cuSOLVER/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
     'og_image': 'https://walkerchi.github.io/torch-sla/_static/logo.jpg',
     'twitter_card': 'summary_large_image',
     'google_site_verification': '',  # Add your Google Search Console verification code here
+    # Language selector
+    'languages': [
+        ('en', 'English', './'),
+        ('zh', '中文', './zh/'),
+    ],
+    'current_language': 'en',
 }
 
 # Sitemap for search engines (requires sphinx-sitemap)
 sitemap_url_scheme = '{link}'
-sitemap_locales = ['en']
+sitemap_locales = ['en', 'zh']
 html_extra_path = ['robots.txt']
 
 # Search engine optimization

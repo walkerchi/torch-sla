@@ -1,0 +1,23 @@
+<form class="sidebar-search-container" method="get" action="{{ pathto('search') }}" role="search">
+  <input class="sidebar-search" placeholder="{{ _("Search") }}" name="q" aria-label="{{ _("Search" ) }}">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+
+{# Language Switcher - SSR rendered with current page preservation #}
+{# Get the current page name (without path) #}
+{% set page_name = pagename.split('/')[-1] if '/' in pagename else pagename %}
+<div class="sidebar-lang-switcher">
+    {% if current_language == 'zh' %}
+    <a href="{{ pathto('../' + page_name) }}" class="sidebar-lang-option">EN</a>
+    {% else %}
+    <a href="#" class="sidebar-lang-option active">EN</a>
+    {% endif %}
+    <span class="sidebar-lang-divider"></span>
+    {% if current_language == 'zh' %}
+    <a href="#" class="sidebar-lang-option active">中文</a>
+    {% else %}
+    <a href="{{ pathto('zh/' + page_name) }}" class="sidebar-lang-option">中文</a>
+    {% endif %}
+</div>

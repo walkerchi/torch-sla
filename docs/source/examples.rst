@@ -233,11 +233,12 @@ This is a 3×3 symmetric positive definite (SPD) tridiagonal matrix from 1D Pois
    import torch
    from torch_sla import SparseTensor
 
-   val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-   row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-   col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+   # Create sparse matrix from dense (easier to read for small matrices)
+   dense = torch.tensor([[4.0, -1.0,  0.0],
+                         [-1.0, 4.0, -1.0],
+                         [ 0.0, -1.0, 4.0]], dtype=torch.float64)
    
-   A = SparseTensor(val, row, col, (3, 3))
+   A = SparseTensor.from_dense(dense)
    b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
    
    x = A.solve(b)
@@ -261,7 +262,11 @@ For the tridiagonal matrix: :math:`\lambda_1 \approx 2.59, \lambda_2 = 4.0, \lam
 
    from torch_sla import SparseTensor
 
-   A = SparseTensor(val, row, col, (3, 3))
+   # Using the tridiagonal matrix from above
+   dense = torch.tensor([[4.0, -1.0,  0.0],
+                         [-1.0, 4.0, -1.0],
+                         [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+   A = SparseTensor.from_dense(dense)
    
    is_sym = A.is_symmetric()              # tensor(True)
    is_pd = A.is_positive_definite()       # tensor(True)
@@ -371,7 +376,7 @@ Choose solver backend and method explicitly.
 Matrix Operations
 ~~~~~~~~~~~~~~~~~
 
-Compute norms and eigenvalues.
+Compute norms, determinants, and eigenvalues.
 
 **Frobenius Norm:**
 
@@ -379,15 +384,34 @@ Compute norms and eigenvalues.
 
    \|A\|_F = \sqrt{\sum_{i,j} |a_{ij}|^2} = \sqrt{52} \approx 7.21
 
+**Determinant:**
+
+.. math::
+
+   \det(A) = \text{product of eigenvalues}
+
+For the tridiagonal matrix: :math:`\det(A) = 56`
+
+**Gradient Formula:**
+
+.. math::
+
+   \frac{\partial \det(A)}{\partial A_{ij}} = \det(A) \cdot (A^{-1})_{ji}
+
 **Code:**
 
 .. code-block:: python
 
    from torch_sla import SparseTensor
 
-   A = SparseTensor(val, row, col, (3, 3))
+   # Using the tridiagonal matrix from above
+   dense = torch.tensor([[4.0, -1.0,  0.0],
+                         [-1.0, 4.0, -1.0],
+                         [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+   A = SparseTensor.from_dense(dense)
    
    norm = A.norm('fro')                              # ≈ 7.21
+   det = A.det()                                     # 56.0 (with gradient support)
    eigenvalues, eigenvectors = A.eigsh(k=2, which='LM')  # Top-2 eigenvalues
 
 ----
@@ -926,6 +950,167 @@ This is memory-efficient: O(1) instead of O(iterations) graph nodes.
 
 ----
 
+Determinant with Gradient Support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compute determinants of sparse matrices with automatic differentiation.
+
+**Determinant Definition:**
+
+For a square matrix :math:`A \in \mathbb{R}^{n \times n}`, the determinant is a scalar value that encodes important matrix properties:
+
+.. math::
+
+   \det(A) = \sum_{\sigma \in S_n} \text{sgn}(\sigma) \prod_{i=1}^{n} a_{i,\sigma(i)}
+
+**Properties:**
+
+- :math:`\det(AB) = \det(A) \det(B)`
+- :math:`\det(A^T) = \det(A)`
+- :math:`\det(A^{-1}) = 1/\det(A)`
+- Matrix is singular ⟺ :math:`\det(A) = 0`
+
+**Gradient Formula (Jacobi's Formula):**
+
+For a differentiable loss :math:`L(\det(A))`:
+
+.. math::
+
+   \frac{\partial \det(A)}{\partial A_{ij}} = \det(A) \cdot (A^{-1})_{ji}
+
+This is computed efficiently using the adjoint method with :math:`O(1)` graph nodes.
+
+**Implementation:**
+
+- **CPU**: LU decomposition via SciPy SuperLU
+- **CUDA**: Dense conversion + ``torch.linalg.det``
+- **Gradient**: Adjoint method (solve :math:`A \mathbf{x} = \mathbf{e}_i` for needed columns of :math:`A^{-1}`)
+
+**Example 1: Basic Determinant**
+
+.. code-block:: python
+
+   import torch
+   from torch_sla import SparseTensor
+
+   # 3x3 tridiagonal matrix from dense
+   dense = torch.tensor([[4.0, -1.0,  0.0],
+                         [-1.0, 4.0, -1.0],
+                         [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+   
+   A = SparseTensor.from_dense(dense)
+   det = A.det()  # 56.0
+
+**Example 2: Gradient Computation**
+
+.. code-block:: python
+
+   # Matrix with gradient tracking
+   dense = torch.tensor([[2.0, 1.0],
+                         [1.0, 3.0]], dtype=torch.float64, requires_grad=True)
+   
+   A = SparseTensor.from_dense(dense)
+   det = A.det()  # 5.0
+   
+   # Compute gradient
+   det.backward()
+   print(dense.grad)  # [[3.0, -1.0], [-1.0, 2.0]]
+
+**Example 3: CUDA Support**
+
+.. code-block:: python
+
+   # Move to CUDA
+   A_cuda = A.cuda()
+   det_cuda = A_cuda.det()  # Automatically uses CUDA backend
+
+**Example 4: Batched Determinants**
+
+.. code-block:: python
+
+   # Multiple matrices with same structure
+   val_batch = torch.tensor([
+       [2.0, 0.0, 0.0, 3.0],  # det = 6
+       [1.0, 0.5, 0.5, 1.0],  # det = 0.75
+   ], dtype=torch.float64)
+   
+   A_batch = SparseTensor(val_batch, row, col, (2, 2, 2))
+   det_batch = A_batch.det()  # [6.0, 0.75]
+
+**Example 5: Optimization with Determinant Constraint**
+
+.. code-block:: python
+
+   # Optimize matrix to achieve target determinant
+   val = torch.tensor([1.0, 0.5, 0.5, 1.0], requires_grad=True)
+   target_det = torch.tensor(2.0)
+   optimizer = torch.optim.Adam([val], lr=0.1)
+   
+   for _ in range(50):
+       optimizer.zero_grad()
+       A = SparseTensor(val, row, col, (2, 2))
+       loss = (A.det() - target_det) ** 2
+       loss.backward()
+       optimizer.step()
+
+**Example 6: Distributed Matrices**
+
+.. code-block:: python
+
+   from torch_sla import DSparseTensor
+   
+   # Create distributed sparse tensor
+   D = DSparseTensor(val, row, col, (n, n), num_partitions=4)
+   
+   # Compute determinant (gathers all partitions)
+   det = D.det()  # Warning: requires data gather
+
+**Numerical Considerations:**
+
+- Determinants can overflow/underflow for large matrices
+- For numerical stability, consider using log-determinant
+- Singular matrices (det ≈ 0) may cause LU decomposition to fail
+- Use ``torch.float64`` for better numerical precision
+
+**Performance:**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 15 15 15 15 40
+
+   * - Matrix Size
+     - CPU (Sparse)
+     - CUDA (Dense)
+     - CPU-for-CUDA
+     - Notes
+   * - 10×10
+     - 0.3 ms
+     - 1.0 ms
+     - 0.5 ms
+     - CUDA 3x slower (dense overhead)
+   * - 100×100
+     - 0.3 ms
+     - 0.3 ms
+     - 0.5 ms
+     - Similar performance
+   * - 1000×1000
+     - 0.7 ms
+     - 2.5 ms
+     - 1.2 ms
+     - CUDA 3.6x slower (O(n³) vs O(n^1.5))
+
+**⚠️ Important Performance Note:**
+
+CUDA is **slower** than CPU for sparse determinants! This is because:
+
+- CPU uses sparse LU decomposition: O(nnz^1.5) time, O(nnz) memory
+- CUDA requires dense conversion: O(n³) time, O(n²) memory
+- cuSOLVER/cuDSS don't expose sparse determinant computation
+
+**Recommendation:** For CUDA tensors, use ``.cpu().det()`` instead of ``.det()``
+
+----
+
 Eigenvalue Decomposition
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1163,6 +1348,8 @@ Interactive examples are available as Jupyter notebooks in the ``examples/`` dir
      - Basic solve, property detection, visualization
    * - ``batched_solve.ipynb``
      - Batched operations and SparseTensorList
+   * - ``determinant.py``
+     - Determinant computation with gradient support (CPU & CUDA)
    * - ``gcn_example.ipynb``
      - Graph neural network with sparse Laplacian
    * - ``nonlinear_solve.ipynb``

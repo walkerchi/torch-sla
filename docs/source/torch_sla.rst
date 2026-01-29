@@ -3,10 +3,6 @@ API Reference
 
 This section provides the complete API documentation for torch-sla.
 
-.. contents:: Table of Contents
-   :local:
-   :depth: 2
-
 ----
 
 Core Classes

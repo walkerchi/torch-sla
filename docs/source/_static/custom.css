@@ -1,101 +1,236 @@
-/* torch-sla custom theme - Yellow/Purple gradient */
+/* ============================================
+   torch-sla Industrial Design Theme
+   Inspired by precision engineering & scientific computing
+   Color palette extracted from logo: Purple/Orange/Gold
+   ============================================ */
 
+/* ============================================
+   CSS VARIABLES - DESIGN SYSTEM
+   ============================================ */
 :root {
-    /* Primary colors - Yellow to Purple gradient palette */
-    --color-brand-primary: #9b59b6;
-    --color-brand-secondary: #f1c40f;
+    /* Primary palette - from logo */
+    --sla-purple-deep: #562E6B;
+    --sla-purple-primary: #64288C;
+    --sla-purple-light: #8E53A2;
+    --sla-purple-soft: #C4A9CE;
     
-    /* Gradient definitions */
-    --gradient-primary: linear-gradient(135deg, #f1c40f 0%, #e74c3c 50%, #9b59b6 100%);
-    --gradient-soft: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #dda0dd 100%);
+    --sla-orange-primary: #F15213;
+    --sla-orange-warm: #B7434C;
+    --sla-gold: #EE9525;
+    
+    /* Industrial accent colors */
+    --sla-steel: #4A5568;
+    --sla-titanium: #718096;
+    --sla-graphite: #2D3748;
+    
+    /* Gradients */
+    --gradient-brand: linear-gradient(135deg, #EE9525 0%, #F15213 40%, #64288C 100%);
+    --gradient-purple: linear-gradient(135deg, #8E53A2 0%, #64288C 50%, #562E6B 100%);
+    --gradient-fire: linear-gradient(135deg, #EE9525 0%, #F15213 100%);
+    --gradient-industrial: linear-gradient(135deg, #2D3748 0%, #4A5568 100%);
+    
+    /* Typography */
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+    --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    
+    /* Border radius - industrial = sharp edges */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
 }
 
-/* Dark mode overrides for Furo */
+/* ============================================
+   DARK MODE (DEFAULT) - Industrial Night
+   ============================================ */
 body[data-theme="dark"],
 body:not([data-theme]) {
-    --color-background-primary: #1a1a2e;
-    --color-background-secondary: #16213e;
-    --color-background-hover: #0f3460;
-    --color-background-border: #e94560;
+    /* Backgrounds - dark steel */
+    --color-background-primary: #0F1419;
+    --color-background-secondary: #1A1F26;
+    --color-background-hover: #242B35;
+    --color-background-border: #3D4652;
     
-    --color-foreground-primary: #eaeaea;
-    --color-foreground-secondary: #c9c9c9;
-    --color-foreground-muted: #9e9e9e;
+    /* Foreground */
+    --color-foreground-primary: #E8EAED;
+    --color-foreground-secondary: #B8BCC4;
+    --color-foreground-muted: #6B7280;
     
-    --color-brand-primary: #f1c40f;
-    --color-brand-content: #dda0dd;
+    /* Brand */
+    --color-brand-primary: #EE9525;
+    --color-brand-content: #8E53A2;
     
-    /* Purple links */
-    --color-link: #b388ff;
-    --color-link--hover: #f1c40f;
+    /* Links - gold primary, purple hover */
+    --color-link: #EE9525;
+    --color-link--hover: #8E53A2;
     
-    --color-sidebar-background: #16213e;
-    --color-sidebar-background-border: #e94560;
+    /* Sidebar */
+    --color-sidebar-background: #141920;
+    --color-sidebar-background-border: #3D4652;
     
-    --color-api-background: #1a1a2e;
-    --color-api-background-hover: #0f3460;
+    /* API */
+    --color-api-background: #1A1F26;
+    --color-api-background-hover: #242B35;
     
-    --color-highlight-on-target: rgba(241, 196, 15, 0.15);
+    /* Highlights */
+    --color-highlight-on-target: rgba(238, 149, 37, 0.12);
+    --color-admonition-background: #1A1F26;
     
-    --color-admonition-background: #16213e;
+    /* Table styling */
+    --best-value-color: #EE9525;
+    --best-value-bg: rgba(238, 149, 37, 0.15);
     
-    /* Table best value color */
-    --best-value-color: #f1c40f;
-    --best-value-bg: rgba(241, 196, 15, 0.15);
+    /* Code blocks */
+    --color-code-background: #1A1F26;
+    --color-code-foreground: #E8EAED;
 }
 
-/* Light mode */
+/* ============================================
+   LIGHT MODE - Industrial Day
+   ============================================ */
 body[data-theme="light"] {
-    --color-link: #9b59b6;
-    --color-link--hover: #f39c12;
+    /* Backgrounds - clean white with subtle warmth */
+    --color-background-primary: #FAFBFC;
+    --color-background-secondary: #F3F4F6;
+    --color-background-hover: #E5E7EB;
+    --color-background-border: #D1D5DB;
     
-    /* Table best value color - darker for visibility */
-    --best-value-color: #8e44ad;
-    --best-value-bg: rgba(142, 68, 173, 0.12);
+    /* Foreground */
+    --color-foreground-primary: #1F2937;
+    --color-foreground-secondary: #4B5563;
+    --color-foreground-muted: #9CA3AF;
+    
+    /* Brand */
+    --color-brand-primary: #64288C;
+    --color-brand-content: #F15213;
+    
+    /* Links - purple primary, orange hover */
+    --color-link: #64288C;
+    --color-link--hover: #F15213;
+    
+    /* Sidebar */
+    --color-sidebar-background: #F3F4F6;
+    --color-sidebar-background-border: #E5E7EB;
+    
+    /* Table styling */
+    --best-value-color: #64288C;
+    --best-value-bg: rgba(100, 40, 140, 0.1);
 }
 
-/* Sidebar logo area styling */
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+body {
+    font-family: var(--font-display);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Main title - bold industrial gradient */
+h1 {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Monospace elements */
+code, pre, .sig, .sig-name {
+    font-family: var(--font-mono) !important;
+}
+
+/* ============================================
+   SIDEBAR - Industrial Panel
+   ============================================ */
 .sidebar-brand {
-    padding: 1rem;
+    padding: var(--space-lg);
     text-align: center;
+    border-bottom: 1px solid var(--color-background-border);
 }
 
 .sidebar-logo {
-    max-width: 80px !important;
-    margin-bottom: 0.5rem;
+    max-width: 72px !important;
+    margin-bottom: var(--space-sm);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-brand-text {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
+    font-weight: 800;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+}
+
+/* Sidebar navigation */
+.sidebar-tree .reference {
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.sidebar-tree .current-page > .reference {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-weight: 700;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
-/* Version badge */
-.sidebar-version {
-    font-size: 0.7rem;
-    color: var(--color-foreground-muted);
-    margin-top: 0.2rem;
+/* Search box - industrial style */
+.sidebar-search input {
+    background: var(--color-background-primary);
+    border: 1px solid var(--color-background-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    transition: all 0.15s ease;
 }
 
-/* Gradient text for main title */
-h1 {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.sidebar-search input:focus {
+    border-color: var(--sla-gold);
+    box-shadow: 0 0 0 3px rgba(238, 149, 37, 0.15);
+    outline: none;
 }
 
-/* Code blocks with subtle gradient border */
+/* ============================================
+   CODE BLOCKS - Technical Precision
+   ============================================ */
 pre {
-    border-left: 3px solid;
-    border-image: var(--gradient-primary) 1;
+    border-left: 3px solid var(--sla-gold);
+    border-radius: var(--radius-md);
+    font-size: 0.9em;
+    line-height: 1.6;
 }
 
-/* Links styling - purple default, gold on hover */
+/* Inline code */
+code.literal {
+    background: var(--color-background-secondary);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-sm);
+    font-size: 0.88em;
+}
+
+/* ============================================
+   LINKS - Precision Engineering Colors
+   ============================================ */
 a,
 a.reference,
 a.reference.internal,
@@ -105,6 +240,7 @@ a.reference.external,
 article a {
     color: var(--color-link) !important;
     text-decoration: none;
+    transition: color 0.15s ease;
 }
 
 a:hover,
@@ -112,171 +248,52 @@ a.reference:hover,
 .content a:hover,
 article a:hover {
     color: var(--color-link--hover) !important;
-    text-decoration: underline;
-}
-
-/* Sidebar link active state */
-.sidebar-tree .current-page > .reference {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
-}
-
-/* Table header - dark mode */
-body[data-theme="dark"] th,
-body:not([data-theme]) th {
-    background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%) !important;
-    border-bottom: 2px solid #f1c40f !important;
-    color: #eaeaea !important;
-}
-
-/* Table header - light mode */
-body[data-theme="light"] th {
-    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%) !important;
-    border-bottom: 2px solid #9b59b6 !important;
-    color: #333 !important;
-}
-
-/* Admonition styling */
-.admonition {
-    border-left: 3px solid;
-    border-image: var(--gradient-primary) 1;
-}
-
-/* Search box styling */
-.sidebar-search input {
-    background: var(--color-background-secondary);
-    border: 1px solid #9b59b6;
-}
-
-.sidebar-search input:focus {
-    border-color: #f1c40f;
-    box-shadow: 0 0 5px rgba(241, 196, 15, 0.3);
-}
-
-/* Button styling */
-button, .btn {
-    background: var(--gradient-primary);
-    border: none;
-    color: white;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--color-background-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #f1c40f, #9b59b6);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #f39c12, #8e44ad);
-}
-
-/* Gradient text class for inline use */
-.gradient-text {
-    background: linear-gradient(90deg, #f1c40f 0%, #e74c3c 50%, #9b59b6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
-}
-
-/* Feature list styling */
-.feature-list {
-    list-style: none;
-    padding-left: 0;
-    margin: 1.5rem 0;
-}
-
-.feature-list li {
-    padding: 0.8rem 1rem;
-    margin: 0.5rem 0;
-    border-left: 3px solid;
-    border-image: var(--gradient-primary) 1;
-    background: rgba(155, 89, 182, 0.05);
-    border-radius: 0 8px 8px 0;
-    transition: all 0.2s ease;
-}
-
-.feature-list li:hover {
-    background: rgba(155, 89, 182, 0.1);
-    transform: translateX(5px);
-}
-
-body[data-theme="light"] .feature-list li {
-    background: rgba(155, 89, 182, 0.08);
-}
-
-body[data-theme="light"] .feature-list li:hover {
-    background: rgba(155, 89, 182, 0.15);
-}
-
-/* Highlight keywords in paragraphs */
-.highlight-keyword {
-    background: linear-gradient(90deg, #f1c40f 0%, #e74c3c 50%, #9b59b6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 600;
-}
-
-/* Badge-style highlights */
-.badge-gradient {
-    background: var(--gradient-primary);
-    color: white !important;
-    -webkit-text-fill-color: white !important;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-weight: 600;
-}
-
-/* Recommendation box styling */
-.recommendation-box {
-    background: linear-gradient(135deg, rgba(241, 196, 15, 0.05), rgba(155, 89, 182, 0.1));
-    border: 1px solid rgba(155, 89, 182, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-}
-
-.recommendation-box h3 {
-    margin-top: 0;
-    font-size: 1.2rem;
-}
-
-body[data-theme="light"] .recommendation-box {
-    background: linear-gradient(135deg, rgba(241, 196, 15, 0.1), rgba(155, 89, 182, 0.08));
-    border-color: rgba(155, 89, 182, 0.3);
-}
-
-/* Key takeaway styling */
-.key-takeaway {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: linear-gradient(90deg, rgba(241, 196, 15, 0.1), rgba(155, 89, 182, 0.1));
-    border-left: 3px solid;
-    border-image: var(--gradient-primary) 1;
-    padding: 0.5rem 1rem;
-    border-radius: 0 8px 8px 0;
-    margin: 0.5rem 0;
+    text-decoration: none;
 }
 
 /* ============================================
-   TABLE BEST VALUE HIGHLIGHTING
+   TABLES - Data Grid Style
    ============================================ */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: var(--space-lg) 0;
+    font-size: 0.9em;
+}
 
-/* Best values in tables - use CSS variable for color */
+/* Table header - industrial dark */
+body[data-theme="dark"] th,
+body:not([data-theme]) th {
+    background: var(--gradient-industrial) !important;
+    border-bottom: 2px solid var(--sla-gold) !important;
+    color: var(--color-foreground-primary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
+    padding: var(--space-sm) var(--space-md) !important;
+}
+
+body[data-theme="light"] th {
+    background: linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%) !important;
+    border-bottom: 2px solid var(--sla-purple-primary) !important;
+    color: var(--color-foreground-primary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
+}
+
+td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-background-border);
+}
+
+tr:hover {
+    background: var(--color-background-hover);
+}
+
+/* Best values - highlighted with brand color */
 table td strong,
 table td b,
 .docutils td strong,
@@ -285,14 +302,354 @@ table td b,
     -webkit-text-fill-color: var(--best-value-color) !important;
     font-weight: 700 !important;
     background: var(--best-value-bg) !important;
-    padding: 2px 6px !important;
-    border-radius: 4px !important;
+    padding: 2px 8px !important;
+    border-radius: var(--radius-sm) !important;
 }
 
-/* Also style strong in th (table headers) */
 table th strong,
 .docutils th strong {
     color: inherit !important;
     -webkit-text-fill-color: inherit !important;
     background: transparent !important;
+}
+
+/* ============================================
+   ADMONITIONS - Alert Boxes
+   ============================================ */
+.admonition {
+    border-left: 3px solid var(--sla-gold);
+    border-radius: var(--radius-md);
+    background: var(--color-background-secondary);
+    padding: var(--space-md);
+    margin: var(--space-lg) 0;
+}
+
+.admonition-title {
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+}
+
+/* ============================================
+   FEATURE LIST - Industrial Specs
+   ============================================ */
+.feature-list {
+    list-style: none;
+    padding-left: 0;
+    margin: var(--space-lg) 0;
+}
+
+.feature-list li {
+    position: relative;
+    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-sm) 0;
+    background: var(--color-background-secondary);
+    border-left: 3px solid transparent;
+    border-image: var(--gradient-brand) 1;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    transition: all 0.2s ease;
+}
+
+.feature-list li:hover {
+    background: var(--color-background-hover);
+    transform: translateX(4px);
+}
+
+/* ============================================
+   GRADIENT TEXT UTILITY
+   ============================================ */
+.gradient-text {
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* ============================================
+   BADGE - Technical Specs
+   ============================================ */
+.badge-gradient {
+    display: inline-block;
+    background: var(--gradient-brand);
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================
+   API DOCUMENTATION - Technical Style
+   ============================================ */
+.sig {
+    background: var(--color-background-secondary);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--sla-purple-primary);
+}
+
+.sig-name {
+    color: var(--sla-gold) !important;
+    font-weight: 600;
+}
+
+.sig-param {
+    color: var(--color-foreground-secondary);
+}
+
+/* ============================================
+   SCROLLBAR - Industrial Chrome
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-purple);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sla-purple-light);
+}
+
+/* ============================================
+   LANGUAGE SELECTOR
+   ============================================ */
+.language-selector {
+    display: flex;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    margin: var(--space-md) 0;
+}
+
+.language-selector a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-background-border);
+    border-radius: var(--radius-md);
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.language-selector a:hover {
+    background: var(--color-background-hover);
+    border-color: var(--sla-gold);
+}
+
+.language-selector a.active {
+    background: var(--gradient-brand);
+    color: white !important;
+    border-color: transparent;
+}
+
+/* ============================================
+   COMPARISON TABLE - Industrial Grid
+   ============================================ */
+.comparison-table {
+    font-size: 0.9em;
+}
+
+.comparison-table th:first-child {
+    text-align: left;
+}
+
+.comparison-table td:not(:first-child),
+.comparison-table th:not(:first-child) {
+    text-align: center;
+}
+
+/* ============================================
+   RECOMMENDATION BOX
+   ============================================ */
+.recommendation-box {
+    background: linear-gradient(135deg, 
+        rgba(238, 149, 37, 0.05) 0%, 
+        rgba(100, 40, 140, 0.08) 100%);
+    border: 1px solid rgba(238, 149, 37, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+}
+
+.recommendation-box h3 {
+    margin-top: 0;
+    color: var(--sla-gold);
+}
+
+/* ============================================
+   KEY METRICS - Industrial Dashboard
+   ============================================ */
+.key-metric {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--color-background-secondary);
+    border-radius: var(--radius-md);
+    min-width: 100px;
+}
+
+.key-metric-value {
+    font-size: 1.5em;
+    font-weight: 800;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.key-metric-label {
+    font-size: 0.75em;
+    color: var(--color-foreground-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: var(--space-xs);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+    .feature-list li {
+        padding: var(--space-sm) var(--space-md);
+    }
+    
+    table {
+        font-size: 0.85em;
+    }
+    
+    .language-selector {
+        justify-content: center;
+    }
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+    .gradient-text,
+    h1 {
+        background: none;
+        -webkit-text-fill-color: var(--sla-purple-deep);
+        color: var(--sla-purple-deep);
+    }
+    
+}
+
+/* ============================================
+   SIDEBAR LANGUAGE SWITCHER - Minimal Style
+   ============================================ */
+.sidebar-lang-switcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0.5rem var(--sidebar-item-spacing-horizontal, 1rem);
+    margin: 0.5rem 0;
+}
+
+.sidebar-lang-option {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-foreground-muted) !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease;
+}
+
+.sidebar-lang-option:hover {
+    color: var(--color-foreground-primary) !important;
+}
+
+.sidebar-lang-option.active {
+    color: var(--color-brand-primary) !important;
+}
+
+.sidebar-lang-divider {
+    width: 1px;
+    height: 12px;
+    background: var(--color-foreground-muted);
+    opacity: 0.4;
+}
+
+
+/* ============================================
+   FAQ SECTION - Compact Style
+   ============================================ */
+/* FAQ section headers - smaller and more compact */
+section#frequently-asked-questions-faq h2,
+section#常见问题-faq h2,
+section h2:has(+ section[id*="what-is"]),
+section h2:has(+ section[id*="什么是"]) {
+    font-size: 1.6rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* FAQ sub-questions - smaller headers */
+section[id*="what-is"] h3,
+section[id*="how-do-i"] h3,
+section[id*="can-i"] h3,
+section[id*="什么是"] h3,
+section[id*="如何"] h3,
+section[id*="能否"] h3,
+article section section h3 {
+    font-size: 1.1rem !important;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--color-background-border);
+}
+
+/* Tighter spacing for FAQ content */
+article section section p {
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* FAQ code blocks - more compact */
+article section section .highlight {
+    margin: 0.75rem 0;
+}
+
+article section section pre {
+    padding: 0.75rem 1rem;
+    font-size: 0.85em;
+}
+
+/* Comparison section headers */
+section#comparison-with-alternatives h2,
+section#与其他方案的对比 h2 {
+    font-size: 1.6rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Comparison sub-sections - smaller */
+section[id*="-vs-"] h3,
+section[id*="torch-sla-vs"] h3 {
+    font-size: 1.15rem !important;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
 }

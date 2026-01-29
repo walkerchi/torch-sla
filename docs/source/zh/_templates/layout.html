@@ -1,0 +1,47 @@
+{% extends "furo/base.html" %}
+
+{% block extrahead %}
+{{ super() }}
+
+{# SEO Meta Tags - Chinese #}
+<meta name="description" content="torch-sla: PyTorch 稀疏线性代数库。GPU加速的稀疏求解器，支持自动微分。">
+<meta name="keywords" content="torch稀疏, pytorch稀疏矩阵, 稀疏线性代数, GPU稀疏求解, CUDA稀疏, 可微分稀疏求解器, 有限元, CFD">
+<meta name="author" content="Mingyuan Chi">
+<meta name="robots" content="index, follow">
+
+{# Open Graph #}
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://walkerchi.github.io/torch-sla/zh/{{ pagename }}.html">
+<meta property="og:title" content="torch-sla: PyTorch 稀疏线性代数 | GPU加速">
+<meta property="og:description" content="PyTorch 稀疏线性代数库。通过 cuSOLVER/cuDSS 实现 GPU 加速求解。">
+<meta property="og:image" content="https://walkerchi.github.io/torch-sla/_static/logo.jpg">
+<meta property="og:locale" content="zh_CN">
+
+<link rel="canonical" href="https://walkerchi.github.io/torch-sla/zh/{{ pagename }}.html">
+<meta name="theme-color" content="#64288C">
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+
+{# Floating Actions Panel - Paper + Language Switcher #}
+<div class="floating-actions">
+    {# Paper Badge #}
+    <a href="https://arxiv.org/abs/2601.13994" class="floating-paper" target="_blank" rel="noopener">
+        <svg class="floating-paper-icon" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM8 12h8v2H8v-2zm0 4h8v2H8v-2zm0-8h4v2H8V8z"/>
+        </svg>
+        <span class="floating-paper-text">
+            <span class="floating-paper-label">arXiv 论文</span>
+            <span class="floating-paper-id">2601.13994</span>
+        </span>
+    </a>
+    
+    {# Language Switcher #}
+    <div class="floating-lang">
+        <a href="../index.html">EN</a>
+        <a href="index.html" class="active">中文</a>
+    </div>
+</div>
+{% endblock %}
+

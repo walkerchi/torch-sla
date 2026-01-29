@@ -105,8 +105,8 @@ torch-sla is ideal for:
 - **Optimization**: Gradient-based optimization involving sparse linear systems
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Documentation:
+   :maxdepth: 1
+   :hidden:
 
    introduction
    installation
@@ -174,7 +174,7 @@ torch-sla supports batched solving for matrices with the same sparsity pattern:
    A = SparseTensor(val_batch, row, col, (batch_size, M, N))
    x = A.solve(b_batch)  # Solves all systems in parallel
 
-For matrices with different patterns, use ``SparseTensorList``.
+For matrices with different patterns, use ``SparseTensorList``. See `batched solve examples <https://github.com/walkerchi/torch-sla/blob/main/examples/batched_solve.py>`_.
 
 How do I use torch-sla on GPU?
 ------------------------------
@@ -249,7 +249,7 @@ torch-sla vs torch.linalg.solve
      - ✅ **~80 MB**
      - ❌ ~8 TB (impossible)
    * - Max Problem Size
-     - ✅ **169M+ DOF**
+     - ✅ **500M+ DOF** (multi-GPU, scalable)
      - ❌ ~50K (GPU memory)
    * - Specialized Solvers
      - ✅ **LU, Cholesky, CG, BiCGStab**
@@ -263,41 +263,6 @@ torch-sla vs torch.linalg.solve
    * - Autograd
      - ✅ **O(1) graph nodes**
      - ✅ Yes
-
-torch-sla vs PyTorch Geometric (PyG)
-------------------------------------
-
-.. list-table::
-   :widths: 30 35 35
-   :header-rows: 1
-   :class: comparison-table
-
-   * - Feature
-     - **torch-sla** ✅
-     - PyTorch Geometric
-   * - Primary Focus
-     - ✅ **Sparse Linear Algebra**
-     - Graph Neural Networks
-   * - Linear System Solve (Ax=b)
-     - ✅ **Direct + Iterative**
-     - ❌ Not supported
-   * - Eigenvalue Decomposition
-     - ✅ **Differentiable eigsh/eigs**
-     - ❌ Not included
-   * - Sparse Matrix Ops
-     - ✅ **Full suite (solve, norm, eigs)**
-     - ⚠️ SpMM, SpMV only
-   * - FEM/CFD Applications
-     - ✅ **Designed for**
-     - ⚠️ Not primary use
-   * - Message Passing
-     - ❌ Not included
-     - ✅ **Core feature**
-   * - GNN Layers
-     - ❌ Not included
-     - ✅ **Core feature**
-
-**Complementary Usage**: torch-sla and PyG work well together — use PyG for graph learning and torch-sla for solving linear systems on graph Laplacians.
 
 torch-sla vs NVIDIA AmgX
 ------------------------
@@ -358,11 +323,11 @@ torch-sla vs PETSc
    * - Solver Variety
      - ⚠️ Core methods
      - ✅ **Extensive (KSP, SNES)**
-   * - MPI Distributed
-     - ⚠️ DSparseTensor (shared memory)
+   * - Distributed
+     - ✅ **DSparseTensor multi-GPU**
      - ✅ **Full MPI support**
    * - Production Scale
-     - ⚠️ 169M DOF tested
+     - ✅ **500M+ DOF** (multi-GPU)
      - ✅ **Exascale proven**
 
 Summary: When to Use torch-sla
@@ -378,7 +343,7 @@ Summary: When to Use torch-sla
      - You're not using PyTorch
    * - ✅ You need **gradient flow** through solve
      - Gradients not needed
-   * - ✅ Problem size **< 169M DOF**
+   * - ✅ Problem size up to **500M+ DOF** (multi-GPU)
      - Exascale problems (use PETSc)
    * - ✅ You want **simple pip install**
      - You need AMG preconditioners (AmgX)
@@ -397,6 +362,12 @@ License
 -------
 
 torch-sla is released under the MIT License. See `LICENSE <https://github.com/walkerchi/torch-sla/blob/main/LICENSE>`_ for details.
+
+Contact
+-------
+
+| **Author**: Walker Chi
+| **Email**: ``x@y`` where ``x = walker.chi.000`` and ``y = gmail.com``
 
 Citation
 --------

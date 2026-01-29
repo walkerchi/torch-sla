@@ -1,0 +1,14 @@
+<form class="sidebar-search-container" method="get" action="{{ pathto('search') }}" role="search">
+  <input class="sidebar-search" placeholder="搜索" name="q" aria-label="搜索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div>
+
+{# Language Switcher - SSR rendered with current page preservation #}
+{# pagename in zh build is like 'introduction', we need to link to '../introduction' for EN #}
+<div class="sidebar-lang-switcher">
+    <a href="../{{ pagename }}.html" class="sidebar-lang-option">EN</a>
+    <span class="sidebar-lang-divider"></span>
+    <a href="#" class="sidebar-lang-option active">中文</a>
+</div>

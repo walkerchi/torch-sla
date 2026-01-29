@@ -1,0 +1,588 @@
+简介
+====
+
+.. raw:: html
+
+   <p><strong>torch-sla</strong> (<span class="gradient-text">Torch Sparse Linear Algebra</span>) 是一个高效的 PyTorch 稀疏线性代数库。它提供可微分的稀疏线性方程求解器，支持多种后端，兼容 CPU 和 CUDA。</p>
+
+核心特性
+--------
+
+.. raw:: html
+
+   <ul class="feature-list">
+     <li><span class="gradient-text">内存高效</span>: 仅存储非零元素 — 使用最少内存求解百万级未知数</li>
+     <li><span class="gradient-text">多后端支持</span>: 可选择 <a href="https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html">SciPy</a>、<a href="https://eigen.tuxfamily.org/">Eigen</a> (C++)、<a href="https://docs.nvidia.com/cuda/cudss/">cuDSS</a> 或 <a href="https://pytorch.org/">PyTorch原生</a></li>
+     <li><span class="gradient-text">后端/方法分离</span>: 独立指定后端和求解方法</li>
+     <li><span class="gradient-text">自动选择</span>: 根据设备、数据类型和问题规模自动选择最佳后端和方法</li>
+     <li><span class="gradient-text">梯度支持</span>: 通过 PyTorch autograd 完整计算梯度，<span class="badge-gradient">O(1) 计算图节点</span></li>
+     <li><span class="gradient-text">批量操作</span>: 支持形状为 <code>[..., M, N, ...]</code> 的批量稀疏张量</li>
+     <li><span class="gradient-text">属性检测</span>: 自动检测对称性和正定性</li>
+     <li><span class="gradient-text">分布式支持</span>: 支持 halo 交换的分布式稀疏矩阵并行计算</li>
+     <li><span class="gradient-text">大规模测试</span>: 经过 <span class="badge-gradient">1.69亿自由度</span> 测试，近线性扩展</li>
+   </ul>
+
+推荐后端
+--------
+
+基于 2D Poisson 方程的广泛基准测试（最高测试 **1.69亿 DOF**）:
+
+.. list-table:: 推荐后端
+   :widths: 25 25 25 25
+   :header-rows: 1
+
+   * - 问题规模
+     - CPU
+     - CUDA
+     - 备注
+   * - 小型 (< 10万 DOF)
+     - ``scipy+superlu``
+     - ``cudss+cholesky``
+     - 直接求解器，机器精度
+   * - 中型 (10万 - 200万 DOF)
+     - ``scipy+superlu``
+     - ``cudss+cholesky``
+     - cuDSS 在 GPU 上最快
+   * - 大型 (200万 - 1.69亿 DOF)
+     - 不适用
+     - ``pytorch+cg``
+     - **仅迭代法**，~1e-6 精度
+   * - 超大型 (> 1.69亿 DOF)
+     - 不适用
+     - ``DSparseMatrix`` 多卡
+     - 多卡域分解并行
+
+核心发现
+~~~~~~~~
+
+1. **PyTorch CG+Jacobi 可扩展至 1.69亿+ DOF**，近线性 O(n^1.1) 复杂度
+2. **直接求解器限于 ~200万 DOF**，因内存 O(n^1.5) 填充
+3. **迭代法建议用 float64** 以获得最佳收敛性
+4. **精度权衡**: 直接法 = 机器精度 (~1e-14)，迭代法 = ~1e-6 但快 100 倍
+
+核心类
+------
+
+SparseTensor
+~~~~~~~~~~~~
+
+稀疏矩阵操作的主类。支持批量和块稀疏张量。
+
+.. code-block:: python
+
+    from torch_sla import SparseTensor
+    
+    # 简单 2D 矩阵 [M, N]
+    A = SparseTensor(values, row, col, (M, N))
+    
+    # 批量矩阵 [B, M, N]
+    A = SparseTensor(values_batch, row, col, (B, M, N))
+    
+    # 求解、范数、特征值
+    x = A.solve(b)
+    norm = A.norm('fro')
+    eigenvalues, eigenvectors = A.eigsh(k=6)
+
+SparseTensorList
+~~~~~~~~~~~~~~~~
+
+不同稀疏模式的多个 SparseTensor 的容器。
+
+.. code-block:: python
+
+    from torch_sla import SparseTensorList
+    
+    matrices = SparseTensorList([A1, A2, A3])
+    x_list = matrices.solve([b1, b2, b3])
+
+DSparseTensor
+~~~~~~~~~~~~~
+
+支持域分解和 halo 交换的分布式稀疏张量。
+
+.. code-block:: python
+
+    from torch_sla import DSparseTensor
+    
+    D = DSparseTensor(val, row, col, shape, num_partitions=4)
+    x_list = D.solve_all(b_list)
+
+LUFactorization
+~~~~~~~~~~~~~~~
+
+LU 分解，用于同一矩阵的高效重复求解。
+
+.. code-block:: python
+
+    lu = A.lu()
+    x = lu.solve(b)  # 使用缓存的 LU 分解快速求解
+
+后端
+----
+
+.. list-table:: 可用后端
+   :widths: 15 15 50 20
+   :header-rows: 1
+
+   * - 后端
+     - 设备
+     - 描述
+     - 推荐
+   * - ``scipy``
+     - CPU
+     - 使用 SuperLU 或 UMFPACK 的 SciPy 后端直接求解器
+     - **CPU 默认**
+   * - ``eigen``
+     - CPU
+     - Eigen C++ 后端迭代求解器 (CG, BiCGStab)
+     - 备选
+   * - ``cudss``
+     - CUDA
+     - NVIDIA cuDSS 直接求解器 (LU, Cholesky, LDLT)
+     - **CUDA 直接**
+   * - ``cusolver``
+     - CUDA
+     - NVIDIA cuSOLVER 直接求解器
+     - 不推荐
+   * - ``pytorch``
+     - CUDA
+     - PyTorch 原生迭代求解器 (CG, BiCGStab) + Jacobi 预处理
+     - **大规模问题 (>200万 DOF)**
+
+求解方法
+--------
+
+直接求解器
+~~~~~~~~~~
+
+.. list-table:: 直接求解方法
+   :widths: 15 20 45 20
+   :header-rows: 1
+
+   * - 方法
+     - 后端
+     - 描述
+     - 精度
+   * - ``superlu``
+     - scipy
+     - SuperLU LU 分解（scipy 默认）
+     - ~1e-14
+   * - ``cholesky``
+     - cudss, cusolver
+     - Cholesky 分解（对称正定矩阵，**最快**）
+     - ~1e-14
+   * - ``ldlt``
+     - cudss
+     - LDLT 分解（对称矩阵）
+     - ~1e-14
+   * - ``lu``
+     - cudss, cusolver
+     - LU 分解（一般矩阵）
+     - ~1e-14
+
+迭代求解器
+~~~~~~~~~~
+
+.. list-table:: 迭代求解方法
+   :widths: 15 20 45 20
+   :header-rows: 1
+
+   * - 方法
+     - 后端
+     - 描述
+     - 精度
+   * - ``cg``
+     - scipy, eigen, pytorch
+     - 共轭梯度法（对称正定矩阵）+ Jacobi 预处理
+     - ~1e-6
+   * - ``bicgstab``
+     - scipy, eigen, pytorch
+     - BiCGStab（一般矩阵）+ Jacobi 预处理
+     - ~1e-6
+   * - ``gmres``
+     - scipy
+     - GMRES（一般矩阵）
+     - ~1e-6
+
+快速开始
+--------
+
+基本用法
+~~~~~~~~
+
+.. code-block:: python
+
+    import torch
+    from torch_sla import SparseTensor
+
+    # 从稠密矩阵创建稀疏矩阵（小矩阵更易读）
+    dense = torch.tensor([[4.0, -1.0,  0.0],
+                          [-1.0, 4.0, -1.0],
+                          [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+
+    # 创建 SparseTensor
+    A = SparseTensor.from_dense(dense)
+    
+    # 求解 Ax = b（CPU 上自动选择 scipy+superlu）
+    b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
+    x = A.solve(b)
+
+CUDA 用法
+~~~~~~~~~
+
+.. code-block:: python
+
+    import torch
+    from torch_sla import SparseTensor
+
+    # 在 CPU 创建，移动到 CUDA
+    A_cuda = A.cuda()
+    
+    # 在 CUDA 上求解（小问题自动选择 cudss+cholesky）
+    b_cuda = b.cuda()
+    x = A_cuda.solve(b_cuda)
+    
+    # 对于超大问题 (DOF > 200万)，使用迭代法
+    x = A_cuda.solve(b_cuda, backend='pytorch', method='cg')
+
+非线性求解
+~~~~~~~~~~
+
+使用伴随法计算梯度求解非线性方程:
+
+.. code-block:: python
+
+    from torch_sla import SparseTensor
+    
+    # 创建刚度矩阵
+    A = SparseTensor(val, row, col, (n, n))
+    
+    # 定义非线性残差: A @ u + u² = f
+    def residual(u, A, f):
+        return A @ u + u**2 - f
+    
+    f = torch.randn(n, requires_grad=True)
+    u0 = torch.zeros(n)
+    
+    # 使用 Newton-Raphson 求解
+    u = A.nonlinear_solve(residual, u0, f, method='newton')
+    
+    # 梯度通过伴随法流动
+    loss = u.sum()
+    loss.backward()
+    print(f.grad)  # ∂L/∂f
+
+基准测试结果
+------------
+
+2D Poisson 方程（5点模板），NVIDIA H200 (140GB)，float64:
+
+性能对比
+~~~~~~~~
+
+.. image:: ../../../assets/benchmarks/performance.png
+   :alt: 求解器性能对比
+   :width: 100%
+
+.. list-table:: 性能（时间单位：毫秒）
+   :widths: 15 15 15 20 20 15
+   :header-rows: 1
+
+   * - DOF
+     - SciPy SuperLU
+     - cuDSS Cholesky
+     - PyTorch CG+Jacobi
+     - 备注
+     - 最优
+   * - 1万
+     - 24
+     - 128
+     - 20
+     - 全部很快
+     - PyTorch
+   * - 10万
+     - 29
+     - 630
+     - 43
+     - 
+     - SciPy
+   * - 100万
+     - 19,400
+     - 7,300
+     - 190
+     - 
+     - **PyTorch 100倍**
+   * - 200万
+     - 52,900
+     - 15,600
+     - 418
+     - 
+     - **PyTorch 100倍**
+   * - 1600万
+     - OOM
+     - OOM
+     - 7,300
+     - 
+     - 仅 PyTorch
+   * - 8100万
+     - OOM
+     - OOM
+     - 75,900
+     - 
+     - 仅 PyTorch
+   * - 1.69亿
+     - OOM
+     - OOM
+     - 224,000
+     - 
+     - 仅 PyTorch
+
+内存使用
+~~~~~~~~
+
+.. image:: ../../../assets/benchmarks/memory.png
+   :alt: 内存使用对比
+   :width: 100%
+
+.. list-table:: 内存特性
+   :widths: 30 30 40
+   :header-rows: 1
+
+   * - 方法
+     - 内存增长
+     - 备注
+   * - SciPy SuperLU
+     - O(n^1.5) 填充
+     - 仅 CPU，限于 ~200万 DOF
+   * - cuDSS Cholesky
+     - O(n^1.5) 填充
+     - GPU，限于 ~200万 DOF
+   * - PyTorch CG+Jacobi
+     - **O(n) ~443 字节/DOF**
+     - 可扩展至 1.69亿+ DOF
+
+精度对比
+~~~~~~~~
+
+.. image:: ../../../assets/benchmarks/accuracy.png
+   :alt: 精度对比
+   :width: 100%
+
+.. list-table:: 精度对比
+   :widths: 30 30 40
+   :header-rows: 1
+
+   * - 方法类型
+     - 相对残差
+     - 备注
+   * - 直接法 (scipy, cudss)
+     - ~1e-14
+     - 机器精度
+   * - 迭代法 (pytorch+cg)
+     - ~1e-6
+     - 可配置容差
+
+核心结论
+~~~~~~~~
+
+1. **迭代求解器可扩展至 1.69亿 DOF**，时间复杂度 O(n^1.1)
+2. **直接求解器限于 ~200万 DOF**，因 O(n^1.5) 内存填充
+3. **PyTorch CG+Jacobi 在 200万 DOF 时比直接法快 100 倍**
+4. **内存高效**: 443 字节/DOF（理论最小值 144 字节/DOF）
+5. **精度权衡**: 直接法达到机器精度，迭代法达到 ~1e-6
+
+分布式求解（多卡）
+~~~~~~~~~~~~~~~~~~
+
+3-4x NVIDIA H200 GPU + NCCL 后端，可扩展至 **4 亿+ DOF**:
+
+**CUDA (3-4 GPU, NCCL)**:
+
+.. list-table::
+   :widths: 15 15 20 15
+   :header-rows: 1
+
+   * - DOF
+     - 时间
+     - 每卡内存
+     - GPU 数
+   * - 1万
+     - 0.1s
+     - 0.03 GB
+     - 4
+   * - 10万
+     - 0.3s
+     - 0.05 GB
+     - 4
+   * - 100万
+     - 0.9s
+     - 0.27 GB
+     - 4
+   * - 1000万
+     - 3.4s
+     - 2.35 GB
+     - 4
+   * - 5000万
+     - 15.2s
+     - 11.6 GB
+     - 4
+   * - 1亿
+     - 36.1s
+     - 23.3 GB
+     - 4
+   * - 2亿
+     - 119.8s
+     - 53.7 GB
+     - 3
+   * - 3亿
+     - 217.4s
+     - 80.5 GB
+     - 3
+   * - **4亿**
+     - **330.9s**
+     - **110.3 GB**
+     - 3
+
+**核心结论**:
+
+- **可扩展至 4 亿 DOF**: 使用 3x H200 GPU（每卡 110 GB）
+- **近线性扩展**: 1000 万 → 4 亿 为 40x DOF，~100x 时间
+- **内存高效**: ~275 字节/DOF 每 GPU
+- **CUDA 比 CPU 快 12 倍**: 10 万 DOF 时 0.3s vs 7.4s
+
+.. code-block:: bash
+
+   # 使用 3-4 卡运行分布式求解
+   torchrun --standalone --nproc_per_node=3 examples/distributed/distributed_solve.py
+
+梯度支持
+~~~~~~~~
+
+所有操作支持 PyTorch autograd 自动微分，使用 **O(1) 计算图节点**:
+
+**SparseTensor 梯度支持**
+
+.. list-table::
+   :widths: 30 10 10 50
+   :header-rows: 1
+
+   * - 操作
+     - CPU
+     - CUDA
+     - 备注
+   * - ``solve()``
+     - ✓
+     - ✓
+     - 伴随法，O(1) 图节点
+   * - ``eigsh()`` / ``eigs()``
+     - ✓
+     - ✓
+     - 伴随法，O(1) 图节点
+   * - ``svd()``
+     - ✓
+     - ✓
+     - 幂迭代，可微分
+   * - ``nonlinear_solve()``
+     - ✓
+     - ✓
+     - 伴随法，仅参数
+   * - ``@`` (A @ x, SpMV)
+     - ✓
+     - ✓
+     - 标准 autograd
+   * - ``@`` (A @ B, SpSpM)
+     - ✓
+     - ✓
+     - 稀疏梯度
+   * - ``+``, ``-``, ``*``
+     - ✓
+     - ✓
+     - 逐元素操作
+   * - ``T()`` (转置)
+     - ✓
+     - ✓
+     - 类视图，梯度流过
+   * - ``norm()``, ``sum()``, ``mean()``
+     - ✓
+     - ✓
+     - 标准 autograd
+   * - ``to_dense()``
+     - ✓
+     - ✓
+     - 标准 autograd
+
+**DSparseTensor 梯度支持**
+
+.. list-table::
+   :widths: 30 10 10 50
+   :header-rows: 1
+
+   * - 操作
+     - CPU
+     - CUDA
+     - 备注
+   * - ``D @ x``
+     - ✓
+     - ✓
+     - 分布式矩阵向量乘带梯度
+   * - ``solve_distributed()``
+     - ✓
+     - ✓
+     - 分布式 CG 带梯度
+   * - ``eigsh()`` / ``eigs()``
+     - ✓
+     - ✓
+     - 分布式 LOBPCG
+   * - ``svd()``
+     - ✓
+     - ✓
+     - 分布式幂迭代
+   * - ``nonlinear_solve()``
+     - ✓
+     - ✓
+     - 分布式 Newton-Krylov
+   * - ``norm('fro')``
+     - ✓
+     - ✓
+     - 分布式求和
+   * - ``to_dense()``
+     - ✓
+     - ✓
+     - 收集数据（有警告）
+
+**核心特性:**
+
+- SparseTensor 对 ``solve()``, ``eigsh()`` 使用 **O(1) 计算图节点** （伴随法）
+- DSparseTensor 使用 **真正的分布式算法** （LOBPCG, CG, 幂迭代）
+- DSparseTensor 核心操作无需数据收集
+- ``nonlinear_solve()`` 的梯度流向传递给 ``residual_fn`` 的 *参数*
+
+性能建议
+--------
+
+1. **迭代法建议用 float64**: 收敛性更好
+2. **对称正定矩阵用 Cholesky**: 比 LU 快约 2 倍
+3. **CPU 端推荐 scipy+superlu**: 速度与精度兼顾
+4. **GPU 小规模问题用 cudss+cholesky**: 200万 DOF 以下最快的直接法
+5. **GPU 大规模问题用 pytorch+cg**: 单卡可达 1.69 亿 DOF
+6. **超大规模用多卡并行**: DSparseMatrix 支持域分解，3 卡可达 5 亿+ DOF
+7. **不推荐 cuSOLVER**: cuDSS 更快且支持 float32
+8. **重复求解缓存 LU 分解**: 用 ``A.lu()`` 复用分解结果
+
+引用
+----
+
+如果您在研究中使用了 torch-sla，请引用我们的论文:
+
+**论文**: `arXiv:2601.13994 <https://arxiv.org/abs/2601.13994>`_ - Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch
+
+.. code-block:: bibtex
+
+   @article{chi2026torchsla,
+     title={torch-sla: Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch},
+     author={Chi, Mingyuan},
+     journal={arXiv preprint arXiv:2601.13994},
+     year={2026},
+     url={https://arxiv.org/abs/2601.13994}
+   }
+
