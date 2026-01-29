@@ -20,6 +20,7 @@ torch-sla: PyTorch Sparse Linear Algebra
 .. raw:: html
 
    <p align="center">
+     <a href="https://arxiv.org/abs/2601.13994"><img src="https://img.shields.io/badge/arXiv-2601.13994-b31b1b.svg" alt="arXiv"></a>
      <a href="https://github.com/walkerchi/torch-sla"><img src="https://img.shields.io/badge/GitHub-torch--sla-blue?logo=github" alt="GitHub"></a>
      <a href="https://pypi.org/project/torch-sla/"><img src="https://img.shields.io/pypi/v/torch-sla?color=green" alt="PyPI"></a>
      <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -71,12 +72,12 @@ Basic Usage
    import torch
    from torch_sla import SparseTensor
 
-   # Create a sparse matrix in COO format
-   val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-   row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-   col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+   # Create a sparse matrix from dense (easier to read for small matrices)
+   dense = torch.tensor([[4.0, -1.0,  0.0],
+                         [-1.0, 4.0, -1.0],
+                         [ 0.0, -1.0, 4.0]], dtype=torch.float64)
 
-   A = SparseTensor(val, row, col, (3, 3))
+   A = SparseTensor.from_dense(dense)
 
    # Solve Ax = b
    b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
@@ -400,13 +401,16 @@ torch-sla is released under the MIT License. See `LICENSE <https://github.com/wa
 Citation
 --------
 
-If you use torch-sla in your research, please cite:
+If you use torch-sla in your research, please cite our paper:
 
 .. code-block:: bibtex
 
-   @software{torch_sla,
-     title = {torch-sla: Torch Sparse Linear Algebra},
-     author = {Walker Chi},
-     year = {2024},
-     url = {https://github.com/walkerchi/torch-sla}
+   @article{chi2026torchsla,
+     title={torch-sla: Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch},
+     author={Chi, Mingyuan},
+     journal={arXiv preprint arXiv:2601.13994},
+     year={2026},
+     url={https://arxiv.org/abs/2601.13994}
    }
+
+**Paper**: `arXiv:2601.13994 <https://arxiv.org/abs/2601.13994>`_ - Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch

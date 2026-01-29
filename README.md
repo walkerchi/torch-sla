@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://arxiv.org/abs/2601.13994"><img src="https://img.shields.io/badge/arXiv-2601.13994-b31b1b.svg" alt="arXiv"></a>
   <a href="https://github.com/walkerchi/torch-sla"><img src="https://img.shields.io/badge/GitHub-repo-181717?logo=github" alt="GitHub"></a>
   <a href="https://walkerchi.github.io/torch-sla/"><img src="https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github" alt="Documentation"></a>
   <a href="https://badge.fury.io/py/torch-sla"><img src="https://badge.fury.io/py/torch-sla.svg" alt="PyPI version"></a>
@@ -528,11 +529,14 @@ MIT License - see [LICENSE](LICENSE)
 
 ## Citation
 
+If you find this library useful, please cite our paper:
+
 ```bibtex
-@software{torch_sla,
-  title = {torch-sla: PyTorch Sparse Linear Algebra},
-  author = {walkerchi},
-  year = {2024},
-  url = {https://github.com/walkerchi/torch-sla}
+@article{chi2026torchsla,
+  title={torch-sla: Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch},
+  author={Chi, Mingyuan},
+  journal={arXiv preprint arXiv:2601.13994},
+  year={2026},
+  url={https://arxiv.org/abs/2601.13994}
 }
 ```

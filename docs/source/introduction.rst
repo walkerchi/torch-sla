@@ -211,13 +211,13 @@ Basic Usage
     import torch
     from torch_sla import SparseTensor
 
-    # Create a sparse matrix in COO format
-    val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-    row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-    col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+    # Create a sparse matrix from dense (easier to read for small matrices)
+    dense = torch.tensor([[4.0, -1.0,  0.0],
+                          [-1.0, 4.0, -1.0],
+                          [ 0.0, -1.0, 4.0]], dtype=torch.float64)
 
     # Create SparseTensor
-    A = SparseTensor(val, row, col, (3, 3))
+    A = SparseTensor.from_dense(dense)
     
     # Solve Ax = b (auto-selects scipy+superlu on CPU)
     b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
@@ -231,8 +231,7 @@ CUDA Usage
     import torch
     from torch_sla import SparseTensor
 
-    # Create on CPU, move to CUDA
-    A = SparseTensor(val, row, col, (3, 3))
+    # Create on CPU, move to CUDA (using the matrix from above)
     A_cuda = A.cuda()
     
     # Solve on CUDA (auto-selects cudss+cholesky for small problems)
@@ -563,3 +562,20 @@ Performance Tips
 5. **Use pytorch+cg for large problems**: Memory efficient, scales to 169M+ DOF
 6. **Avoid cuSOLVER**: cudss is faster and supports float32
 7. **Use LU factorization for repeated solves**: Cache with ``A.lu()``
+
+Citation
+--------
+
+If you use torch-sla in your research, please cite our paper:
+
+**Paper**: `arXiv:2601.13994 <https://arxiv.org/abs/2601.13994>`_ - Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch
+
+.. code-block:: bibtex
+
+   @article{chi2026torchsla,
+     title={torch-sla: Differentiable Sparse Linear Algebra with Adjoint Solvers and Sparse Tensor Parallelism for PyTorch},
+     author={Chi, Mingyuan},
+     journal={arXiv preprint arXiv:2601.13994},
+     year={2026},
+     url={https://arxiv.org/abs/2601.13994}
+   }
