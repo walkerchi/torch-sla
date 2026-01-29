@@ -34,9 +34,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install sphinx furo sphinx-sitemap
-        # Install torch CPU and numpy for autodoc to work (scipy is mocked in conf.py)
+        # Install all dependencies for autodoc to work properly
         pip install torch --index-url https://download.pytorch.org/whl/cpu
-        pip install "numpy<2"
+        pip install "numpy<2" scipy
         # Install torch-sla in editable mode
         pip install -e . --no-deps --no-build-isolation || pip install -e . --no-deps
 

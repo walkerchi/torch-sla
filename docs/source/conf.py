@@ -8,12 +8,10 @@ import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Autodoc configuration ---------------------------------------------------
-# Mock scipy which has version conflicts with numpy 2.x
-# torch and numpy are installed in CI for autodoc to work properly
+# Mock optional dependencies that may not be installed
 autodoc_mock_imports = [
-    'scipy',
-    'scipy.sparse',
-    'scipy.sparse.linalg',
+    'scikits',
+    'scikits.umfpack',
 ]
 
 # -- Project information -----------------------------------------------------
