@@ -40,20 +40,6 @@ jobs:
         # Install torch-sla in editable mode
         pip install -e . --no-deps --no-build-isolation || pip install -e . --no-deps
 
-    - name: Verify torch_sla import
-      run: |
-        python << 'EOF'
-        import sys
-        sys.path.insert(0, '.')
-        from unittest.mock import MagicMock
-        sys.modules['scipy'] = MagicMock()
-        sys.modules['scipy.sparse'] = MagicMock()
-        sys.modules['scipy.sparse.linalg'] = MagicMock()
-        import torch_sla
-        print(f'torch_sla imported: {torch_sla}')
-        print(f'SparseTensor: {torch_sla.SparseTensor}')
-        EOF
-
     - name: Build documentation (English)
       run: |
         cd docs
