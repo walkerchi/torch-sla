@@ -42,19 +42,17 @@ jobs:
 
     - name: Verify torch_sla import
       run: |
-        python -c "
-import sys
-sys.path.insert(0, '.')
-# Mock scipy like conf.py does
-from unittest.mock import MagicMock
-sys.modules['scipy'] = MagicMock()
-sys.modules['scipy.sparse'] = MagicMock()
-sys.modules['scipy.sparse.linalg'] = MagicMock()
-import torch_sla
-print(f'torch_sla imported: {torch_sla}')
-print(f'SparseTensor: {torch_sla.SparseTensor}')
-print(f'SparseTensor methods: {[m for m in dir(torch_sla.SparseTensor) if not m.startswith(\"_\")][:10]}')
-"
+        python << 'EOF'
+        import sys
+        sys.path.insert(0, '.')
+        from unittest.mock import MagicMock
+        sys.modules['scipy'] = MagicMock()
+        sys.modules['scipy.sparse'] = MagicMock()
+        sys.modules['scipy.sparse.linalg'] = MagicMock()
+        import torch_sla
+        print(f'torch_sla imported: {torch_sla}')
+        print(f'SparseTensor: {torch_sla.SparseTensor}')
+        EOF
 
     - name: Build documentation (English)
       run: |
