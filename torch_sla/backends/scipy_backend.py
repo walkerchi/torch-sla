@@ -352,3 +352,91 @@ def scipy_ilu(
     
     A = torch_coo_to_scipy_csr(val, row, col, shape)
     return spla.spilu(A.tocsc(), drop_tol=drop_tol, fill_factor=fill_factor)
+
+
+def scipy_det(
+    val: torch.Tensor,
+    row: torch.Tensor,
+    col: torch.Tensor,
+    shape: Tuple[int, int]
+) -> torch.Tensor:
+    """
+    Compute determinant of sparse matrix using LU decomposition.
+    
+    For a square matrix A, det(A) is computed from the LU factorization:
+    det(A) = det(P) * det(L) * det(U)
+    where P is the permutation matrix, L is lower triangular (det=1),
+    and U is upper triangular (det = product of diagonal elements).
+    
+    Parameters
+    ----------
+    val : torch.Tensor
+        Non-zero values
+    row, col : torch.Tensor
+        Row and column indices
+    shape : Tuple[int, int]
+        Matrix shape (must be square)
+        
+    Returns
+    -------
+    torch.Tensor
+        Determinant value (scalar tensor)
+        
+    Raises
+    ------
+    ValueError
+        If matrix is not square
+    ImportError
+        If SciPy is not available
+        
+    Notes
+    -----
+    - For large matrices, the determinant can overflow/underflow
+    - Consider using log-determinant for numerical stability
+    - This uses LU decomposition via SuperLU
+    """
+    if not SCIPY_AVAILABLE:
+        raise ImportError("SciPy is required for determinant computation")
+    
+    if shape[0] != shape[1]:
+        raise ValueError(f"Matrix must be square for determinant, got shape {shape}")
+    
+    # Convert to SciPy CSC format (required for splu)
+    A = torch_coo_to_scipy_csr(val, row, col, shape)
+    A_csc = A.tocsc()
+    
+    # Compute LU decomposition
+    lu = spla.splu(A_csc)
+    
+    # Determinant from LU factorization
+    # det(A) = det(P) * det(L) * det(U)
+    # det(L) = 1 (unit diagonal)
+    # det(U) = product of diagonal elements
+    # det(P) = (-1)^(number of row exchanges)
+    
+    # Get diagonal of U
+    diag_U = lu.U.diagonal()
+    det_U = np.prod(diag_U)
+    
+    # Get sign from permutation
+    # The permutation is represented by perm_r (row permutation)
+    # Count inversions to get sign
+    perm = lu.perm_r
+    n = len(perm)
+    # Simple way: count how many swaps needed
+    sign = 1
+    visited = [False] * n
+    for i in range(n):
+        if not visited[i]:
+            j = i
+            cycle_length = 0
+            while not visited[j]:
+                visited[j] = True
+                j = perm[j]
+                cycle_length += 1
+            if cycle_length > 1:
+                sign *= (-1) ** (cycle_length - 1)
+    
+    det_val = sign * det_U
+    
+    return torch.tensor(det_val, dtype=val.dtype, device=val.device)
