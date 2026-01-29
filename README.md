@@ -97,20 +97,22 @@ x = A_cuda.solve(b_cuda, backend='pytorch', method='cg')
 
 ## Recommended Backends
 
-Based on benchmarks on 2D Poisson equations (tested up to **169M DOF**):
+Based on benchmarks on 2D Poisson equations (tested up to **400M DOF** multi-GPU):
 
 | Problem Size | CPU | CUDA | Notes |
 |-------------|-----|------|-------|
 | **Small (< 100K DOF)** | `scipy+superlu` | `cudss+cholesky` | Direct solvers, machine precision |
 | **Medium (100K - 2M DOF)** | `scipy+superlu` | `cudss+cholesky` | cuDSS is fastest on GPU |
 | **Large (2M - 169M DOF)** | N/A | `pytorch+cg` | **Iterative only**, ~1e-6 precision |
+| **Very Large (> 169M DOF)** | N/A | `DSparseMatrix` multi-GPU | Multi-GPU domain decomposition |
 
 ### Key Insights
 
-1. **PyTorch CG+Jacobi scales to 169M+ DOF** with near-linear O(n^1.1) complexity
-2. **Direct solvers limited to ~2M DOF** due to memory (O(n^1.5) fill-in)
-3. **Use float64** for best convergence with iterative solvers
-4. **Trade-off**: Direct = machine precision, Iterative = ~1e-6 but 100x faster
+1. **PyTorch CG+Jacobi scales to 169M+ DOF** on single GPU with near-linear O(n^1.1) complexity
+2. **Multi-GPU scales to 400M+ DOF** with DSparseMatrix domain decomposition (3x H200)
+3. **Direct solvers limited to ~2M DOF** due to memory (O(n^1.5) fill-in)
+4. **Use float64** for best convergence with iterative solvers
+5. **Trade-off**: Direct = machine precision (~1e-14), Iterative = ~1e-6 but 100x faster
 
 ## Backends and Methods
 
