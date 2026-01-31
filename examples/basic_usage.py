@@ -19,18 +19,14 @@ from torch_sla import SparseTensor, spsolve
 # =============================================================================
 
 def example_1_create_sparse():
-    """Create SparseTensor from COO format."""
+    """Create SparseTensor from dense matrix (easier for small matrices)."""
     # Create a simple 3x3 SPD tridiagonal matrix
-    # [4, -1,  0]
-    # [-1, 4, -1]
-    # [0, -1,  4]
-    val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-    row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-    col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
-    shape = (3, 3)
+    dense = torch.tensor([[4.0, -1.0,  0.0],
+                          [-1.0, 4.0, -1.0],
+                          [ 0.0, -1.0, 4.0]], dtype=torch.float64)
     
-    # Create SparseTensor
-    A = SparseTensor(val, row, col, shape)
+    # Create SparseTensor from dense
+    A = SparseTensor.from_dense(dense)
     print(f"Created: {A}")
     print(f"Dense form:\n{A.to_dense()}")
     
@@ -124,12 +120,12 @@ def example_3_spy_visualization():
 
 def example_4_property_detection():
     """Detect matrix properties."""
-    # Create SPD matrix
-    val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-    row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-    col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+    # Create SPD matrix from dense
+    dense_A = torch.tensor([[4.0, -1.0,  0.0],
+                            [-1.0, 4.0, -1.0],
+                            [ 0.0, -1.0, 4.0]], dtype=torch.float64)
     
-    A = SparseTensor(val, row, col, (3, 3))
+    A = SparseTensor.from_dense(dense_A)
     
     # Property checks
     print(f"Matrix A:\n{A.to_dense()}")
@@ -138,11 +134,10 @@ def example_4_property_detection():
     print(f"Is positive definite (Cholesky): {A.is_positive_definite('cholesky')}")
     
     # Non-symmetric matrix
-    val_nonsym = torch.tensor([4.0, -1.0, -2.0, 4.0], dtype=torch.float64)
-    row_nonsym = torch.tensor([0, 0, 1, 1])
-    col_nonsym = torch.tensor([0, 1, 0, 1])
+    dense_B = torch.tensor([[4.0, -1.0],
+                            [-2.0, 4.0]], dtype=torch.float64)
     
-    B = SparseTensor(val_nonsym, row_nonsym, col_nonsym, (2, 2))
+    B = SparseTensor.from_dense(dense_B)
     print(f"\nMatrix B (non-symmetric):\n{B.to_dense()}")
     print(f"Is symmetric: {B.is_symmetric()}")
 
@@ -153,11 +148,11 @@ def example_4_property_detection():
 
 def example_5_matrix_multiplication():
     """Matrix multiplication operations."""
-    # Create sparse matrix
-    val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-    row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-    col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
-    A = SparseTensor(val, row, col, (3, 3))
+    # Create sparse matrix from dense
+    dense = torch.tensor([[4.0, -1.0,  0.0],
+                          [-1.0, 4.0, -1.0],
+                          [ 0.0, -1.0, 4.0]], dtype=torch.float64)
+    A = SparseTensor.from_dense(dense)
     A_dense = A.to_dense()
     
     # Sparse @ Dense vector
@@ -175,7 +170,7 @@ def example_5_matrix_multiplication():
     print(f"Dense @ Sparse: correct = {torch.allclose(y, x @ A_dense)}")
     
     # Sparse @ Sparse
-    B = SparseTensor(val.clone(), row.clone(), col.clone(), (3, 3))
+    B = SparseTensor.from_dense(dense.clone())
     C = A @ B
     print(f"Sparse @ Sparse: correct = {torch.allclose(C.to_dense(), A_dense @ A_dense)}")
 
@@ -217,11 +212,11 @@ def example_6_norms_and_eigenvalues():
 
 def example_7_basic_solve():
     """Basic sparse linear solve."""
-    val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
-    row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
-    col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
+    dense = torch.tensor([[4.0, -1.0,  0.0],
+                          [-1.0, 4.0, -1.0],
+                          [ 0.0, -1.0, 4.0]], dtype=torch.float64)
     
-    A = SparseTensor(val, row, col, (3, 3))
+    A = SparseTensor.from_dense(dense)
     b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
     
     # Solve Ax = b
