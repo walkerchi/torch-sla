@@ -495,3 +495,12 @@ if __name__ == "__main__":
     print("Batched GCN demo completed!")
     print("=" * 70)
 
+
+
+
+
+
+
+
+
+
