@@ -3536,12 +3536,24 @@ class SparseTensor:
     # =========================================================================
     
     def _apply_elementwise(self, func, *args, **kwargs) -> "SparseTensor":
-        """Apply element-wise function to values."""
+        """Apply element-wise function to values.
+        
+        Returns the same type as self to support subclassing.
+        Subclasses should ensure their __init__ accepts (values, row_indices, col_indices, shape)
+        or override this method.
+        """
         new_values = func(self.values, *args, **kwargs)
-        return SparseTensor(
-            new_values, self.row_indices, self.col_indices,
-            self._shape, sparse_dim=self._sparse_dim
-        )
+        # Use type(self) to preserve subclass type
+        try:
+            return type(self)(
+                new_values, self.row_indices, self.col_indices, self._shape
+            )
+        except TypeError:
+            # Fallback for subclasses with incompatible __init__
+            return SparseTensor(
+                new_values, self.row_indices, self.col_indices,
+                self._shape, sparse_dim=self._sparse_dim
+            )
     
     # Arithmetic operations
     def __add__(self, other: Union[torch.Tensor, "SparseTensor", float, int]) -> "SparseTensor":
@@ -3759,14 +3771,22 @@ class SparseTensor:
     
     # Gradient-related
     def detach(self) -> "SparseTensor":
-        """Detach from computation graph."""
-        return SparseTensor(
-            self.values.detach(),
-            self.row_indices,
-            self.col_indices,
-            self._shape,
-            sparse_dim=self._sparse_dim
-        )
+        """Detach from computation graph. Preserves subclass type."""
+        try:
+            return type(self)(
+                self.values.detach(),
+                self.row_indices,
+                self.col_indices,
+                self._shape
+            )
+        except TypeError:
+            return SparseTensor(
+                self.values.detach(),
+                self.row_indices,
+                self.col_indices,
+                self._shape,
+                sparse_dim=self._sparse_dim
+            )
     
     def requires_grad_(self, requires_grad: bool = True) -> "SparseTensor":
         """Enable/disable gradient tracking."""
@@ -3784,24 +3804,40 @@ class SparseTensor:
         return self.values.grad
     
     def clone(self) -> "SparseTensor":
-        """Create a copy of this SparseTensor."""
-        return SparseTensor(
-            self.values.clone(),
-            self.row_indices.clone(),
-            self.col_indices.clone(),
-            self._shape,
-            sparse_dim=self._sparse_dim
-        )
-    
+        """Create a copy of this SparseTensor. Preserves subclass type."""
+        try:
+            return type(self)(
+                self.values.clone(),
+                self.row_indices.clone(),
+                self.col_indices.clone(),
+                self._shape
+            )
+        except TypeError:
+            return SparseTensor(
+                self.values.clone(),
+                self.row_indices.clone(),
+                self.col_indices.clone(),
+                self._shape,
+                sparse_dim=self._sparse_dim
+            )
+
     def contiguous(self) -> "SparseTensor":
-        """Make values contiguous in memory."""
-        return SparseTensor(
-            self.values.contiguous(),
-            self.row_indices.contiguous(),
-            self.col_indices.contiguous(),
-            self._shape,
-            sparse_dim=self._sparse_dim
-        )
+        """Make values contiguous in memory. Preserves subclass type."""
+        try:
+            return type(self)(
+                self.values.contiguous(),
+                self.row_indices.contiguous(),
+                self.col_indices.contiguous(),
+                self._shape
+            )
+        except TypeError:
+            return SparseTensor(
+                self.values.contiguous(),
+                self.row_indices.contiguous(),
+                self.col_indices.contiguous(),
+                self._shape,
+                sparse_dim=self._sparse_dim
+            )
     
     # =========================================================================
     # Persistence (I/O)
