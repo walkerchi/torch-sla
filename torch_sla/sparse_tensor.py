@@ -1981,12 +1981,14 @@ class SparseTensor:
             batch_shape = self.batch_shape
             B = self.batch_size
             vals_flat = self.values.reshape(B, self.nnz)
+            # Determine output dtype via type promotion
+            out_dtype = torch.result_type(self.values, x)
             
             if x.dim() == 1:
                 # x: [N] - same for all batches -> result [B, M]
                 x_gathered = x[col]
                 products = vals_flat * x_gathered
-                result = torch.zeros(B, M, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, M, dtype=out_dtype, device=self.device)
                 row_expanded = row.unsqueeze(0).expand(B, -1)
                 result.scatter_add_(1, row_expanded, products)
                 return result.reshape(*batch_shape, M)
@@ -1996,7 +1998,7 @@ class SparseTensor:
                 x_flat = x.reshape(B, N)
                 x_gathered = x_flat[:, col]
                 products = vals_flat * x_gathered
-                result = torch.zeros(B, M, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, M, dtype=out_dtype, device=self.device)
                 row_expanded = row.unsqueeze(0).expand(B, -1)
                 result.scatter_add_(1, row_expanded, products)
                 return result.reshape(*batch_shape, M)
@@ -2006,22 +2008,25 @@ class SparseTensor:
                 x_flat = x.reshape(B, N, K)
                 x_gathered = x_flat[:, col, :]
                 products = vals_flat.unsqueeze(-1) * x_gathered
-                result = torch.zeros(B, M, K, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, M, K, dtype=out_dtype, device=self.device)
                 row_expanded = row.unsqueeze(0).unsqueeze(-1).expand(B, -1, K)
                 result.scatter_add_(1, row_expanded, products)
                 return result.reshape(*batch_shape, M, K)
         else:
+            # Determine output dtype via type promotion (handles float32 @ float64, etc.)
+            out_dtype = torch.result_type(self.values, x)
+            
             if x.dim() == 1:
                 x_gathered = x[col]
                 products = self.values * x_gathered
-                result = torch.zeros(M, dtype=self.dtype, device=self.device)
+                result = torch.zeros(M, dtype=out_dtype, device=self.device)
                 result.scatter_add_(0, row, products)
                 return result
             else:
                 K = x.size(1)
                 x_gathered = x[col]
                 products = self.values.unsqueeze(1) * x_gathered
-                result = torch.zeros(M, K, dtype=self.dtype, device=self.device)
+                result = torch.zeros(M, K, dtype=out_dtype, device=self.device)
                 row_expanded = row.unsqueeze(1).expand(-1, K)
                 result.scatter_add_(0, row_expanded, products)
                 return result
@@ -2048,11 +2053,13 @@ class SparseTensor:
             batch_shape = self.batch_shape
             B = self.batch_size
             vals_flat = self.values.reshape(B, self.nnz)
+            # Determine output dtype via type promotion
+            out_dtype = torch.result_type(self.values, X)
             
             if X.dim() == 1:
                 X_gathered = X[row]
                 products = vals_flat * X_gathered
-                result = torch.zeros(B, N, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, N, dtype=out_dtype, device=self.device)
                 col_expanded = col.unsqueeze(0).expand(B, -1)
                 result.scatter_add_(1, col_expanded, products)
                 return result.reshape(*batch_shape, N)
@@ -2061,7 +2068,7 @@ class SparseTensor:
                 X_flat = X.reshape(B, M)
                 X_gathered = X_flat[:, row]
                 products = vals_flat * X_gathered
-                result = torch.zeros(B, N, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, N, dtype=out_dtype, device=self.device)
                 col_expanded = col.unsqueeze(0).expand(B, -1)
                 result.scatter_add_(1, col_expanded, products)
                 return result.reshape(*batch_shape, N)
@@ -2071,22 +2078,25 @@ class SparseTensor:
                 X_flat = X.reshape(B, K, M)
                 X_gathered = X_flat[:, :, row]
                 products = vals_flat.unsqueeze(1) * X_gathered
-                result = torch.zeros(B, K, N, dtype=self.dtype, device=self.device)
+                result = torch.zeros(B, K, N, dtype=out_dtype, device=self.device)
                 col_expanded = col.unsqueeze(0).unsqueeze(0).expand(B, K, -1)
                 result.scatter_add_(2, col_expanded, products)
                 return result.reshape(*batch_shape, K, N)
         else:
+            # Determine output dtype via type promotion
+            out_dtype = torch.result_type(self.values, X)
+            
             if X.dim() == 1:
                 X_gathered = X[row]
                 products = self.values * X_gathered
-                result = torch.zeros(N, dtype=self.dtype, device=self.device)
+                result = torch.zeros(N, dtype=out_dtype, device=self.device)
                 result.scatter_add_(0, col, products)
                 return result
             else:
                 K = X.size(0)
                 X_gathered = X[:, row]
                 products = self.values.unsqueeze(0) * X_gathered
-                result = torch.zeros(K, N, dtype=self.dtype, device=self.device)
+                result = torch.zeros(K, N, dtype=out_dtype, device=self.device)
                 col_expanded = col.unsqueeze(0).expand(K, -1)
                 result.scatter_add_(1, col_expanded, products)
                 return result
