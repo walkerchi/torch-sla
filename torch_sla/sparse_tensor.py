@@ -2240,19 +2240,19 @@ class SparseTensor:
         """
         if not self.is_square:
             raise ValueError("Matrix must be square for solve()")
-        
+
         if self.is_block:
             raise NotImplementedError("solve() not yet supported for block sparse tensors")
-        
+
         # Get matrix properties
         is_sym = self.is_symmetric().all().item() if self.is_batched else self.is_symmetric().item()
         is_pd = self.is_positive_definite().all().item() if self.is_batched else self.is_positive_definite().item()
         is_spd = is_sym and is_pd
-        
-        from .linear_solve import spsolve
-        
+
+        from .linear_solve import spsolve, SparseLinearSolveMultiRHS
+
         M, N = self.sparse_shape
-        
+
         if self.is_batched:
             batch_shape = self.batch_shape
             vals_flat = self.values.reshape(-1, self.nnz)
@@ -2271,6 +2271,13 @@ class SparseTensor:
             
             return torch.stack(results).reshape(*batch_shape, N)
         else:
+            if b.dim() == 2:
+                # Multiple RHS: b is [M, K]
+                # Use LU factorization once, solve for all columns efficiently
+                return SparseLinearSolveMultiRHS.apply(
+                    self.values, self.row_indices, self.col_indices,
+                    (M, N), b
+                )
             return spsolve(
                 self.values, self.row_indices, self.col_indices,
                 (M, N), b,

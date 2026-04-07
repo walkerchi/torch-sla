@@ -139,17 +139,27 @@ Based on benchmarks on 2D Poisson equations (tested up to **400M DOF** multi-GPU
 
 ## Batched Solve
 
+Two batched solving modes are supported:
+
+**Batched matrices** — same sparsity structure, different values per batch:
+
 ```python
-# Batched matrices: same structure, different values
 batch_size = 4
 val_batch = val.unsqueeze(0).expand(batch_size, -1).clone()
 
 # Create batched SparseTensor [B, M, N]
 A = SparseTensor(val_batch, row, col, (batch_size, 3, 3))
 
-# Batched solve
 b = torch.randn(batch_size, 3, dtype=torch.float64)
 x = A.solve(b)  # Shape: [batch_size, 3]
+```
+
+**Multiple right-hand sides** — single matrix, multiple RHS columns (LU factorized once):
+
+```python
+A = SparseTensor(val, row, col, (3, 3))
+b = torch.randn(3, 5, dtype=torch.float64)  # 5 right-hand sides
+x = A.solve(b)  # Shape: [3, 5]
 ```
 
 ## Distributed Computing (DSparseMatrix)

@@ -67,6 +67,54 @@ from .backends.pytorch_backend import pytorch_solve
 # Autograd Functions for gradient support
 # ============================================================================
 
+
+class SparseLinearSolveMultiRHS(Function):
+    """LU-based solver for multiple right-hand sides with gradient support.
+
+    Factorizes A once with splu, then solves for all K columns of b efficiently.
+    """
+
+    @staticmethod
+    def forward(ctx, val, row, col, shape, b):
+        import scipy.sparse as sp
+        import scipy.sparse.linalg as spla
+
+        A_scipy = sp.coo_matrix(
+            (val.detach().cpu().numpy(),
+             (row.cpu().numpy(), col.cpu().numpy())),
+            shape=shape,
+        ).tocsc()
+        lu = spla.splu(A_scipy)
+        u_np = lu.solve(b.detach().cpu().numpy())  # [M, K] → [N, K]
+        u = torch.from_numpy(u_np).to(dtype=val.dtype, device=val.device)
+
+        ctx.save_for_backward(val, row, col, u)
+        ctx.shape = shape
+        return u
+
+    @staticmethod
+    def backward(ctx, grad_u):
+        import scipy.sparse as sp
+        import scipy.sparse.linalg as spla
+
+        val, row, col, u = ctx.saved_tensors
+        shape = ctx.shape
+
+        # Solve A^T @ grad_b = grad_u  (A^T via swapped row/col)
+        AT_scipy = sp.coo_matrix(
+            (val.detach().cpu().numpy(),
+             (col.cpu().numpy(), row.cpu().numpy())),
+            shape=(shape[1], shape[0]),
+        ).tocsc()
+        lu_t = spla.splu(AT_scipy)
+        grad_b_np = lu_t.solve(grad_u.detach().cpu().numpy())
+        grad_b = torch.from_numpy(grad_b_np).to(dtype=val.dtype, device=val.device)
+
+        # grad_val[e] = -grad_b[row[e], :] · u[col[e], :]
+        grad_val = -(grad_b[row] * u[col]).sum(-1)
+
+        return grad_val, None, None, None, grad_b
+
 class SparseLinearSolveScipySuperLU(Function):
     """SciPy SuperLU solver with gradient support"""
 
