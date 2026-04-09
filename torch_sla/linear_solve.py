@@ -68,47 +68,91 @@ from .backends.pytorch_backend import pytorch_solve
 # ============================================================================
 
 
+def _torch_to_cupy(t):
+    """Convert a CUDA torch.Tensor to a CuPy array (zero-copy)."""
+    import cupy as cp
+    return cp.from_dlpack(t)
+
+
+def _cupy_to_torch(a):
+    """Convert a CuPy array to a CUDA torch.Tensor (zero-copy)."""
+    return torch.from_dlpack(a)
+
+
+def _is_cupy_available():
+    """Check if CuPy sparse LU is usable."""
+    try:
+        import cupyx.scipy.sparse.linalg  # noqa: F401
+        return True
+    except (ImportError, OSError):
+        return False
+
+
+def _splu_solve_scipy(val, row, col, shape, b):
+    """LU factorize + multi-RHS solve via SciPy (CPU)."""
+    import scipy.sparse as sp
+    import scipy.sparse.linalg as spla
+
+    A = sp.coo_matrix(
+        (val.detach().cpu().numpy(),
+         (row.cpu().numpy(), col.cpu().numpy())),
+        shape=shape,
+    ).tocsc()
+    lu = spla.splu(A)
+    u_np = lu.solve(b.detach().cpu().numpy())
+    return torch.from_numpy(u_np).to(dtype=val.dtype, device=val.device)
+
+
+def _splu_solve_cupy(val, row, col, shape, b):
+    """LU factorize + multi-RHS solve via CuPy (CUDA)."""
+    import cupy as cp
+    import cupyx.scipy.sparse as csp
+    import cupyx.scipy.sparse.linalg as csla
+
+    cp.cuda.Device(val.device.index).use()
+    A = csp.coo_matrix(
+        (_torch_to_cupy(val.detach()),
+         (_torch_to_cupy(row), _torch_to_cupy(col))),
+        shape=shape,
+    ).tocsc()
+    lu = csla.splu(A)
+    u_cupy = lu.solve(_torch_to_cupy(b.detach()))
+    return _cupy_to_torch(u_cupy).to(dtype=val.dtype)
+
+
+def _splu_solve(val, row, col, shape, b):
+    """Multi-RHS solve with automatic backend selection.
+
+    CUDA + CuPy available → CuPy (on GPU).
+    Otherwise → SciPy (on CPU, results moved back to original device).
+    """
+    if val.is_cuda and _is_cupy_available():
+        return _splu_solve_cupy(val, row, col, shape, b)
+    return _splu_solve_scipy(val, row, col, shape, b)
+
+
 class SparseLinearSolveMultiRHS(Function):
     """LU-based solver for multiple right-hand sides with gradient support.
 
     Factorizes A once with splu, then solves for all K columns of b efficiently.
+    Automatically selects backend: CuPy for CUDA tensors, SciPy for CPU tensors.
+    Falls back to SciPy (CPU) if CuPy is not available.
     """
 
     @staticmethod
     def forward(ctx, val, row, col, shape, b):
-        import scipy.sparse as sp
-        import scipy.sparse.linalg as spla
-
-        A_scipy = sp.coo_matrix(
-            (val.detach().cpu().numpy(),
-             (row.cpu().numpy(), col.cpu().numpy())),
-            shape=shape,
-        ).tocsc()
-        lu = spla.splu(A_scipy)
-        u_np = lu.solve(b.detach().cpu().numpy())  # [M, K] → [N, K]
-        u = torch.from_numpy(u_np).to(dtype=val.dtype, device=val.device)
-
+        u = _splu_solve(val, row, col, shape, b)
         ctx.save_for_backward(val, row, col, u)
         ctx.shape = shape
         return u
 
     @staticmethod
     def backward(ctx, grad_u):
-        import scipy.sparse as sp
-        import scipy.sparse.linalg as spla
-
         val, row, col, u = ctx.saved_tensors
-        shape = ctx.shape
+        shape_T = (ctx.shape[1], ctx.shape[0])
 
         # Solve A^T @ grad_b = grad_u  (A^T via swapped row/col)
-        AT_scipy = sp.coo_matrix(
-            (val.detach().cpu().numpy(),
-             (col.cpu().numpy(), row.cpu().numpy())),
-            shape=(shape[1], shape[0]),
-        ).tocsc()
-        lu_t = spla.splu(AT_scipy)
-        grad_b_np = lu_t.solve(grad_u.detach().cpu().numpy())
-        grad_b = torch.from_numpy(grad_b_np).to(dtype=val.dtype, device=val.device)
+        grad_b = _splu_solve(val, col, row, shape_T, grad_u)
 
         # grad_val[e] = -grad_b[row[e], :] · u[col[e], :]
         grad_val = -(grad_b[row] * u[col]).sum(-1)
