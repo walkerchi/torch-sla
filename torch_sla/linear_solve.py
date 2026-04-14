@@ -68,97 +68,6 @@ from .backends.pytorch_backend import pytorch_solve
 # ============================================================================
 
 
-def _torch_to_cupy(t):
-    """Convert a CUDA torch.Tensor to a CuPy array (zero-copy)."""
-    import cupy as cp
-    return cp.from_dlpack(t)
-
-
-def _cupy_to_torch(a):
-    """Convert a CuPy array to a CUDA torch.Tensor (zero-copy)."""
-    return torch.from_dlpack(a)
-
-
-def _is_cupy_available():
-    """Check if CuPy sparse LU is usable."""
-    try:
-        import cupyx.scipy.sparse.linalg  # noqa: F401
-        return True
-    except (ImportError, OSError):
-        return False
-
-
-def _splu_solve_scipy(val, row, col, shape, b):
-    """LU factorize + multi-RHS solve via SciPy (CPU)."""
-    import scipy.sparse as sp
-    import scipy.sparse.linalg as spla
-
-    A = sp.coo_matrix(
-        (val.detach().cpu().numpy(),
-         (row.cpu().numpy(), col.cpu().numpy())),
-        shape=shape,
-    ).tocsc()
-    lu = spla.splu(A)
-    u_np = lu.solve(b.detach().cpu().numpy())
-    return torch.from_numpy(u_np).to(dtype=val.dtype, device=val.device)
-
-
-def _splu_solve_cupy(val, row, col, shape, b):
-    """LU factorize + multi-RHS solve via CuPy (CUDA)."""
-    import cupy as cp
-    import cupyx.scipy.sparse as csp
-    import cupyx.scipy.sparse.linalg as csla
-
-    cp.cuda.Device(val.device.index).use()
-    A = csp.coo_matrix(
-        (_torch_to_cupy(val.detach()),
-         (_torch_to_cupy(row), _torch_to_cupy(col))),
-        shape=shape,
-    ).tocsc()
-    lu = csla.splu(A)
-    u_cupy = lu.solve(_torch_to_cupy(b.detach()))
-    return _cupy_to_torch(u_cupy).to(dtype=val.dtype)
-
-
-def _splu_solve(val, row, col, shape, b):
-    """Multi-RHS solve with automatic backend selection.
-
-    CUDA + CuPy available → CuPy (on GPU).
-    Otherwise → SciPy (on CPU, results moved back to original device).
-    """
-    if val.is_cuda and _is_cupy_available():
-        return _splu_solve_cupy(val, row, col, shape, b)
-    return _splu_solve_scipy(val, row, col, shape, b)
-
-
-class SparseLinearSolveMultiRHS(Function):
-    """LU-based solver for multiple right-hand sides with gradient support.
-
-    Factorizes A once with splu, then solves for all K columns of b efficiently.
-    Automatically selects backend: CuPy for CUDA tensors, SciPy for CPU tensors.
-    Falls back to SciPy (CPU) if CuPy is not available.
-    """
-
-    @staticmethod
-    def forward(ctx, val, row, col, shape, b):
-        u = _splu_solve(val, row, col, shape, b)
-        ctx.save_for_backward(val, row, col, u)
-        ctx.shape = shape
-        return u
-
-    @staticmethod
-    def backward(ctx, grad_u):
-        val, row, col, u = ctx.saved_tensors
-        shape_T = (ctx.shape[1], ctx.shape[0])
-
-        # Solve A^T @ grad_b = grad_u  (A^T via swapped row/col)
-        grad_b = _splu_solve(val, col, row, shape_T, grad_u)
-
-        # grad_val[e] = -grad_b[row[e], :] · u[col[e], :]
-        grad_val = -(grad_b[row] * u[col]).sum(-1)
-
-        return grad_val, None, None, None, grad_b
-
 class SparseLinearSolveScipySuperLU(Function):
     """SciPy SuperLU solver with gradient support"""
 
@@ -184,6 +93,8 @@ class SparseLinearSolveScipySuperLU(Function):
         gradb = scipy_solve(val, col, row, (shape[1], shape[0]), gradu,
                            method=method, atol=atol, maxiter=maxiter)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None, None, None
 
 
@@ -193,7 +104,13 @@ class SparseLinearSolveEigenCG(Function):
     @staticmethod
     def forward(ctx, val, row, col, shape, b, atol, maxiter):
         _eigen = get_eigen_module()
-        u = _eigen.cg(torch.stack([row, col], 0), val, shape[0], shape[1], b, atol, maxiter)
+        indices = torch.stack([row, col], 0)
+        if b.dim() == 2:
+            cols = [_eigen.cg(indices, val, shape[0], shape[1], b[:, k], atol, maxiter)
+                    for k in range(b.shape[1])]
+            u = torch.stack(cols, dim=1)
+        else:
+            u = _eigen.cg(indices, val, shape[0], shape[1], b, atol, maxiter)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
         ctx.atol = atol
@@ -207,8 +124,16 @@ class SparseLinearSolveEigenCG(Function):
         m, n = ctx.A_shape
         atol = ctx.atol
         maxiter = ctx.maxiter
-        gradb = _eigen.cg(torch.stack([col, row], 0), val, n, m, gradu, atol, maxiter)
+        indices_T = torch.stack([col, row], 0)
+        if gradu.dim() == 2:
+            cols = [_eigen.cg(indices_T, val, n, m, gradu[:, k], atol, maxiter)
+                    for k in range(gradu.shape[1])]
+            gradb = torch.stack(cols, dim=1)
+        else:
+            gradb = _eigen.cg(indices_T, val, n, m, gradu, atol, maxiter)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None, None
 
 
@@ -218,7 +143,13 @@ class SparseLinearSolveEigenBiCGStab(Function):
     @staticmethod
     def forward(ctx, val, row, col, shape, b, atol, maxiter):
         _eigen = get_eigen_module()
-        u = _eigen.bicgstab(torch.stack([row, col], 0), val, shape[0], shape[1], b, atol, maxiter)
+        indices = torch.stack([row, col], 0)
+        if b.dim() == 2:
+            cols = [_eigen.bicgstab(indices, val, shape[0], shape[1], b[:, k], atol, maxiter)
+                    for k in range(b.shape[1])]
+            u = torch.stack(cols, dim=1)
+        else:
+            u = _eigen.bicgstab(indices, val, shape[0], shape[1], b, atol, maxiter)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
         ctx.atol = atol
@@ -232,9 +163,25 @@ class SparseLinearSolveEigenBiCGStab(Function):
         m, n = ctx.A_shape
         atol = ctx.atol
         maxiter = ctx.maxiter
-        gradb = _eigen.bicgstab(torch.stack([col, row], 0), val, n, m, gradu, atol, maxiter)
+        indices_T = torch.stack([col, row], 0)
+        if gradu.dim() == 2:
+            cols = [_eigen.bicgstab(indices_T, val, n, m, gradu[:, k], atol, maxiter)
+                    for k in range(gradu.shape[1])]
+            gradb = torch.stack(cols, dim=1)
+        else:
+            gradb = _eigen.bicgstab(indices_T, val, n, m, gradu, atol, maxiter)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None, None
+
+
+def _cusolver_solve_multi(solve_fn, indices, val, m, n, b, tol):
+    """Column-loop wrapper for cuSOLVER solvers (single-RHS C++ API)."""
+    if b.dim() == 2:
+        cols = [solve_fn(indices, val, m, n, b[:, k], tol) for k in range(b.shape[1])]
+        return torch.stack(cols, dim=1)
+    return solve_fn(indices, val, m, n, b, tol)
 
 
 class SparseLinearSolveCuSolverQR(Function):
@@ -244,7 +191,7 @@ class SparseLinearSolveCuSolverQR(Function):
     def forward(ctx, val, row, col, shape, b, tol):
         cusolver = get_cusolver_module()
         indices = torch.stack([row, col], 0)
-        u = cusolver.qr(indices, val, shape[0], shape[1], b, tol)
+        u = _cusolver_solve_multi(cusolver.qr, indices, val, shape[0], shape[1], b, tol)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
         ctx.tol = tol
@@ -257,8 +204,10 @@ class SparseLinearSolveCuSolverQR(Function):
         m, n = ctx.A_shape
         tol = ctx.tol
         indices_T = torch.stack([col, row], 0)
-        gradb = cusolver.qr(indices_T, val, n, m, gradu, tol)
+        gradb = _cusolver_solve_multi(cusolver.qr, indices_T, val, n, m, gradu, tol)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None
 
 
@@ -269,7 +218,7 @@ class SparseLinearSolveCuSolverCholesky(Function):
     def forward(ctx, val, row, col, shape, b, tol):
         cusolver = get_cusolver_module()
         indices = torch.stack([row, col], 0)
-        u = cusolver.cholesky(indices, val, shape[0], shape[1], b, tol)
+        u = _cusolver_solve_multi(cusolver.cholesky, indices, val, shape[0], shape[1], b, tol)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
         ctx.tol = tol
@@ -282,8 +231,10 @@ class SparseLinearSolveCuSolverCholesky(Function):
         m, n = ctx.A_shape
         tol = ctx.tol
         indices = torch.stack([row, col], 0)
-        gradb = cusolver.cholesky(indices, val, m, n, gradu, tol)
+        gradb = _cusolver_solve_multi(cusolver.cholesky, indices, val, m, n, gradu, tol)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None
 
 
@@ -294,7 +245,7 @@ class SparseLinearSolveCuSolverLU(Function):
     def forward(ctx, val, row, col, shape, b, tol):
         cusolver = get_cusolver_module()
         indices = torch.stack([row, col], 0)
-        u = cusolver.lu(indices, val, shape[0], shape[1], b, tol)
+        u = _cusolver_solve_multi(cusolver.lu, indices, val, shape[0], shape[1], b, tol)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
         ctx.tol = tol
@@ -307,8 +258,10 @@ class SparseLinearSolveCuSolverLU(Function):
         m, n = ctx.A_shape
         tol = ctx.tol
         indices_T = torch.stack([col, row], 0)
-        gradb = cusolver.lu(indices_T, val, n, m, gradu, tol)
+        gradb = _cusolver_solve_multi(cusolver.lu, indices_T, val, n, m, gradu, tol)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None
 
 
@@ -331,15 +284,17 @@ class SparseLinearSolveCuDSS(Function):
         val, row, col, u = ctx.saved_tensors
         m, n = ctx.A_shape
         matrix_type = ctx.matrix_type
-        
+
         if matrix_type in ['symmetric', 'spd', 'hpd']:
             indices = torch.stack([row, col], 0)
             gradb = cudss.solve(indices, val, m, n, gradu, matrix_type, "default")
         else:
             indices_T = torch.stack([col, row], 0)
             gradb = cudss.solve(indices_T, val, n, m, gradu, "general", "default")
-        
+
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None
 
 
@@ -363,6 +318,8 @@ class SparseLinearSolveCuDSSLU(Function):
         indices_T = torch.stack([col, row], 0)
         gradb = cudss.lu(indices_T, val, n, m, gradu)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb
 
 
@@ -386,6 +343,8 @@ class SparseLinearSolveCuDSSCholesky(Function):
         indices = torch.stack([row, col], 0)
         gradb = cudss.cholesky(indices, val, m, n, gradu)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb
 
 
@@ -409,6 +368,8 @@ class SparseLinearSolveCuDSSLDLT(Function):
         indices = torch.stack([row, col], 0)
         gradb = cudss.ldlt(indices, val, m, n, gradu)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb
 
 
@@ -450,6 +411,8 @@ class SparseLinearSolvePyTorch(Function):
         if gradb.dtype != val.dtype:
             gradb = gradb.to(val.dtype)
         gradval = -gradb[row] * u[col]
+        if gradval.dim() == 2:
+            gradval = gradval.sum(-1)
         return gradval, None, None, None, gradb, None, None, None, None, None, None
 
 
@@ -490,7 +453,7 @@ def spsolve(
     shape : Tuple[int, int]
         (m, n) Shape of sparse matrix A
     b : torch.Tensor
-        [m] Right-hand side vector
+        [m] or [m, K] Right-hand side vector (or matrix for multiple RHS)
     backend : str, optional
         Backend to use:
         - 'auto': Auto-select based on device and problem size (default)
@@ -521,7 +484,7 @@ def spsolve(
     Returns
     -------
     torch.Tensor
-        [n] Solution vector x
+        [n] or [n, K] Solution vector (or matrix for multiple RHS)
 
     Examples
     --------
@@ -552,7 +515,7 @@ def spsolve(
     assert val.dim() == 1, f"val must be 1D tensor, got {val.dim()}"
     assert row.dim() == 1, f"row must be 1D tensor, got {row.dim()}"
     assert col.dim() == 1, f"col must be 1D tensor, got {col.dim()}"
-    assert b.dim() == 1, f"b must be 1D tensor, got {b.dim()}"
+    assert b.dim() in (1, 2), f"b must be 1D or 2D tensor, got {b.dim()}"
     assert shape[0] > 0, f"shape[0] must be positive, got {shape[0]}"
     assert shape[1] > 0, f"shape[1] must be positive, got {shape[1]}"
     assert val.size(0) == row.size(0), "val and row must have same size"

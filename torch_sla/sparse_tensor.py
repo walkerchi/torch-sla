@@ -2249,7 +2249,7 @@ class SparseTensor:
         is_pd = self.is_positive_definite().all().item() if self.is_batched else self.is_positive_definite().item()
         is_spd = is_sym and is_pd
 
-        from .linear_solve import spsolve, SparseLinearSolveMultiRHS
+        from .linear_solve import spsolve
 
         M, N = self.sparse_shape
 
@@ -2271,13 +2271,6 @@ class SparseTensor:
             
             return torch.stack(results).reshape(*batch_shape, N)
         else:
-            if b.dim() == 2:
-                # Multiple RHS: b is [M, K]
-                # Use LU factorization once, solve for all columns efficiently
-                return SparseLinearSolveMultiRHS.apply(
-                    self.values, self.row_indices, self.col_indices,
-                    (M, N), b
-                )
             return spsolve(
                 self.values, self.row_indices, self.col_indices,
                 (M, N), b,

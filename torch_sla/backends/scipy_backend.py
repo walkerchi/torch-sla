@@ -124,64 +124,68 @@ def scipy_solve(
         M_np = M.detach().cpu().numpy()
         M_scipy = spla.LinearOperator(shape, matvec=lambda x: M_np @ x)
     
-    # Direct solvers
+    # Helper for iterative solvers: they only accept 1D b, so loop over columns
+    def _iterative_solve(solver_fn, A, b_np, **kwargs):
+        if b_np.ndim == 2:
+            cols = []
+            for k in range(b_np.shape[1]):
+                x_k, info = solver_fn(A, b_np[:, k], **kwargs)
+                if info != 0:
+                    warnings.warn(f"{solver_fn.__name__} did not converge for column {k} (info={info})")
+                cols.append(x_k)
+            return np.column_stack(cols)
+        else:
+            x_np, info = solver_fn(A, b_np, **kwargs)
+            if info != 0:
+                warnings.warn(f"{solver_fn.__name__} did not converge (info={info})")
+            return x_np
+
+    # Direct solvers (spla.spsolve natively supports 2D b)
     if method == "superlu":
         try:
-            x_np = spla.spsolve(A, b_np, use_umfpack=False)
+            x_np = np.asarray(spla.spsolve(A, b_np, use_umfpack=False))
         except Exception as e:
             warnings.warn(f"SuperLU solver failed: {e}, falling back to iterative")
-            x_np, info = spla.bicgstab(A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
-    
+            x_np = _iterative_solve(spla.bicgstab, A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "umfpack":
         if not UMFPACK_AVAILABLE:
             warnings.warn("UMFPACK not available, falling back to SuperLU")
-            x_np = spla.spsolve(A, b_np, use_umfpack=False)
+            x_np = np.asarray(spla.spsolve(A, b_np, use_umfpack=False))
         else:
             try:
-                x_np = spla.spsolve(A, b_np, use_umfpack=True)
+                x_np = np.asarray(spla.spsolve(A, b_np, use_umfpack=True))
             except Exception as e:
                 warnings.warn(f"UMFPACK solver failed: {e}, falling back to SuperLU")
-                x_np = spla.spsolve(A, b_np, use_umfpack=False)
-    
-    # Iterative solvers
+                x_np = np.asarray(spla.spsolve(A, b_np, use_umfpack=False))
+
+    # Iterative solvers (single-RHS API, column-loop for 2D b)
     elif method == "cg":
-        x_np, info = spla.cg(A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
-        if info != 0:
-            warnings.warn(f"CG did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.cg, A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "bicgstab":
-        x_np, info = spla.bicgstab(A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
-        if info != 0:
-            warnings.warn(f"BiCGStab did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.bicgstab, A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "gmres":
-        x_np, info = spla.gmres(A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
-        if info != 0:
-            warnings.warn(f"GMRES did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.gmres, A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "lgmres":
-        x_np, info = spla.lgmres(A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
-        if info != 0:
-            warnings.warn(f"LGMRES did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.lgmres, A, b_np, atol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "minres":
-        x_np, info = spla.minres(A, b_np, tol=atol, maxiter=maxiter, M=M_scipy)
-        if info != 0:
-            warnings.warn(f"MINRES did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.minres, A, b_np, tol=atol, maxiter=maxiter, M=M_scipy)
+
     elif method == "qmr":
-        x_np, info = spla.qmr(A, b_np, atol=atol, maxiter=maxiter, M1=M_scipy)
-        if info != 0:
-            warnings.warn(f"QMR did not converge (info={info})")
-    
+        x_np = _iterative_solve(spla.qmr, A, b_np, atol=atol, maxiter=maxiter, M1=M_scipy)
+
     # Legacy method names for backward compatibility
     elif method == "spsolve" or method == "auto":
-        x_np = spla.spsolve(A, b_np)
-    
+        x_np = np.asarray(spla.spsolve(A, b_np))
+
     else:
         raise ValueError(f"Unknown method: {method}. Available: superlu, umfpack, cg, bicgstab, gmres, lgmres, minres, qmr")
-    
-    return torch.from_numpy(x_np).to(dtype=val.dtype, device=val.device)
+
+    return torch.from_numpy(np.ascontiguousarray(x_np)).to(dtype=val.dtype, device=val.device)
 
 
 def scipy_eigs(

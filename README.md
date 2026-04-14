@@ -154,7 +154,7 @@ b = torch.randn(batch_size, 3, dtype=torch.float64)
 x = A.solve(b)  # Shape: [batch_size, 3]
 ```
 
-**Multiple right-hand sides** — single matrix, multiple RHS columns (LU factorized once):
+**Multiple right-hand sides** — single matrix, multiple RHS columns (factorized once for direct solvers):
 
 ```python
 A = SparseTensor(val, row, col, (3, 3))

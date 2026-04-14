@@ -1384,7 +1384,14 @@ def pytorch_solve(
         Solution vector
     """
     if method == 'cg':
-        if mixed_precision and val.dtype == torch.float32:
+        if b.dim() == 2:
+            # Multiple RHS: use batched PCG solver with SpMM
+            A_mat = CachedSparseMatrix(val, row, col, shape)
+            M = get_preconditioner(A_mat, preconditioner)
+            result = batched_pcg_solve(A_mat, b, X0=x0, atol=atol, rtol=rtol,
+                                       maxiter=maxiter, preconditioner=M)
+            return result.X
+        elif mixed_precision and val.dtype == torch.float32:
             A = CachedSparseMatrix(val, row, col, shape)
             M = get_preconditioner(A, preconditioner)
             # Wrap preconditioner for float64
@@ -1397,6 +1404,15 @@ def pytorch_solve(
                                      maxiter=maxiter, preconditioner=preconditioner)
         return result.x
     elif method == 'bicgstab':
+        if b.dim() == 2:
+            # No batched bicgstab; column-loop
+            cols = []
+            for k in range(b.shape[1]):
+                x_k, _, _ = pbicgstab_solve(val, row, col, shape, b[:, k], x0=None,
+                                            atol=atol, rtol=rtol, maxiter=maxiter,
+                                            preconditioner=preconditioner)
+                cols.append(x_k)
+            return torch.stack(cols, dim=1)
         x, _, _ = pbicgstab_solve(val, row, col, shape, b, x0=x0, atol=atol, rtol=rtol,
                                   maxiter=maxiter, preconditioner=preconditioner)
         return x

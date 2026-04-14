@@ -285,6 +285,88 @@ def test_spsolve_csr():
 
 
 # ============================================================================
+# Multi-RHS Tests
+# ============================================================================
+
+def _make_spd_sparse(n):
+    """Create a sparse SPD matrix and return (val, row, col, shape, A_dense)."""
+    A_dense = torch.rand(n, n).double()
+    A_dense = A_dense @ A_dense.T + torch.eye(n).double() * n
+    A_dense[A_dense.abs() < 0.3] = 0
+    A = A_dense.to_sparse_coo().coalesce()
+    return A.values(), A.indices()[0], A.indices()[1], A.shape, A_dense
+
+
+@pytest.mark.parametrize('method', ['superlu', 'cg', 'bicgstab'])
+def test_spsolve_multi_rhs(method):
+    """Test spsolve with 2D b (multiple right-hand sides)"""
+    n, k = 32, 5
+    val, row, col, shape, A_dense = _make_spd_sparse(n)
+    b = torch.randn(n, k).double()
+
+    x = spsolve(val, row, col, shape, b, backend='scipy', method=method, atol=1e-10)
+
+    assert x.shape == (n, k), f"Expected shape ({n}, {k}), got {x.shape}"
+
+    # Verify each column: Ax_k ≈ b_k
+    for j in range(k):
+        residual = A_dense @ x[:, j] - b[:, j]
+        relative_error = residual.norm() / b[:, j].norm()
+        assert relative_error < 1e-3, f"Column {j}: relative error {relative_error}"
+
+
+@pytest.mark.parametrize('method', ['superlu', 'cg'])
+def test_spsolve_multi_rhs_gradient(method):
+    """Test gradient computation for multi-RHS solve"""
+    n, k = 16, 3
+    _, row, col, shape, _ = _make_spd_sparse(n)
+    # Re-create with fresh values for grad
+    A_dense = torch.rand(n, n).double()
+    A_dense = A_dense @ A_dense.T + torch.eye(n).double() * n
+    A_dense[A_dense.abs() < 0.3] = 0
+    A = A_dense.to_sparse_coo().coalesce()
+
+    val = A.values().clone().requires_grad_(True)
+    b = torch.randn(n, k).double().requires_grad_(True)
+    A_dense2 = A_dense.clone().requires_grad_(True)
+    b2 = b.detach().clone().requires_grad_(True)
+
+    # Sparse multi-RHS solve
+    x = spsolve(val, A.indices()[0], A.indices()[1], A.shape, b,
+                backend='scipy', method=method, atol=1e-10)
+    x.sum().backward()
+
+    # Dense reference
+    x_ref = torch.linalg.solve(A_dense2, b2)
+    x_ref.sum().backward()
+
+    torch.testing.assert_close(x, x_ref, rtol=1e-3, atol=1e-3)
+    torch.testing.assert_close(b.grad, b2.grad, rtol=1e-3, atol=1e-3)
+
+
+def test_sparse_tensor_multi_rhs():
+    """Test SparseTensor.solve() with 2D b"""
+    from torch_sla import SparseTensor
+
+    n, k = 32, 4
+    A_dense = torch.rand(n, n).double()
+    A_dense = A_dense @ A_dense.T + torch.eye(n).double() * n
+    A_dense[A_dense.abs() < 0.3] = 0
+    A_coo = A_dense.to_sparse_coo().coalesce()
+
+    A = SparseTensor(A_coo.values(), A_coo.indices()[0], A_coo.indices()[1], A_coo.shape)
+    b = torch.randn(n, k).double()
+
+    x = A.solve(b)
+    assert x.shape == (n, k)
+
+    # Verify
+    for j in range(k):
+        residual = A_dense @ x[:, j] - b[:, j]
+        assert residual.norm() / b[:, j].norm() < 1e-3
+
+
+# ============================================================================
 # Backend Discovery Tests
 # ============================================================================
 
