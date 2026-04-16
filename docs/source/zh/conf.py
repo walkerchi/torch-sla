@@ -24,7 +24,7 @@ html_context = {
     'keywords': 'torch稀疏, pytorch稀疏矩阵, 稀疏线性代数, GPU稀疏求解, CUDA稀疏, 可微分稀疏求解器, 有限元, CFD, FEM, 神经网络',
     'author': 'Walker Chi',
     'og_title': 'torch-sla: PyTorch 稀疏线性代数库',
-    'og_description': 'PyTorch 稀疏线性代数库。通过 cuSOLVER/cuDSS 实现 GPU 加速求解 Ax=b。完整支持自动微分。',
+    'og_description': 'PyTorch 稀疏线性代数库。通过 CuPy/cuDSS 实现 GPU 加速求解 Ax=b。完整支持自动微分。',
     'og_image': 'https://walkerchi.github.io/torch-sla/_static/logo.jpg',
     'twitter_card': 'summary_large_image',
     'languages': [

@@ -89,7 +89,7 @@ class DetAdjoint(Function):
         if is_cuda:
             # For CUDA, convert to dense and use torch.linalg.det
             # NOTE: This is inefficient for sparse matrices due to O(n²) memory
-            # and O(n³) computation. cuSOLVER/cuDSS don't expose determinant
+            # and O(n³) computation. cuDSS doesn't expose determinant
             # computation for sparse matrices directly.
             # 
             # Performance: ~100x slower than CPU for sparse matrices
@@ -825,7 +825,7 @@ class SparseTensor:
     **10. CUDA Support**
     
     >>> A_cuda = A.cuda()
-    >>> x = A_cuda.solve(b.cuda())  # Uses cuDSS or cuSOLVER
+    >>> x = A_cuda.solve(b.cuda())  # Uses cuDSS or CuPy
     """
     
     def __init__(
@@ -2997,7 +2997,7 @@ class SparseTensor:
         - CUDA: Converts to dense (O(n²) memory + O(n³) compute), ~0.2-2.5ms
         
         The CUDA version requires converting the sparse matrix to dense format
-        because cuSOLVER/cuDSS don't expose determinant computation for sparse
+        because cuDSS doesn't expose determinant computation for sparse
         matrices. This makes it inefficient for large sparse matrices.
         
         **Recommendation**: For sparse matrices, use `.cpu().det().cuda()` instead:

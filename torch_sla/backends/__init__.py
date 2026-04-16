@@ -4,11 +4,11 @@ Backend management for torch-sla
 This module provides a unified interface for different sparse linear algebra backends:
 
 Backends:
-- 'scipy': SciPy backend (CPU only) - Uses SuperLU for direct solvers
+- 'scipy': SciPy backend (CPU only) - Uses LU for direct solvers
 - 'eigen': Eigen backend (CPU only) - Iterative solvers (CG, BiCGStab)
 - 'pytorch': PyTorch-native (CPU & CUDA) - Iterative solvers with Jacobi preconditioning
 - 'cupy': CuPy backend (CUDA only) - Direct and iterative solvers via cupyx.scipy
-- 'cudss': NVIDIA cuDSS (CUDA only) - Direct solvers (LU, Cholesky, LDLT)
+- 'cudss': NVIDIA cuDSS via nvmath-python (CUDA only) - Direct solvers (LU, Cholesky, LDLT)
 
 Methods (solver algorithms):
 - 'lu': LU factorization (scipy, cupy, cudss)
@@ -140,16 +140,16 @@ def is_cupy_available() -> bool:
 
 
 def is_cudss_available() -> bool:
-    """Check if cuDSS backend is available"""
+    """Check if cuDSS backend is available (via nvmath-python)"""
     global _cudss_available
     if _cudss_available is None:
         if not _check_cuda():
             _cudss_available = False
         else:
             try:
-                _load_cudss_backend()
+                import nvmath.bindings.cudss  # noqa: F401
                 _cudss_available = True
-            except Exception:
+            except ImportError:
                 _cudss_available = False
     return _cudss_available
 
@@ -195,7 +195,7 @@ def select_backend(
     Auto-select the best backend based on device, problem size, and dtype.
 
     Recommendations based on benchmark results:
-    - CPU: scipy+superlu (all sizes, fast + machine precision)
+    - CPU: scipy+lu (all sizes, fast + machine precision)
     - CUDA (DOF < 2M): cudss+cholesky (fast + high precision)
     - CUDA (DOF >= 2M): pytorch+cg (memory efficient, ~1e-6 precision)
 
@@ -334,71 +334,8 @@ def _load_eigen_backend():
         raise RuntimeError(f"Failed to load Eigen backend: {e}")
 
 
-def _find_cudss_paths():
-    """Find cuDSS include and library paths from pip package"""
-    import site
-    import os
-
-    # Search paths
-    search_paths = site.getsitepackages() + [site.getusersitepackages()]
-
-    for base in search_paths:
-        # nvidia-cudss-cu12 installs to nvidia/cu12/
-        include_path = os.path.join(base, 'nvidia', 'cu12', 'include')
-        lib_path = os.path.join(base, 'nvidia', 'cu12', 'lib')
-
-        if os.path.exists(os.path.join(include_path, 'cudss.h')):
-            return include_path, lib_path
-
-    return None, None
-
-
-def _load_cudss_backend():
-    """Load cuDSS backend"""
-    global _cudss_module
-
-    if _cudss_module is not None:
-        return _cudss_module
-
-    if not _check_cuda():
-        raise RuntimeError("CUDA is not available")
-
-    import os
-    from torch.utils.cpp_extension import load
-
-    # Find cuDSS paths
-    cudss_include, cudss_lib = _find_cudss_paths()
-
-    if cudss_include is None:
-        raise RuntimeError("cuDSS not found. Install with: pip install nvidia-cudss-cu12")
-
-    try:
-        # Determine the correct linker flag for libcudss
-        # nvidia-cudss-cu12 >= 0.7 only ships libcudss.so.0 without an unversioned symlink,
-        # so -lcudss fails. Use -l:libcudss.so.0 to link against the versioned library directly.
-        cudss_so = os.path.join(cudss_lib, 'libcudss.so')
-        if os.path.exists(cudss_so):
-            cudss_link_flag = '-lcudss'
-        else:
-            cudss_link_flag = '-l:libcudss.so.0'
-
-        _cudss_module = load(
-            name="cudss_spsolve",
-            sources=[os.path.abspath(os.path.join(
-                os.path.dirname(__file__), "..", "..", "csrc", "cudss", "cudss_spsolve.cu"
-            ))],
-            extra_include_paths=[cudss_include],
-            extra_ldflags=[f'-L{cudss_lib}', cudss_link_flag, '-lcusparse', f'-Wl,-rpath,{cudss_lib}'],
-            verbose=False
-        )
-        return _cudss_module
-    except Exception as e:
-        raise RuntimeError(f"Failed to load cuDSS backend: {e}")
-
-
 # Lazy-loaded modules
 _eigen_module = None
-_cudss_module = None
 
 
 # Convenience functions for getting modules
@@ -413,5 +350,6 @@ def get_eigen_module():
 
 
 def get_cudss_module():
-    """Get cuDSS backend module"""
-    return _load_cudss_backend()
+    """Get cuDSS backend module (via nvmath-python)"""
+    from .nvmath_backend import _NvmathCudssModule
+    return _NvmathCudssModule()

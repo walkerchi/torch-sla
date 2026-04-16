@@ -68,7 +68,6 @@ setup(
     package_data={
         'torch_sla': [
             '../csrc/spsolve/*.cpp',
-            '../csrc/cudss/*.cu',
         ],
     },
     include_package_data=True,

@@ -180,7 +180,7 @@ def test_spsolve_gradient_cupy(method):
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
 def test_spsolve_cupy_float32():
-    """Test CuPy solver with float32 (not supported by old cusolver)"""
+    """Test CuPy solver with float32"""
     if not is_cupy_available():
         pytest.skip("CuPy backend not available")
 

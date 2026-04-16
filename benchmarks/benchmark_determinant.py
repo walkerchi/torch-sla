@@ -223,7 +223,7 @@ def main():
     print("3. CPU-for-CUDA: Same as CPU, just move tensor to CPU first")
     print("4. Gradient: ~100x slower due to n linear solves for computing (A^{-1})^T")
     print("5. **RECOMMENDATION: Always use .cpu().det() for sparse matrices, even on CUDA**")
-    print("6. Reason: cuSOLVER/cuDSS don't expose sparse determinant, must convert to dense")
+    print("6. Reason: cuDSS doesn't expose sparse determinant, must convert to dense")
     print("7. Note: Determinant values overflow for n > 1000")
 
 if __name__ == "__main__":

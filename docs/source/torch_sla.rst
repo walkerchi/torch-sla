@@ -266,7 +266,7 @@ Backend Availability Checks
 
 .. autofunction:: torch_sla.is_eigen_available
 
-.. autofunction:: torch_sla.is_cusolver_available
+.. autofunction:: torch_sla.is_cupy_available
 
 .. autofunction:: torch_sla.is_cudss_available
 
@@ -303,10 +303,10 @@ Dictionary mapping backend names to available solver methods.
 .. code-block:: python
 
    BACKEND_METHODS = {
-       'scipy': ['superlu', 'umfpack', 'cg', 'bicgstab', 'gmres', 'minres'],
+       'scipy': ['lu', 'umfpack', 'cg', 'bicgstab', 'gmres', 'minres'],
        'eigen': ['cg', 'bicgstab'],
        'pytorch': ['cg', 'bicgstab'],
-       'cusolver': ['qr', 'cholesky', 'lu'],
+       'cupy': ['lu', 'cg', 'cgs', 'gmres', 'minres', 'lsqr', 'lsmr'],
        'cudss': ['lu', 'cholesky', 'ldlt'],
    }
 
@@ -318,15 +318,15 @@ Dictionary mapping backend names to their default solver methods.
 .. code-block:: python
 
    DEFAULT_METHODS = {
-       'scipy': 'superlu',
-       'eigen': 'cg',
+       'scipy': 'lu',
+       'eigen': 'bicgstab',
        'pytorch': 'cg',
-       'cusolver': 'cholesky',
+       'cupy': 'lu',
        'cudss': 'cholesky',
    }
 
 Type Aliases
 ~~~~~~~~~~~~
 
-- ``BackendType``: Literal type for backend names: ``'scipy'``, ``'eigen'``, ``'pytorch'``, ``'cusolver'``, ``'cudss'``
-- ``MethodType``: Literal type for solver methods: ``'superlu'``, ``'umfpack'``, ``'cg'``, ``'bicgstab'``, ``'gmres'``, ``'minres'``, ``'qr'``, ``'cholesky'``, ``'lu'``, ``'ldlt'``
+- ``BackendType``: Literal type for backend names: ``'scipy'``, ``'eigen'``, ``'pytorch'``, ``'cupy'``, ``'cudss'``
+- ``MethodType``: Literal type for solver methods: ``'lu'``, ``'umfpack'``, ``'cg'``, ``'cgs'``, ``'bicgstab'``, ``'gmres'``, ``'minres'``, ``'cholesky'``, ``'ldlt'``, ``'lsqr'``, ``'lsmr'``

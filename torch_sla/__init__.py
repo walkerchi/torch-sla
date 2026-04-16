@@ -5,8 +5,8 @@ A differentiable sparse linear equation solver library for PyTorch with multiple
 
 Backends
 --------
-- CPU: SciPy (SuperLU, UMFPACK), Eigen (CG, BiCGStab)
-- CUDA: CuPy (spsolve, CG, GMRES), cuDSS (LU, Cholesky, LDLT)
+- CPU: SciPy (LU, UMFPACK), Eigen (CG, BiCGStab)
+- CUDA: CuPy (LU, CG, GMRES), cuDSS (LU, Cholesky, LDLT)
 
 Features
 --------
@@ -26,7 +26,7 @@ Usage
 >>> row = torch.tensor([0, 0, 1, 1, 1, 2, 2])
 >>> col = torch.tensor([0, 1, 0, 1, 2, 1, 2])
 >>> b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
->>> x = spsolve(val, row, col, (3, 3), b)  # Auto-selects scipy+superlu on CPU
+>>> x = spsolve(val, row, col, (3, 3), b)  # Auto-selects scipy+lu on CPU
 >>>
 >>> # Method 2: Specify backend and method
 >>> x = spsolve(val, row, col, (3, 3), b, backend='scipy', method='lu')

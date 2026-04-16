@@ -67,7 +67,7 @@ def example_cupy():
     A = create_spd_matrix(n, density=0.3, device='cuda')
     b = torch.randn(n, dtype=torch.float64, device='cuda')
 
-    # Direct solver (SuperLU on GPU)
+    # Direct solver (LU on GPU)
     x_direct = sla.spsolve(
         A.values(), A.indices()[0], A.indices()[1], A.shape, b,
         backend='cupy', method='lu'

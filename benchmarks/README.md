@@ -42,7 +42,7 @@ det = A_cuda.cpu().det()  # 1.3 ms (1.9x faster!)
 ```
 
 **Why is CUDA slow?**
-- cuSOLVER/cuDSS don't expose sparse determinant computation
+- cuDSS doesn't expose sparse determinant computation
 - Must convert to dense: O(n²) memory + O(n³) computation
 - CPU sparse LU: O(nnz^1.5) ≈ O(n^1.5) for tridiagonal matrices
 

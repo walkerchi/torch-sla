@@ -22,8 +22,9 @@ build
 twine
 ghp-import
 
-# Optional CUDA backend
-nvidia-cudss-cu12>=0.7.0
+# Optional CUDA backends
+nvmath-python[cu12]
+cupy-cuda12x>=13.0
 
 
 

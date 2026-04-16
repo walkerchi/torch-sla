@@ -44,7 +44,7 @@ Performance Scaling
    :class: benchmark-table
 
    * - DOF
-     - SciPy SuperLU
+     - SciPy LU
      - cuDSS Cholesky
      - PyTorch CG
      - Speedup vs Direct
@@ -105,7 +105,7 @@ Memory Usage
      - Scaling
      - Memory @ 2M DOF
      - Max DOF (140GB)
-   * - SciPy SuperLU
+   * - SciPy LU
      - O(n\ :sup:`1.5`) fill-in
      - ~50 GB
      - ~2M (CPU)
@@ -160,7 +160,7 @@ Accuracy Comparison
      - Precision
      - 1M DOF
      - Notes
-   * - SciPy SuperLU
+   * - SciPy LU
      - ~1e-14
      - 2.3e-15
      - Machine precision
@@ -472,7 +472,7 @@ Backend Comparison Summary
      - Max DOF
      - Precision
      - Relative Speed
-   * - ``scipy+superlu``
+   * - ``scipy+lu``
      - Small CPU problems
      - ~2M
      - 1e-14
@@ -510,7 +510,7 @@ Recommendations
      <ul class="feature-list">
        <li><span class="gradient-text">Small Problems (&lt; 100K DOF)</span>: Use <code>cudss+cholesky</code> for best accuracy</li>
        <li><span class="gradient-text">Large Problems (&gt; 1M DOF)</span>: Use <code>pytorch+cg</code> — it's the <span class="badge-gradient">only option that scales</span></li>
-       <li><span class="gradient-text">Machine Precision</span>: Direct solvers (<code>cholesky</code>, <code>superlu</code>) achieve ~1e-14</li>
+       <li><span class="gradient-text">Machine Precision</span>: Direct solvers (<code>cholesky</code>, <code>lu</code>) achieve ~1e-14</li>
        <li><span class="gradient-text">ML Training</span>: Iterative solvers with <code>tol=1e-4</code> offer the best speed/accuracy tradeoff</li>
      </ul>
    </div>
@@ -527,15 +527,15 @@ Based on Problem Size
      - CUDA Recommendation
      - Notes
    * - < 10K DOF
-     - ``scipy+superlu``
-     - ``scipy+superlu``
+     - ``scipy+lu``
+     - ``scipy+lu``
      - GPU overhead not worth it
    * - 10K - 100K DOF
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky``
      - GPU starts to pay off
    * - 100K - 2M DOF
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky`` or ``pytorch+cg``
      - CG faster but less precise
    * - **> 2M DOF**
@@ -554,7 +554,7 @@ Based on Precision Requirements
      - Recommendation
      - Achievable Precision
    * - Machine precision needed
-     - ``cudss+cholesky`` (CUDA) or ``scipy+superlu`` (CPU)
+     - ``cudss+cholesky`` (CUDA) or ``scipy+lu`` (CPU)
      - ~1e-14
    * - Engineering precision (1e-6)
      - ``pytorch+cg`` with ``tol=1e-6``

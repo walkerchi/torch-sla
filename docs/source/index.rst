@@ -32,7 +32,7 @@ Why torch-sla?
 .. raw:: html
 
    <ul class="feature-list">
-     <li>🚀 <span class="gradient-text">High Performance</span>: CUDA-accelerated solvers via cuSOLVER and cuDSS</li>
+     <li>🚀 <span class="gradient-text">High Performance</span>: CUDA-accelerated solvers via CuPy and cuDSS</li>
      <li>💾 <span class="gradient-text">Memory Efficient</span>: Store only non-zero elements, enabling solving of systems with millions of unknowns</li>
      <li>🔄 <span class="gradient-text">Differentiable</span>: Full gradient support through <code>torch.autograd</code></li>
      <li>📦 <span class="gradient-text">Batch Processing</span>: Solve thousands of systems in parallel</li>
@@ -48,7 +48,7 @@ Key Features
    <ul class="feature-list">
      <li><span class="gradient-text">Memory efficient</span>: Only stores non-zero elements — a 1M×1M matrix with 1% density uses ~80MB instead of ~8TB</li>
      <li><span class="gradient-text">Full gradient support</span> via torch.autograd for end-to-end differentiable pipelines</li>
-     <li><span class="gradient-text">Multiple backends</span>: <a href="https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html">SciPy</a>, <a href="https://eigen.tuxfamily.org/">Eigen</a>, <a href="https://docs.nvidia.com/cuda/cusolver/">cuSOLVER</a>, <a href="https://docs.nvidia.com/cuda/cudss/">cuDSS</a></li>
+     <li><span class="gradient-text">Multiple backends</span>: <a href="https://docs.scipy.org/doc/scipy/reference/sparse.linalg.html">SciPy</a>, <a href="https://eigen.tuxfamily.org/">Eigen</a>, <a href="https://docs.cupy.dev/">CuPy</a>, <a href="https://docs.nvidia.com/cuda/cudss/">cuDSS</a></li>
      <li><span class="gradient-text">Batch solving</span>: Same-layout and different-layout sparse matrices</li>
      <li><span class="gradient-text">Distributed solving</span>: Domain decomposition with halo exchange</li>
      <li><span class="gradient-text">169M+ DOF tested</span>: Scales to very large problems with near-linear complexity</li>
@@ -91,7 +91,7 @@ CUDA Acceleration
    # Move to GPU for CUDA-accelerated solving
    A_cuda = A.cuda()
    b_cuda = b.cuda()
-   x = A_cuda.solve(b_cuda)  # Uses cuDSS or cuSOLVER automatically
+   x = A_cuda.solve(b_cuda)  # Uses cuDSS or CuPy automatically
 
 Use Cases
 ---------
@@ -146,8 +146,8 @@ What sparse solvers does torch-sla support?
 
 torch-sla supports multiple backends:
 
-- **CPU**: SciPy (SuperLU, UMFPACK, CG, BiCGStab, GMRES), Eigen (CG, BiCGStab)
-- **GPU**: cuSOLVER (QR, Cholesky, LU), cuDSS (LU, Cholesky, LDLT)
+- **CPU**: SciPy (LU, UMFPACK, CG, BiCGStab, GMRES), Eigen (CG, BiCGStab)
+- **GPU**: CuPy (LU, CG, GMRES), cuDSS (LU, Cholesky, LDLT)
 
 The library automatically selects the best solver based on your hardware and matrix properties.
 
@@ -184,7 +184,7 @@ Simply move your tensors to CUDA:
 .. code-block:: python
 
    A_cuda = A.cuda()
-   x = A_cuda.solve(b.cuda())  # Uses cuDSS or cuSOLVER
+   x = A_cuda.solve(b.cuda())  # Uses cuDSS or CuPy
 
 What is the difference between SparseTensor and DSparseTensor?
 --------------------------------------------------------------
@@ -210,7 +210,7 @@ torch-sla vs scipy.sparse.linalg
      - ✅ **Native tensors**
      - ❌ Requires numpy copy
    * - GPU Acceleration
-     - ✅ **CUDA (cuDSS, cuSOLVER)**
+     - ✅ **CUDA (cuDSS, CuPy)**
      - ❌ CPU only
    * - Autograd Gradients
      - ✅ **Full support (adjoint)**
@@ -258,7 +258,7 @@ torch-sla vs torch.linalg.solve
      - ✅ **Same/different patterns**
      - ⚠️ Same shape only
    * - GPU Support
-     - ✅ **cuDSS, cuSOLVER, PyTorch**
+     - ✅ **cuDSS, CuPy, PyTorch**
      - ✅ Yes
    * - Autograd
      - ✅ **O(1) graph nodes**

@@ -34,7 +34,8 @@
 - PyTorch >= 1.10.0
 - SciPy（CPU 推荐）
 - CUDA Toolkit（GPU 后端需要）
-- nvidia-cudss-cu12（可选，cuDSS 后端需要）
+- nvmath-python（可选，cuDSS 后端需要）
+- cupy-cuda12x（可选，CuPy 后端需要）
 
 后端依赖
 --------
@@ -49,12 +50,12 @@
    * - ``scipy``
      - scipy
      - ``pip install scipy``
+   * - ``cupy``
+     - cupy-cuda12x
+     - ``pip install cupy-cuda12x``
    * - ``cudss``
-     - nvidia-cudss-cu12
-     - ``pip install nvidia-cudss-cu12``
-   * - ``cusolver``
-     - CUDA Toolkit
-     - 随 CUDA 安装
+     - nvmath-python
+     - ``pip install nvmath-python[cu12]``
    * - ``pytorch``
      - torch
      - 已包含

@@ -36,11 +36,11 @@ Based on extensive benchmarks on 2D Poisson equations (tested up to **169M DOF**
      - CUDA
      - Notes
    * - Small (< 100K DOF)
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky``
      - Direct solvers, machine precision
    * - Medium (100K - 2M DOF)
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky``
      - cuDSS is fastest on GPU
    * - Large (2M - 169M DOF)
@@ -130,7 +130,7 @@ Backends
      - Recommended
    * - ``scipy``
      - CPU
-     - SciPy backend using SuperLU or UMFPACK for direct solvers
+     - SciPy backend using LU or UMFPACK for direct solvers
      - **CPU default**
    * - ``eigen``
      - CPU
@@ -140,10 +140,10 @@ Backends
      - CUDA
      - NVIDIA cuDSS for direct solvers (LU, Cholesky, LDLT)
      - **CUDA direct**
-   * - ``cusolver``
+   * - ``cupy``
      - CUDA
-     - NVIDIA cuSOLVER for direct solvers
-     - Not recommended
+     - CuPy GPU solvers (LU, CG, GMRES) via cupyx.scipy
+     - Alternative
    * - ``pytorch``
      - CUDA
      - PyTorch-native iterative (CG, BiCGStab) with Jacobi preconditioning
@@ -163,21 +163,17 @@ Direct Solvers
      - Backends
      - Description
      - Precision
-   * - ``superlu``
-     - scipy
-     - SuperLU LU factorization (default for scipy)
+   * - ``lu``
+     - scipy, cupy, cudss
+     - LU factorization (general matrices, direct)
      - ~1e-14
    * - ``cholesky``
-     - cudss, cusolver
+     - cudss
      - Cholesky factorization (for SPD matrices, **fastest**)
      - ~1e-14
    * - ``ldlt``
      - cudss
      - LDLT factorization (for symmetric matrices)
-     - ~1e-14
-   * - ``lu``
-     - cudss, cusolver
-     - LU factorization (general matrices)
      - ~1e-14
 
 Iterative Solvers
@@ -223,7 +219,7 @@ Basic Usage
     # Create SparseTensor
     A = SparseTensor.from_dense(dense)
     
-    # Solve Ax = b (auto-selects scipy+superlu on CPU)
+    # Solve Ax = b (auto-selects scipy+lu on CPU)
     b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
     x = A.solve(b)
 
@@ -289,7 +285,7 @@ Performance Comparison
    :header-rows: 1
 
    * - DOF
-     - SciPy SuperLU
+     - SciPy LU
      - cuDSS Cholesky
      - PyTorch CG+Jacobi
      - Notes
@@ -351,7 +347,7 @@ Memory Usage
    * - Method
      - Memory Scaling
      - Notes
-   * - SciPy SuperLU
+   * - SciPy LU
      - O(n^1.5) fill-in
      - CPU only, limited to ~2M DOF
    * - cuDSS Cholesky
@@ -562,11 +558,11 @@ Performance Tips
 
 1. **Use float64 for iterative solvers**: Better convergence properties
 2. **Use cholesky for SPD matrices**: 2x faster than LU
-3. **Use scipy+superlu for CPU**: Best balance of speed and precision
+3. **Use scipy+lu for CPU**: Best balance of speed and precision
 4. **Use cudss+cholesky for small CUDA problems**: Fastest direct solver (< 2M DOF)
 5. **Use pytorch+cg for large problems**: Memory efficient, scales to 169M+ DOF on single GPU
 6. **Use multi-GPU for very large problems**: DSparseMatrix supports domain decomposition, 3 GPUs can reach 500M+ DOF
-7. **Avoid cuSOLVER**: cudss is faster and supports float32
+7. **Use cupy** for GPU iterative solvers (CG, GMRES) or as a direct solver fallback
 8. **Use LU factorization for repeated solves**: Cache with ``A.lu()``
 
 Citation

@@ -77,7 +77,7 @@ cupy = [
 ]
 # CUDA backends (requires CUDA 12+)
 cuda = [
-    "nvidia-cudss-cu12>=0.7.0",
+    "nvmath-python[cu12]",
     "cupy-cuda12x>=13.0",
 ]
 # Full installation with all optional dependencies
@@ -85,7 +85,7 @@ all = [
     "pytest>=6.0",
     "numpy>=1.19.0",
     "scipy>=1.5.0",
-    "nvidia-cudss-cu12>=0.7.0",
+    "nvmath-python[cu12]",
     "cupy-cuda12x>=13.0",
 ]
 

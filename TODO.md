@@ -44,7 +44,7 @@
 
 **Implementation Details:**
 - **Gradient formula**: ∂det(A)/∂A_ij = det(A) · (A⁻¹)_ji (Jacobi's formula)
-- **CPU backend**: LU decomposition via SciPy SuperLU (~0.3-0.8ms for n=10-1000)
+- **CPU backend**: LU decomposition via SciPy LU (~0.3-0.8ms for n=10-1000)
 - **CUDA backend**: torch.linalg.det for forward, torch.linalg.solve for gradient
 - **Memory efficiency**: O(1) graph nodes via adjoint method (no iteration history)
 - **Supported classes**: SparseTensor, DSparseTensor (with data gather warning)
@@ -70,7 +70,7 @@ n = 1000    | 0.71 ms      | 2.51 ms      | 1.20 ms      | 431 ms   | 3.6x SLOWE
 - CPU uses sparse LU (O(nnz^1.5)), CUDA requires dense conversion (O(n²) memory + O(n³) compute)
 - CUDA is 1-3.6x slower than CPU across all matrix sizes
 - **Recommendation**: Always use `.cpu().det()` for sparse matrices, even on CUDA
-- Reason: cuSOLVER/cuDSS don't expose sparse determinant computation
+- Reason: cuDSS doesn't expose sparse determinant computation
 - Gradient computation ~100x slower (requires n linear solves for (A^{-1})^T)
 - Determinant values overflow for n > 1000
 

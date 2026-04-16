@@ -28,7 +28,7 @@
 ## Features
 
 - 🔥 **Differentiable**: Full gradient support through `torch.autograd`
-- 🚀 **Multiple Backends**: SciPy, Eigen (CPU), cuSOLVER, cuDSS, PyTorch-native (CUDA)
+- 🚀 **Multiple Backends**: SciPy, Eigen (CPU), CuPy, cuDSS, PyTorch-native (CUDA)
 - 📦 **Batched Operations**: Support for batched sparse tensors `[..., M, N, ...]`
 - 🎯 **Property Detection**: Auto-detect symmetry and positive definiteness
 - ⚡ **High Performance**: Auto-selects best solver based on device, dtype, and problem size
@@ -54,7 +54,7 @@ cd torch-sla
 pip install -e ".[dev]"
 ```
 
-> **Note**: cuDSS (`nvidia-cudss-cu12`) is now available on PyPI! Installing `torch-sla[cuda]` will automatically include it.
+> **Note**: CUDA backends use `nvmath-python` (for cuDSS) and `cupy-cuda12x` (for CuPy). Installing `torch-sla[cuda]` will automatically include them.
 
 ## Quick Start
 
@@ -75,7 +75,7 @@ b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
 x = A.solve(b)
 
 # Specify backend and method
-x = A.solve(b, backend='scipy', method='superlu')
+x = A.solve(b, backend='scipy', method='lu')
 ```
 
 ### CUDA Solve
@@ -101,8 +101,8 @@ Based on benchmarks on 2D Poisson equations (tested up to **400M DOF** multi-GPU
 
 | Problem Size | CPU | CUDA | Notes |
 |-------------|-----|------|-------|
-| **Small (< 100K DOF)** | `scipy+superlu` | `cudss+cholesky` | Direct solvers, machine precision |
-| **Medium (100K - 2M DOF)** | `scipy+superlu` | `cudss+cholesky` | cuDSS is fastest on GPU |
+| **Small (< 100K DOF)** | `scipy+lu` | `cudss+cholesky` | Direct solvers, machine precision |
+| **Medium (100K - 2M DOF)** | `scipy+lu` | `cudss+cholesky` | cuDSS is fastest on GPU |
 | **Large (2M - 169M DOF)** | N/A | `pytorch+cg` | **Iterative only**, ~1e-6 precision |
 | **Very Large (> 169M DOF)** | N/A | `DSparseMatrix` multi-GPU | Multi-GPU domain decomposition |
 
@@ -120,22 +120,23 @@ Based on benchmarks on 2D Poisson equations (tested up to **400M DOF** multi-GPU
 
 | Backend | Device | Description | Recommended For |
 |---------|--------|-------------|-----------------|
-| `scipy` | CPU | SciPy (SuperLU/UMFPACK) | **CPU default** - fast + machine precision |
+| `scipy` | CPU | SciPy (LU/UMFPACK) | **CPU default** - fast + machine precision |
 | `eigen` | CPU | Eigen C++ (CG, BiCGStab) | Alternative CPU iterative |
+| `cupy` | CUDA | CuPy (LU, CG, GMRES) | GPU direct + iterative via cupyx.scipy |
 | `cudss` | CUDA | NVIDIA cuDSS (LU, Cholesky, LDLT) | **CUDA default** - fastest direct |
-| `cusolver` | CUDA | NVIDIA cuSOLVER | Not recommended (slower, no float32) |
 | `pytorch` | CUDA | PyTorch-native (CG, BiCGStab) | Very large problems (> 2M DOF) |
 
 ### Solver Methods
 
 | Method | Backends | Best For | Precision |
 |--------|----------|----------|-----------|
-| `superlu` | scipy | General matrices | Machine precision |
-| `cholesky` | cudss, cusolver | **SPD matrices (fastest)** | Machine precision |
+| `lu` | scipy, cupy, cudss | General matrices (direct) | Machine precision |
+| `cholesky` | cudss | **SPD matrices (fastest)** | Machine precision |
 | `ldlt` | cudss | Symmetric matrices | Machine precision |
-| `lu` | cudss, cusolver | General matrices | Machine precision |
-| `cg` | scipy, eigen, pytorch | SPD matrices (iterative) | ~1e-6 to 1e-7 |
+| `umfpack` | scipy | General matrices (requires scikit-umfpack) | Machine precision |
+| `cg` | scipy, eigen, cupy, pytorch | SPD matrices (iterative) | ~1e-6 to 1e-7 |
 | `bicgstab` | scipy, eigen, pytorch | General (iterative) | ~1e-6 to 1e-7 |
+| `gmres` | scipy, cupy | General (iterative) | ~1e-6 to 1e-7 |
 
 ## Batched Solve
 
@@ -363,7 +364,7 @@ x = lu.solve(b)
 
 ![Solver Performance](https://raw.githubusercontent.com/walkerchi/torch-sla/main/assets/benchmarks/performance.png)
 
-| DOF | SciPy SuperLU | cuDSS Cholesky | PyTorch CG+Jacobi |
+| DOF | SciPy LU | cuDSS Cholesky | PyTorch CG+Jacobi |
 |----:|-------------:|---------------:|------------------:|
 | 10K | 24ms | 128ms | 20ms |
 | 100K | 29ms | 630ms | 43ms |
@@ -379,7 +380,7 @@ x = lu.solve(b)
 
 | Method | Memory Scaling | Notes |
 |--------|---------------|-------|
-| **SciPy SuperLU** | O(n^1.5) fill-in | CPU only, limited to ~2M DOF |
+| **SciPy LU** | O(n^1.5) fill-in | CPU only, limited to ~2M DOF |
 | **cuDSS Cholesky** | O(n^1.5) fill-in | GPU, limited to ~2M DOF |
 | **PyTorch CG+Jacobi** | **O(n) ~443 bytes/DOF** | Scales to 169M+ DOF |
 
@@ -477,10 +478,10 @@ torchrun --standalone --nproc_per_node=4 examples/distributed/distributed_solve.
 
 1. **Use float64** for iterative solvers (better convergence)
 2. **Use cholesky** for SPD matrices (2x faster than LU)
-3. **Use scipy+superlu** for CPU (all sizes)
+3. **Use scipy+lu** for CPU (all sizes)
 4. **Use cudss+cholesky** for CUDA (up to ~2M DOF)
 5. **Use pytorch+cg** for very large problems (> 2M DOF)
-6. **Avoid cuSOLVER** - slower than cudss, no float32 support
+6. **Use cupy** for GPU iterative solvers (CG, GMRES) or as a direct solver fallback
 7. **Use LU factorization** for repeated solves with same matrix
 8. **Determinant computation**:
    - **Use CPU for sparse matrices** - CUDA requires dense conversion (much slower)
@@ -496,7 +497,8 @@ torchrun --standalone --nproc_per_node=4 examples/distributed/distributed_solve.
 - PyTorch >= 1.10.0
 - SciPy (recommended for CPU)
 - CUDA Toolkit (for GPU backends)
-- nvidia-cudss-cu12 (optional, for cuDSS backend)
+- nvmath-python (optional, for cuDSS backend)
+- cupy-cuda12x (optional, for CuPy backend)
 
 ## Performance Tips
 
@@ -510,7 +512,7 @@ det = A_cuda.det()  # 2.5 ms
 det = A_cuda.cpu().det()  # 1.3 ms (1.9x faster!)
 ```
 
-**Why?** cuSOLVER/cuDSS don't expose sparse determinant, requiring O(n²) dense conversion. CPU sparse LU is O(nnz^1.5), much faster for sparse matrices.
+**Why?** cuDSS doesn't expose sparse determinant, requiring O(n²) dense conversion. CPU sparse LU is O(nnz^1.5), much faster for sparse matrices.
 
 ### Linear Solve
 

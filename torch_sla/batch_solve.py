@@ -158,7 +158,7 @@ def spsolve_batch_same_layout(
         Use SparseTensor.decompose().solve() instead for a more Pythonic interface:
         
         >>> A = SparseTensor(val, row, col, shape)
-        >>> decomp = A.decompose(method='superlu')
+        >>> decomp = A.decompose(method='lu')
         >>> x_batch = decomp.solve(val_batch, b_batch)
     
     All matrices A_i share the same (row, col) structure but have different values.

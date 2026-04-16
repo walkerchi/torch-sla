@@ -288,13 +288,13 @@ SafeTensors 格式
      - 方法
    * - ``scipy``
      - CPU
-     - ``superlu``, ``umfpack``, ``cg``, ``bicgstab``, ``gmres``
+     - ``lu``, ``umfpack``, ``cg``, ``bicgstab``, ``gmres``
    * - ``eigen``
      - CPU
      - ``cg``, ``bicgstab``
-   * - ``cusolver``
+   * - ``cupy``
      - CUDA
-     - ``qr``, ``cholesky``, ``lu``
+     - ``lu``, ``cg``, ``cgs``, ``gmres``, ``minres``
    * - ``cudss``
      - CUDA
      - ``lu``, ``cholesky``, ``ldlt``
@@ -307,8 +307,8 @@ SafeTensors 格式
 
    A = SparseTensor(val, row, col, (n, n))
    b = torch.randn(n, dtype=torch.float64)
-   
-   x1 = A.solve(b, backend='scipy', method='superlu')    # 直接法
+
+   x1 = A.solve(b, backend='scipy', method='lu')          # 直接法
    x2 = A.solve(b, backend='scipy', method='cg')         # 迭代法（SPD）
    x3 = A.solve(b, backend='scipy', method='bicgstab')   # 迭代法（一般）
 
@@ -689,7 +689,7 @@ CUDA 用法
 
 传输到GPU进行CUDA加速求解。
 
-**性能：** cuDSS/cuSOLVER 对于大型系统可快10-100倍。
+**性能：** cuDSS/CuPy 对于大型系统可快10-100倍。
 
 **代码：**
 
@@ -707,7 +707,7 @@ CUDA 用法
 CUDA上的后端选择
 ~~~~~~~~~~~~~~~~
 
-**自动选择：** cuDSS（首选）→ cuSOLVER（备选）
+**自动选择：** cuDSS（首选）→ CuPy（备选）
 
 **代码：**
 
@@ -715,7 +715,7 @@ CUDA上的后端选择
 
    x = A_cuda.solve(b_cuda, backend='cudss', method='lu')
    x = A_cuda.solve(b_cuda, backend='cudss', method='cholesky')  # 对于 SPD
-   x = A_cuda.solve(b_cuda, backend='cusolver', method='qr')
+   x = A_cuda.solve(b_cuda, backend='cupy', method='lu')
 
 ----
 

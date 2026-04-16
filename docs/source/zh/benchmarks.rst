@@ -23,7 +23,7 @@
    :header-rows: 1
 
    * - DOF
-     - SciPy SuperLU
+     - SciPy LU
      - cuDSS Cholesky
      - PyTorch CG+Jacobi
      - 最优
@@ -77,7 +77,7 @@
    * - 方法
      - 内存扩展
      - 备注
-   * - SciPy SuperLU
+   * - SciPy LU
      - O(n^1.5) 填充
      - 仅 CPU，限于 ~200万 DOF
    * - cuDSS Cholesky

@@ -46,8 +46,8 @@ For additional backends and features:
 
    <div class="recommendation-box">
      <h4><span class="gradient-text">cuDSS Now on PyPI!</span></h4>
-     <p>NVIDIA's cuDSS sparse direct solver is now available as <code>nvidia-cudss-cu12</code> on PyPI. 
-     Installing <code>torch-sla[cuda]</code> will automatically install cuDSS.</p>
+     <p>CUDA backends use <code>nvmath-python</code> (for cuDSS) and <code>cupy-cuda12x</code> (for CuPy).
+     Installing <code>torch-sla[cuda]</code> will automatically install them.</p>
    </div>
 
 Backend Requirements
@@ -66,9 +66,9 @@ Backend Requirements
    * - ``pytorch``
      - Included with PyTorch
      - Native CG/BiCGStab solvers
-   * - ``cusolver``
-     - CUDA toolkit
-     - GPU direct solvers (bundled with PyTorch CUDA)
+   * - ``cupy``
+     - ``pip install cupy-cuda12x``
+     - GPU direct + iterative solvers via cupyx.scipy
    * - ``cudss``
-     - ``pip install torch-sla[cuda]``
+     - ``pip install nvmath-python[cu12]``
      - Best for medium-scale GPU problems (10K-2M DOF)

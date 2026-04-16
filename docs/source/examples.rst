@@ -347,13 +347,13 @@ Choose solver backend and method explicitly.
      - Methods
    * - ``scipy``
      - CPU
-     - ``superlu``, ``umfpack``, ``cg``, ``bicgstab``, ``gmres``
+     - ``lu``, ``umfpack``, ``cg``, ``bicgstab``, ``gmres``
    * - ``eigen``
      - CPU
      - ``cg``, ``bicgstab``
-   * - ``cusolver``
+   * - ``cupy``
      - CUDA
-     - ``qr``, ``cholesky``, ``lu``
+     - ``lu``, ``cg``, ``cgs``, ``gmres``, ``minres``
    * - ``cudss``
      - CUDA
      - ``lu``, ``cholesky``, ``ldlt``
@@ -367,7 +367,7 @@ Choose solver backend and method explicitly.
    A = SparseTensor(val, row, col, (n, n))
    b = torch.randn(n, dtype=torch.float64)
    
-   x1 = A.solve(b, backend='scipy', method='superlu')    # Direct
+   x1 = A.solve(b, backend='scipy', method='lu')          # Direct
    x2 = A.solve(b, backend='scipy', method='cg')         # Iterative (SPD)
    x3 = A.solve(b, backend='scipy', method='bicgstab')   # Iterative (general)
 
@@ -825,7 +825,7 @@ Move to CUDA
 
 Transfer to GPU for CUDA-accelerated solving.
 
-**Performance:** cuDSS/cuSOLVER can be 10-100× faster for large systems.
+**Performance:** cuDSS/CuPy can be 10-100× faster for large systems.
 
 **Code:**
 
@@ -843,7 +843,7 @@ Transfer to GPU for CUDA-accelerated solving.
 Backend Selection on CUDA
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Auto Selection:** cuDSS (preferred) → cuSOLVER (fallback)
+**Auto Selection:** cuDSS (preferred) → CuPy (fallback)
 
 **Code:**
 
@@ -851,7 +851,7 @@ Backend Selection on CUDA
 
    x = A_cuda.solve(b_cuda, backend='cudss', method='lu')
    x = A_cuda.solve(b_cuda, backend='cudss', method='cholesky')  # For SPD
-   x = A_cuda.solve(b_cuda, backend='cusolver', method='qr')
+   x = A_cuda.solve(b_cuda, backend='cupy', method='lu')
 
 ----
 
@@ -982,7 +982,7 @@ This is computed efficiently using the adjoint method with :math:`O(1)` graph no
 
 **Implementation:**
 
-- **CPU**: LU decomposition via SciPy SuperLU
+- **CPU**: LU decomposition via SciPy LU
 - **CUDA**: Dense conversion + ``torch.linalg.det``
 - **Gradient**: Adjoint method (solve :math:`A \mathbf{x} = \mathbf{e}_i` for needed columns of :math:`A^{-1}`)
 
@@ -1105,7 +1105,7 @@ CUDA is **slower** than CPU for sparse determinants! This is because:
 
 - CPU uses sparse LU decomposition: O(nnz^1.5) time, O(nnz) memory
 - CUDA requires dense conversion: O(n³) time, O(n²) memory
-- cuSOLVER/cuDSS don't expose sparse determinant computation
+- cuDSS doesn't expose sparse determinant computation
 
 **Recommendation:** For CUDA tensors, use ``.cpu().det()`` instead of ``.det()``
 

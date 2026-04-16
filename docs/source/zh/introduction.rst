@@ -36,11 +36,11 @@
      - CUDA
      - 备注
    * - 小型 (< 10万 DOF)
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky``
      - 直接求解器，机器精度
    * - 中型 (10万 - 200万 DOF)
-     - ``scipy+superlu``
+     - ``scipy+lu``
      - ``cudss+cholesky``
      - cuDSS 在 GPU 上最快
    * - 大型 (200万 - 1.69亿 DOF)
@@ -130,7 +130,7 @@ LU 分解，用于同一矩阵的高效重复求解。
      - 推荐
    * - ``scipy``
      - CPU
-     - 使用 SuperLU 或 UMFPACK 的 SciPy 后端直接求解器
+     - 使用 LU 或 UMFPACK 的 SciPy 后端直接求解器
      - **CPU 默认**
    * - ``eigen``
      - CPU
@@ -140,10 +140,10 @@ LU 分解，用于同一矩阵的高效重复求解。
      - CUDA
      - NVIDIA cuDSS 直接求解器 (LU, Cholesky, LDLT)
      - **CUDA 直接**
-   * - ``cusolver``
+   * - ``cupy``
      - CUDA
-     - NVIDIA cuSOLVER 直接求解器
-     - 不推荐
+     - CuPy GPU 求解器 (LU, CG, GMRES) 通过 cupyx.scipy
+     - 备选
    * - ``pytorch``
      - CUDA
      - PyTorch 原生迭代求解器 (CG, BiCGStab) + Jacobi 预处理
@@ -163,21 +163,17 @@ LU 分解，用于同一矩阵的高效重复求解。
      - 后端
      - 描述
      - 精度
-   * - ``superlu``
-     - scipy
-     - SuperLU LU 分解（scipy 默认）
+   * - ``lu``
+     - scipy, cupy, cudss
+     - LU 分解（一般矩阵，直接法）
      - ~1e-14
    * - ``cholesky``
-     - cudss, cusolver
+     - cudss
      - Cholesky 分解（对称正定矩阵，**最快**）
      - ~1e-14
    * - ``ldlt``
      - cudss
      - LDLT 分解（对称矩阵）
-     - ~1e-14
-   * - ``lu``
-     - cudss, cusolver
-     - LU 分解（一般矩阵）
      - ~1e-14
 
 迭代求解器
@@ -223,7 +219,7 @@ LU 分解，用于同一矩阵的高效重复求解。
     # 创建 SparseTensor
     A = SparseTensor.from_dense(dense)
     
-    # 求解 Ax = b（CPU 上自动选择 scipy+superlu）
+    # 求解 Ax = b（CPU 上自动选择 scipy+lu）
     b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
     x = A.solve(b)
 
@@ -289,7 +285,7 @@ CUDA 用法
    :header-rows: 1
 
    * - DOF
-     - SciPy SuperLU
+     - SciPy LU
      - cuDSS Cholesky
      - PyTorch CG+Jacobi
      - 备注
@@ -351,7 +347,7 @@ CUDA 用法
    * - 方法
      - 内存增长
      - 备注
-   * - SciPy SuperLU
+   * - SciPy LU
      - O(n^1.5) 填充
      - 仅 CPU，限于 ~200万 DOF
    * - cuDSS Cholesky
@@ -562,11 +558,11 @@ CUDA 用法
 
 1. **迭代法建议用 float64**: 收敛性更好
 2. **对称正定矩阵用 Cholesky**: 比 LU 快约 2 倍
-3. **CPU 端推荐 scipy+superlu**: 速度与精度兼顾
+3. **CPU 端推荐 scipy+lu**: 速度与精度兼顾
 4. **GPU 小规模问题用 cudss+cholesky**: 200万 DOF 以下最快的直接法
 5. **GPU 大规模问题用 pytorch+cg**: 单卡可达 1.69 亿 DOF
 6. **超大规模用多卡并行**: DSparseMatrix 支持域分解，3 卡可达 5 亿+ DOF
-7. **不推荐 cuSOLVER**: cuDSS 更快且支持 float32
+7. **推荐 cupy** 用于 GPU 迭代求解器 (CG, GMRES) 或作为直接求解器备选
 8. **重复求解缓存 LU 分解**: 用 ``A.lu()`` 复用分解结果
 
 引用

@@ -265,9 +265,9 @@ det = A_cuda.cpu().det()  # Much faster!
 ```
 
 ### Issue: Import error for cuDSS
-**Solution**: Install CUDA support
+**Solution**: Install nvmath-python
 ```bash
-pip install nvidia-cudss-cu12
+pip install nvmath-python[cu12]
 ```
 
 ## 📚 Resources

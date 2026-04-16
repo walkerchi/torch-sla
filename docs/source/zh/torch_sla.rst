@@ -162,10 +162,10 @@ BACKEND_METHODS
 .. code-block:: python
 
    BACKEND_METHODS = {
-       'scipy': ['superlu', 'umfpack', 'cg', 'bicgstab', 'gmres', 'minres'],
+       'scipy': ['lu', 'umfpack', 'cg', 'bicgstab', 'gmres', 'minres'],
        'eigen': ['cg', 'bicgstab'],
        'pytorch': ['cg', 'bicgstab'],
-       'cusolver': ['qr', 'cholesky', 'lu'],
+       'cupy': ['lu', 'cg', 'cgs', 'gmres', 'minres', 'lsqr', 'lsmr'],
        'cudss': ['lu', 'cholesky', 'ldlt'],
    }
 
@@ -177,10 +177,10 @@ DEFAULT_METHODS
 .. code-block:: python
 
    DEFAULT_METHODS = {
-       'scipy': 'superlu',
-       'eigen': 'cg',
+       'scipy': 'lu',
+       'eigen': 'bicgstab',
        'pytorch': 'cg',
-       'cusolver': 'cholesky',
+       'cupy': 'lu',
        'cudss': 'cholesky',
    }
 

@@ -5,7 +5,7 @@ This module provides differentiable sparse linear equation solvers with multiple
 
 Backends:
 ---------
-- 'scipy': SciPy backend (CPU only) - Direct solvers via SuperLU/UMFPACK
+- 'scipy': SciPy backend (CPU only) - Direct solvers via LU/UMFPACK
 - 'eigen': Eigen backend (CPU only) - Iterative solvers (CG, BiCGStab)
 - 'pytorch': PyTorch-native (CPU & CUDA) - Iterative solvers for large-scale problems
 - 'cupy': CuPy backend (CUDA only) - Direct and iterative solvers via cupyx.scipy
@@ -32,10 +32,10 @@ Usage:
     x = spsolve(val, row, col, shape, b)
 
     # Specify backend and method
-    x = spsolve(val, row, col, shape, b, backend='scipy', method='superlu')
+    x = spsolve(val, row, col, shape, b, backend='scipy', method='lu')
     x = spsolve(val, row, col, shape, b, backend='cudss', method='lu')
     x = spsolve(val, row, col, shape, b, backend='pytorch', method='cg')  # GPU iterative
-    x = spsolve(val, row, col, shape, b, backend='cupy', method='spsolve')  # CuPy GPU direct
+    x = spsolve(val, row, col, shape, b, backend='cupy', method='lu')     # CuPy GPU direct
 """
 
 import warnings
@@ -401,7 +401,7 @@ def spsolve(
     backend : str, optional
         Backend to use:
         - 'auto': Auto-select based on device and problem size (default)
-        - 'scipy': SciPy (CPU only, uses SuperLU/UMFPACK)
+        - 'scipy': SciPy (CPU only, uses LU/UMFPACK)
         - 'eigen': Eigen C++ (CPU only, iterative)
         - 'pytorch': PyTorch-native (CPU & CUDA, iterative) - best for large problems
         - 'cupy': CuPy (CUDA only, direct and iterative via cupyx.scipy)
@@ -470,6 +470,19 @@ def spsolve(
 
     device = val.device
     n = shape[0]  # Problem size (DOF)
+
+    # Parse combined backend_method strings (e.g., "cudss_lu" → backend="cudss", method="lu")
+    if backend == "auto" and method != "auto":
+        for bk in BACKEND_METHODS:
+            prefix = bk + "_"
+            if method.startswith(prefix):
+                backend = bk
+                method = method[len(prefix):]
+                break
+            if method == bk:
+                backend = bk
+                method = "auto"
+                break
 
     # Auto-select backend based on device and problem size
     if backend == "auto":
@@ -543,7 +556,7 @@ def spsolve(
         if not val.is_cuda:
             raise ValueError("cuDSS backend requires CUDA tensors")
         if not is_cudss_available():
-            raise RuntimeError("cuDSS backend is not available. Install with: pip install nvidia-cudss-cu12")
+            raise RuntimeError("cuDSS backend is not available. Install with: pip install nvmath-python[cu12]")
 
         if method == "lu":
             return SparseLinearSolveCuDSSLU.apply(val, row, col, shape, b)

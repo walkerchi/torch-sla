@@ -120,7 +120,7 @@ html_context = {
     'keywords': 'torch sparse, torch sparse matrix, torch sparse tensor, pytorch sparse, pytorch sparse matrix, pytorch sparse solver, sparse linear algebra pytorch, torch.sparse, sparse linear algebra, GPU sparse solver, CUDA sparse, cuSOLVER, cuDSS, differentiable sparse solver, autograd sparse, scipy sparse pytorch, sparse COO, sparse CSR, FEM pytorch, CFD pytorch, spsolve pytorch',
     'author': 'Walker Chi',
     'og_title': 'torch-sla: PyTorch Sparse Linear Algebra with GPU Acceleration',
-    'og_description': 'PyTorch Sparse Linear Algebra library. Solve Ax=b with GPU acceleration via cuSOLVER/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
+    'og_description': 'PyTorch Sparse Linear Algebra library. Solve Ax=b with GPU acceleration via CuPy/cuDSS. Full autograd support for differentiable sparse operations. pip install torch-sla.',
     'og_image': 'https://walkerchi.github.io/torch-sla/_static/logo.jpg',
     'twitter_card': 'summary_large_image',
     'google_site_verification': '',  # Add your Google Search Console verification code here
