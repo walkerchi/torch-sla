@@ -53,7 +53,7 @@ setup(
     name='torch-sla',
     version=VERSION,
     author='Mingyuan Chi, Shizheng Wen',
-    author_email='walkerchi@example.com, shizheng.wen@sam.math.ethz.ch',
+    author_email='walker.chi.000@gmail.com, shizheng.wen@sam.math.ethz.ch',
     description='PyTorch Sparse Linear Algebra - Differentiable sparse solvers with CUDA support',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',

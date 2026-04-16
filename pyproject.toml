@@ -9,11 +9,11 @@ description = "PyTorch Sparse Linear Algebra - Differentiable sparse solvers wit
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Mingyuan Chi", email = "walkerchi@example.com"},
+    {name = "Mingyuan Chi", email = "walker.chi.000@gmail.com"},
     {name = "Shizheng Wen", email = "shizheng.wen@sam.math.ethz.ch"}
 ]
 maintainers = [
-    {name = "Mingyuan Chi", email = "walkerchi@example.com"},
+    {name = "Mingyuan Chi", email = "walker.chi.000@gmail.com"},
     {name = "Shizheng Wen", email = "shizheng.wen@sam.math.ethz.ch"}
 ]
 keywords = [
