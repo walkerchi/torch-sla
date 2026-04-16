@@ -5,7 +5,7 @@ SciPy provides highly optimized sparse solvers that are generally faster
 and more stable than custom implementations.
 
 Methods:
-- 'superlu': SuperLU direct solver (default) - LU factorization
+- 'lu': LU factorization via SuperLU (default)
 - 'umfpack': UMFPACK direct solver (requires scikit-umfpack)
 - 'cg': Conjugate Gradient (for SPD matrices)
 - 'bicgstab': BiCGStab (for general matrices)
@@ -69,7 +69,7 @@ def scipy_solve(
     col: torch.Tensor,
     shape: Tuple[int, int],
     b: torch.Tensor,
-    method: str = "superlu",
+    method: str = "lu",
     atol: float = 1e-10,
     maxiter: int = 10000,
     M: Optional[torch.Tensor] = None
@@ -90,7 +90,7 @@ def scipy_solve(
     method : str
         Solver method:
         Direct solvers:
-        - 'superlu': SuperLU LU factorization (default)
+        - 'lu': LU factorization via SuperLU (default)
         - 'umfpack': UMFPACK LU factorization
         Iterative solvers:
         - 'cg': Conjugate Gradient (SPD)
@@ -141,7 +141,7 @@ def scipy_solve(
             return x_np
 
     # Direct solvers (spla.spsolve natively supports 2D b)
-    if method == "superlu":
+    if method in ("lu", "superlu"):
         try:
             x_np = np.asarray(spla.spsolve(A, b_np, use_umfpack=False))
         except Exception as e:
@@ -183,7 +183,7 @@ def scipy_solve(
         x_np = np.asarray(spla.spsolve(A, b_np))
 
     else:
-        raise ValueError(f"Unknown method: {method}. Available: superlu, umfpack, cg, bicgstab, gmres, lgmres, minres, qmr")
+        raise ValueError(f"Unknown method: {method}. Available: lu, umfpack, cg, bicgstab, gmres, lgmres, minres, qmr")
 
     return torch.from_numpy(np.ascontiguousarray(x_np)).to(dtype=val.dtype, device=val.device)
 

@@ -49,52 +49,63 @@ def example_cpu_solvers():
     print(f"BiCGStab relative residual: {residual_bicg:.2e}")
 
 
-def example_cusolver():
-    """Example using cuSOLVER direct solvers"""
+def example_cupy():
+    """Example using CuPy solvers (direct and iterative on GPU)"""
     print("\n" + "=" * 60)
-    print("cuSOLVER Direct Solvers")
+    print("CuPy GPU Solvers (Direct + Iterative)")
     print("=" * 60)
 
     if not torch.cuda.is_available():
-        print("CUDA not available, skipping cuSOLVER example")
+        print("CUDA not available, skipping CuPy example")
         return
 
-    if not sla.is_cusolver_available():
-        print("cuSOLVER backend not available, skipping")
+    if not sla.is_cupy_available():
+        print("CuPy backend not available, skipping")
         return
 
     n = 100
     A = create_spd_matrix(n, density=0.3, device='cuda')
     b = torch.randn(n, dtype=torch.float64, device='cuda')
 
-    # LU decomposition
-    x_lu = sla.spsolve(
+    # Direct solver (SuperLU on GPU)
+    x_direct = sla.spsolve(
         A.values(), A.indices()[0], A.indices()[1], A.shape, b,
-        backend='cudss', method='lu', tol=1e-12
+        backend='cupy', method='lu'
     )
 
-    # Cholesky decomposition (for SPD matrices)
-    x_chol = sla.spsolve(
+    # CG iterative solver (for SPD matrices)
+    x_cg = sla.spsolve(
         A.values(), A.indices()[0], A.indices()[1], A.shape, b,
-        backend='cudss', method='cholesky', tol=1e-12
+        backend='cupy', method='cg', atol=1e-10
     )
 
-    # LDLT decomposition
-    x_ldlt = sla.spsolve(
+    # GMRES iterative solver (for general matrices)
+    x_gmres = sla.spsolve(
         A.values(), A.indices()[0], A.indices()[1], A.shape, b,
-        backend='cudss', method='ldlt', tol=1e-12
+        backend='cupy', method='gmres', atol=1e-10
     )
 
     # Verify solutions
     A_dense = A.to_dense()
-    residual_lu = (torch.mv(A_dense, x_lu) - b).norm() / b.norm()
-    residual_chol = (torch.mv(A_dense, x_chol) - b).norm() / b.norm()
-    residual_ldlt = (torch.mv(A_dense, x_ldlt) - b).norm() / b.norm()
+    residual_direct = (torch.mv(A_dense, x_direct) - b).norm() / b.norm()
+    residual_cg = (torch.mv(A_dense, x_cg) - b).norm() / b.norm()
+    residual_gmres = (torch.mv(A_dense, x_gmres) - b).norm() / b.norm()
 
     print(f"Matrix size: {n}x{n}, NNZ: {A._nnz()}")
-    print(f"LU relative residual: {residual_lu:.2e}")
-    print(f"Cholesky relative residual: {residual_chol:.2e}")
-    print(f"LDLT relative residual: {residual_ldlt:.2e}")
+    print(f"Direct (spsolve) relative residual: {residual_direct:.2e}")
+    print(f"CG relative residual: {residual_cg:.2e}")
+    print(f"GMRES relative residual: {residual_gmres:.2e}")
+
+    # Also demonstrate float32 support
+    A32 = create_spd_matrix(n, density=0.3, device='cuda').coalesce()
+    A32 = torch.sparse_coo_tensor(A32.indices(), A32.values().float(), A32.shape).coalesce()
+    b32 = torch.randn(n, dtype=torch.float32, device='cuda')
+    x32 = sla.spsolve(
+        A32.values(), A32.indices()[0], A32.indices()[1], A32.shape, b32,
+        backend='cupy', method='lu'
+    )
+    residual32 = (torch.mv(A32.to_dense(), x32) - b32).norm() / b32.norm()
+    print(f"Float32 spsolve relative residual: {residual32:.2e}")
 
 
 def example_cudss():
@@ -204,12 +215,12 @@ def example_convenience_functions():
 if __name__ == '__main__':
     print("torch-sla Examples")
     print(f"Available backends: {sla.get_available_backends()}")
-    print(f"cuSOLVER available: {sla.is_cusolver_available()}")
+    print(f"CuPy available: {sla.is_cupy_available()}")
     print(f"cuDSS available: {sla.is_cudss_available()}")
 
     # Run examples
     example_cpu_solvers()
-    example_cusolver()
+    example_cupy()
     example_cudss()
     example_gradient()
     example_convenience_functions()

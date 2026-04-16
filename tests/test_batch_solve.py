@@ -15,7 +15,7 @@ from torch_sla import (
     spsolve_batch_coo_same_layout,
     spsolve_batch_coo_different_layout,
     ParallelBatchSolver,
-    is_cusolver_available,
+    is_cupy_available,
     is_cudss_available,
 )
 
@@ -211,30 +211,29 @@ def test_parallel_batch_solver():
 # ============================================================================
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
-@pytest.mark.parametrize('method', ['cusolver_qr', 'cusolver_cholesky', 'cusolver_lu'])
-def test_batch_same_layout_cusolver(method):
-    """Test batch solve with cuSOLVER backends"""
-    if not is_cusolver_available():
-        pytest.skip("cuSOLVER not available")
-    
+def test_batch_same_layout_cupy():
+    """Test batch solve with CuPy backend"""
+    if not is_cupy_available():
+        pytest.skip("CuPy not available")
+
     n = 32
     batch_size = 3
     device = 'cuda'
-    
+
     A_template = create_spd_sparse(n, density=0.3, device=device)
     row = A_template._indices()[0]
     col = A_template._indices()[1]
     nnz = A_template._nnz()
     shape = tuple(A_template.shape)
-    
+
     val_batch = torch.randn(batch_size, nnz, dtype=torch.float64, device=device)
     b_batch = torch.randn(batch_size, n, dtype=torch.float64, device=device)
-    
+
     x_batch = spsolve_batch_same_layout(
         val_batch, row, col, shape, b_batch,
-        method=method
+        method='cupy_lu'
     )
-    
+
     assert x_batch.shape == (batch_size, n)
 
 

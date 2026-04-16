@@ -6,7 +6,7 @@ A differentiable sparse linear equation solver library for PyTorch with multiple
 Backends
 --------
 - CPU: SciPy (SuperLU, UMFPACK), Eigen (CG, BiCGStab)
-- CUDA: cuSOLVER (QR, Cholesky, LU), cuDSS (LU, Cholesky, LDLT)
+- CUDA: CuPy (spsolve, CG, GMRES), cuDSS (LU, Cholesky, LDLT)
 
 Features
 --------
@@ -29,7 +29,7 @@ Usage
 >>> x = spsolve(val, row, col, (3, 3), b)  # Auto-selects scipy+superlu on CPU
 >>>
 >>> # Method 2: Specify backend and method
->>> x = spsolve(val, row, col, (3, 3), b, backend='scipy', method='superlu')
+>>> x = spsolve(val, row, col, (3, 3), b, backend='scipy', method='lu')
 >>>
 >>> # Method 3: SparseTensor class
 >>> A = SparseTensor(val, row, col, (3, 3))
@@ -78,7 +78,7 @@ from .backends import (
     # Availability checks
     is_scipy_available,
     is_eigen_available,
-    is_cusolver_available,
+    is_cupy_available,
     is_cudss_available,
     # Backend-method mappings
     BACKEND_METHODS,
@@ -120,7 +120,7 @@ from .nonlinear_solve import (
 )
 
 __version__ = "0.1.4"
-__author__ = "walkerchi"
+__author__ = "Mingyuan Chi, Shizheng Wen"
 
 __all__ = [
     # Single solve
@@ -148,7 +148,7 @@ __all__ = [
     "select_method",
     "is_scipy_available",
     "is_eigen_available",
-    "is_cusolver_available",
+    "is_cupy_available",
     "is_cudss_available",
     "BACKEND_METHODS",
     "DEFAULT_METHODS",

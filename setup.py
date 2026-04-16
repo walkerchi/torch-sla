@@ -52,8 +52,8 @@ class CustomBuildExt(build_ext):
 setup(
     name='torch-sla',
     version=VERSION,
-    author='walkerchi',
-    author_email='walkerchi@example.com',
+    author='Mingyuan Chi, Shizheng Wen',
+    author_email='walkerchi@example.com, shizheng.wen@sam.math.ethz.ch',
     description='PyTorch Sparse Linear Algebra - Differentiable sparse solvers with CUDA support',
     long_description=get_long_description(),
     long_description_content_type='text/markdown',
@@ -68,7 +68,6 @@ setup(
     package_data={
         'torch_sla': [
             '../csrc/spsolve/*.cpp',
-            '../csrc/cusolver/*.cu',
             '../csrc/cudss/*.cu',
         ],
     },
@@ -124,7 +123,7 @@ setup(
     ],
     
     keywords=[
-        'pytorch', 'sparse', 'linear-algebra', 'cuda', 'cusolver', 'cudss',
+        'pytorch', 'sparse', 'linear-algebra', 'cuda', 'cupy', 'cudss',
         'sparse-matrix', 'linear-solver', 'differentiable', 'autograd',
     ],
     

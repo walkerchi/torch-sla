@@ -9,17 +9,19 @@ description = "PyTorch Sparse Linear Algebra - Differentiable sparse solvers wit
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "walkerchi", email = "walkerchi@example.com"}
+    {name = "Mingyuan Chi", email = "walkerchi@example.com"},
+    {name = "Shizheng Wen", email = "shizheng.wen@sam.math.ethz.ch"}
 ]
 maintainers = [
-    {name = "walkerchi", email = "walkerchi@example.com"}
+    {name = "Mingyuan Chi", email = "walkerchi@example.com"},
+    {name = "Shizheng Wen", email = "shizheng.wen@sam.math.ethz.ch"}
 ]
 keywords = [
     "pytorch",
     "sparse",
     "linear-algebra",
     "cuda",
-    "cusolver",
+    "cupy",
     "cudss",
     "sparse-matrix",
     "linear-solver",
@@ -69,9 +71,14 @@ docs = [
     "furo",
     "sphinx-autodoc-typehints",
 ]
+# CuPy backend (CUDA 12+)
+cupy = [
+    "cupy-cuda12x>=13.0",
+]
 # CUDA backends (requires CUDA 12+)
 cuda = [
     "nvidia-cudss-cu12>=0.7.0",
+    "cupy-cuda12x>=13.0",
 ]
 # Full installation with all optional dependencies
 all = [
@@ -79,6 +86,7 @@ all = [
     "numpy>=1.19.0",
     "scipy>=1.5.0",
     "nvidia-cudss-cu12>=0.7.0",
+    "cupy-cuda12x>=13.0",
 ]
 
 [project.urls]

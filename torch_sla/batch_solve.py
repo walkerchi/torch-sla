@@ -16,16 +16,15 @@ import warnings
 
 from .backends import (
     get_cpu_module,
-    get_cusolver_module,
     get_cudss_module,
-    is_cusolver_available,
+    is_cupy_available,
     is_cudss_available,
 )
 
 
 MethodType = Literal[
     'cg', 'bicgstab',
-    'cusolver_qr', 'cusolver_cholesky', 'cusolver_lu',
+    'cupy_lu',
     'cudss', 'cudss_lu', 'cudss_cholesky', 'cudss_ldlt'
 ]
 
@@ -65,15 +64,9 @@ class BatchSparseLinearSolveSameLayout(Function):
             elif method == 'bicgstab':
                 _cpu = get_cpu_module()
                 x = _cpu.bicgstab(torch.stack([row, col], 0), val, m, n, b, atol, maxiter)
-            elif method == 'cusolver_qr':
-                _cusolver = get_cusolver_module()
-                x = _cusolver.qr(torch.stack([row, col], 0), val, m, n, b, 1e-12)
-            elif method == 'cusolver_cholesky':
-                _cusolver = get_cusolver_module()
-                x = _cusolver.cholesky(torch.stack([row, col], 0), val, m, n, b, 1e-12)
-            elif method == 'cusolver_lu':
-                _cusolver = get_cusolver_module()
-                x = _cusolver.lu(torch.stack([row, col], 0), val, m, n, b, 1e-12)
+            elif method == 'cupy_lu':
+                from .backends.cupy_backend import cupy_solve
+                x = cupy_solve(val, row, col, (m, n), b, method='lu')
             elif method == 'cudss_lu':
                 _cudss = get_cudss_module()
                 x = _cudss.lu(torch.stack([row, col], 0), val, m, n, b)
@@ -123,15 +116,9 @@ class BatchSparseLinearSolveSameLayout(Function):
             elif method == 'bicgstab':
                 _cpu = get_cpu_module()
                 gradb = _cpu.bicgstab(torch.stack([col, row], 0), val, n, m, gradu, atol, maxiter)
-            elif method == 'cusolver_qr':
-                _cusolver = get_cusolver_module()
-                gradb = _cusolver.qr(torch.stack([col, row], 0), val, n, m, gradu, 1e-12)
-            elif method == 'cusolver_cholesky':
-                _cusolver = get_cusolver_module()
-                gradb = _cusolver.cholesky(torch.stack([row, col], 0), val, m, n, gradu, 1e-12)
-            elif method == 'cusolver_lu':
-                _cusolver = get_cusolver_module()
-                gradb = _cusolver.lu(torch.stack([col, row], 0), val, n, m, gradu, 1e-12)
+            elif method == 'cupy_lu':
+                from .backends.cupy_backend import cupy_solve
+                gradb = cupy_solve(val, col, row, (n, m), gradu, method='lu')
             elif method in ['cudss_lu']:
                 _cudss = get_cudss_module()
                 gradb = _cudss.lu(torch.stack([col, row], 0), val, n, m, gradu)

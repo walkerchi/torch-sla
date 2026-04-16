@@ -44,7 +44,7 @@ import math
 from .backends import (
     is_scipy_available,
     is_eigen_available,
-    is_cusolver_available,
+    is_cupy_available,
     is_cudss_available,
     select_backend,
     select_method,
@@ -159,7 +159,7 @@ class DetAdjoint(Function):
             else:
                 # Use scipy backend for CPU
                 from .backends.scipy_backend import scipy_solve
-                x = scipy_solve(val, row, col, shape, e_i, method='superlu')
+                x = scipy_solve(val, row, col, shape, e_i, method='lu')
             
             A_inv_cols[i.item()] = x
         
@@ -362,7 +362,7 @@ def auto_select_method(
     """
     if not is_cuda:
         if is_scipy_available():
-            return ("scipy", "superlu")
+            return ("scipy", "lu")
         elif is_eigen_available():
             return ("eigen", "cg" if is_spd else "bicgstab")
         else:
@@ -374,11 +374,11 @@ def auto_select_method(
     if available_memory > 0 and estimated_memory < available_memory * memory_threshold:
         if is_cudss_available():
             return ("cudss", "cholesky" if is_spd else "lu")
-        elif is_cusolver_available():
-            return ("cusolver", "cholesky" if is_spd else "qr")
+        elif is_cupy_available():
+            return ("cupy", "lu")
     
     if is_scipy_available():
-        return ("scipy", "superlu")
+        return ("scipy", "lu")
     
     raise RuntimeError("No suitable backend available")
 
@@ -2194,15 +2194,15 @@ class SparseTensor:
             Right-hand side vector(s). Shape:
             - Non-batched: [M] or [M, K] for multiple RHS
             - Batched: [...batch, M] or [...batch, M, K]
-        backend : {"auto", "scipy", "eigen", "cusolver", "cudss"}, optional
+        backend : {"auto", "scipy", "eigen", "cupy", "cudss"}, optional
             Solver backend. Default: "auto" (selects based on device).
             - "scipy": Uses SciPy's sparse solvers (CPU only)
             - "eigen": Uses Eigen C++ library (CPU only)
-            - "cusolver": Uses NVIDIA cuSOLVER (CUDA only)
+            - "cupy": Uses CuPy's sparse solvers (CUDA only)
             - "cudss": Uses NVIDIA cuDSS (CUDA only)
         method : str, optional
             Solver method. Default: "auto" (selects based on matrix properties).
-            - Direct methods: "superlu", "umfpack", "lu", "qr", "cholesky", "ldlt"
+            - Direct methods: "lu", "umfpack", "cholesky", "ldlt"
             - Iterative methods: "cg", "bicgstab", "gmres", "minres"
         atol : float, optional
             Absolute tolerance for iterative solvers. Default: 1e-10.
@@ -2302,7 +2302,7 @@ class SparseTensor:
             All matrices share the same row_indices and col_indices.
         b : torch.Tensor
             Right-hand side. Shape [...batch, M].
-        backend : {"auto", "scipy", "eigen", "cusolver", "cudss"}, optional
+        backend : {"auto", "scipy", "eigen", "cupy", "cudss"}, optional
             Solver backend. See solve() for details. Default: "auto".
         method : str, optional
             Solver method. See solve() for details. Default: "auto".

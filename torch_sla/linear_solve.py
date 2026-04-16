@@ -8,34 +8,34 @@ Backends:
 - 'scipy': SciPy backend (CPU only) - Direct solvers via SuperLU/UMFPACK
 - 'eigen': Eigen backend (CPU only) - Iterative solvers (CG, BiCGStab)
 - 'pytorch': PyTorch-native (CPU & CUDA) - Iterative solvers for large-scale problems
-- 'cusolver': NVIDIA cuSOLVER (CUDA only) - Direct solvers (QR, Cholesky, LU)
+- 'cupy': CuPy backend (CUDA only) - Direct and iterative solvers via cupyx.scipy
 - 'cudss': NVIDIA cuDSS (CUDA only) - Direct solvers (LU, Cholesky, LDLT)
 
 Methods:
 --------
 Direct solvers:
-- 'superlu': SuperLU direct solver (scipy backend)
-- 'umfpack': UMFPACK direct solver (scipy backend)
+- 'lu': LU factorization (scipy, cupy, cudss)
+- 'umfpack': UMFPACK direct solver (scipy only)
 - 'lu': LU decomposition
-- 'qr': QR decomposition (cusolver)
 - 'cholesky': Cholesky decomposition (SPD matrices)
 - 'ldlt': LDLT decomposition (symmetric matrices, cudss)
 
 Iterative solvers:
 - 'cg': Conjugate Gradient (SPD matrices)
 - 'bicgstab': BiCGStab (general matrices)
-- 'gmres': GMRES (general matrices, scipy)
+- 'gmres': GMRES (general matrices)
 - 'minres': MINRES (symmetric matrices, scipy)
 
 Usage:
 ------
     # Auto-select backend and method based on device and problem size
     x = spsolve(val, row, col, shape, b)
-    
+
     # Specify backend and method
     x = spsolve(val, row, col, shape, b, backend='scipy', method='superlu')
     x = spsolve(val, row, col, shape, b, backend='cudss', method='lu')
     x = spsolve(val, row, col, shape, b, backend='pytorch', method='cg')  # GPU iterative
+    x = spsolve(val, row, col, shape, b, backend='cupy', method='spsolve')  # CuPy GPU direct
 """
 
 import warnings
@@ -45,12 +45,11 @@ from typing import Tuple, Optional, Union, Literal
 
 from .backends import (
     get_eigen_module,
-    get_cusolver_module,
     get_cudss_module,
     is_scipy_available,
     is_eigen_available,
     is_pytorch_available,
-    is_cusolver_available,
+    is_cupy_available,
     is_cudss_available,
     select_backend,
     select_method,
@@ -88,7 +87,7 @@ class SparseLinearSolveScipySuperLU(Function):
         method = ctx.method
         atol = ctx.atol
         maxiter = ctx.maxiter
-        
+
         # Solve A^T * gradb = gradu
         gradb = scipy_solve(val, col, row, (shape[1], shape[0]), gradu,
                            method=method, atol=atol, maxiter=maxiter)
@@ -176,93 +175,38 @@ class SparseLinearSolveEigenBiCGStab(Function):
         return gradval, None, None, None, gradb, None, None
 
 
-def _cusolver_solve_multi(solve_fn, indices, val, m, n, b, tol):
-    """Column-loop wrapper for cuSOLVER solvers (single-RHS C++ API)."""
-    if b.dim() == 2:
-        cols = [solve_fn(indices, val, m, n, b[:, k], tol) for k in range(b.shape[1])]
-        return torch.stack(cols, dim=1)
-    return solve_fn(indices, val, m, n, b, tol)
-
-
-class SparseLinearSolveCuSolverQR(Function):
-    """cuSOLVER QR solver with gradient support"""
+class SparseLinearSolveCuPy(Function):
+    """CuPy solver with gradient support (direct and iterative methods)"""
 
     @staticmethod
-    def forward(ctx, val, row, col, shape, b, tol):
-        cusolver = get_cusolver_module()
-        indices = torch.stack([row, col], 0)
-        u = _cusolver_solve_multi(cusolver.qr, indices, val, shape[0], shape[1], b, tol)
+    def forward(ctx, val, row, col, shape, b, method, atol, maxiter, tol):
+        from .backends.cupy_backend import cupy_solve
+        u = cupy_solve(val, row, col, shape, b, method=method, atol=atol, maxiter=maxiter, tol=tol)
         ctx.save_for_backward(val, row, col, u)
         ctx.A_shape = shape
+        ctx.method = method
+        ctx.atol = atol
+        ctx.maxiter = maxiter
         ctx.tol = tol
         return u
 
     @staticmethod
     def backward(ctx, gradu):
-        cusolver = get_cusolver_module()
+        from .backends.cupy_backend import cupy_solve
         val, row, col, u = ctx.saved_tensors
         m, n = ctx.A_shape
+        method = ctx.method
+        atol = ctx.atol
+        maxiter = ctx.maxiter
         tol = ctx.tol
-        indices_T = torch.stack([col, row], 0)
-        gradb = _cusolver_solve_multi(cusolver.qr, indices_T, val, n, m, gradu, tol)
+
+        # Solve A^T * gradb = gradu (adjoint method)
+        gradb = cupy_solve(val, col, row, (n, m), gradu,
+                          method=method, atol=atol, maxiter=maxiter, tol=tol)
         gradval = -gradb[row] * u[col]
         if gradval.dim() == 2:
             gradval = gradval.sum(-1)
-        return gradval, None, None, None, gradb, None
-
-
-class SparseLinearSolveCuSolverCholesky(Function):
-    """cuSOLVER Cholesky solver with gradient support"""
-
-    @staticmethod
-    def forward(ctx, val, row, col, shape, b, tol):
-        cusolver = get_cusolver_module()
-        indices = torch.stack([row, col], 0)
-        u = _cusolver_solve_multi(cusolver.cholesky, indices, val, shape[0], shape[1], b, tol)
-        ctx.save_for_backward(val, row, col, u)
-        ctx.A_shape = shape
-        ctx.tol = tol
-        return u
-
-    @staticmethod
-    def backward(ctx, gradu):
-        cusolver = get_cusolver_module()
-        val, row, col, u = ctx.saved_tensors
-        m, n = ctx.A_shape
-        tol = ctx.tol
-        indices = torch.stack([row, col], 0)
-        gradb = _cusolver_solve_multi(cusolver.cholesky, indices, val, m, n, gradu, tol)
-        gradval = -gradb[row] * u[col]
-        if gradval.dim() == 2:
-            gradval = gradval.sum(-1)
-        return gradval, None, None, None, gradb, None
-
-
-class SparseLinearSolveCuSolverLU(Function):
-    """cuSOLVER LU solver with gradient support"""
-
-    @staticmethod
-    def forward(ctx, val, row, col, shape, b, tol):
-        cusolver = get_cusolver_module()
-        indices = torch.stack([row, col], 0)
-        u = _cusolver_solve_multi(cusolver.lu, indices, val, shape[0], shape[1], b, tol)
-        ctx.save_for_backward(val, row, col, u)
-        ctx.A_shape = shape
-        ctx.tol = tol
-        return u
-
-    @staticmethod
-    def backward(ctx, gradu):
-        cusolver = get_cusolver_module()
-        val, row, col, u = ctx.saved_tensors
-        m, n = ctx.A_shape
-        tol = ctx.tol
-        indices_T = torch.stack([col, row], 0)
-        gradb = _cusolver_solve_multi(cusolver.lu, indices_T, val, n, m, gradu, tol)
-        gradval = -gradb[row] * u[col]
-        if gradval.dim() == 2:
-            gradval = gradval.sum(-1)
-        return gradval, None, None, None, gradb, None
+        return gradval, None, None, None, gradb, None, None, None, None
 
 
 class SparseLinearSolveCuDSS(Function):
@@ -378,7 +322,7 @@ class SparseLinearSolvePyTorch(Function):
 
     @staticmethod
     def forward(ctx, val, row, col, shape, b, method, atol, rtol, maxiter, preconditioner, mixed_precision):
-        u = pytorch_solve(val, row, col, shape, b, method=method, atol=atol, rtol=rtol, 
+        u = pytorch_solve(val, row, col, shape, b, method=method, atol=atol, rtol=rtol,
                           maxiter=maxiter, preconditioner=preconditioner, mixed_precision=mixed_precision)
         # Convert back to input dtype if mixed precision was used
         if mixed_precision and u.dtype != val.dtype:
@@ -403,7 +347,7 @@ class SparseLinearSolvePyTorch(Function):
         maxiter = ctx.maxiter
         preconditioner = ctx.preconditioner
         mixed_precision = ctx.mixed_precision
-        
+
         # Solve A^T * gradb = gradu
         gradb = pytorch_solve(val, col, row, (shape[1], shape[0]), gradu,
                               method=method, atol=atol, rtol=rtol, maxiter=maxiter,
@@ -460,14 +404,15 @@ def spsolve(
         - 'scipy': SciPy (CPU only, uses SuperLU/UMFPACK)
         - 'eigen': Eigen C++ (CPU only, iterative)
         - 'pytorch': PyTorch-native (CPU & CUDA, iterative) - best for large problems
-        - 'cusolver': NVIDIA cuSOLVER (CUDA only, direct)
+        - 'cupy': CuPy (CUDA only, direct and iterative via cupyx.scipy)
         - 'cudss': NVIDIA cuDSS (CUDA only, direct)
     method : str, optional
         Solver method. Available methods depend on backend:
         - 'auto': Auto-select based on matrix properties
-        - 'superlu', 'umfpack': Direct solvers (scipy)
-        - 'cg', 'bicgstab', 'gmres': Iterative solvers
-        - 'lu', 'qr', 'cholesky', 'ldlt': Direct solvers (CUDA)
+        - 'lu': LU factorization (scipy, cupy, cudss)
+        - 'umfpack': UMFPACK direct solver (scipy only)
+        - 'cholesky', 'ldlt': Direct solvers (cudss)
+        - 'cg', 'cgs', 'bicgstab', 'gmres': Iterative solvers
     atol : float, optional
         Absolute tolerance for iterative solvers, by default 1e-10
     maxiter : int, optional
@@ -490,20 +435,20 @@ def spsolve(
     --------
     >>> import torch
     >>> from torch_sla import spsolve
-    >>> 
+    >>>
     >>> # Create a simple SPD matrix
     >>> val = torch.tensor([4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0], dtype=torch.float64)
     >>> row = torch.tensor([0, 0, 1, 1, 1, 2, 2], dtype=torch.int64)
     >>> col = torch.tensor([0, 1, 0, 1, 2, 1, 2], dtype=torch.int64)
     >>> shape = (3, 3)
     >>> b = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float64)
-    >>> 
+    >>>
     >>> # Auto-select backend and method
     >>> x = spsolve(val, row, col, shape, b)
-    >>> 
+    >>>
     >>> # Specify backend and method
-    >>> x = spsolve(val, row, col, shape, b, backend='scipy', method='superlu')
-    >>> 
+    >>> x = spsolve(val, row, col, shape, b, backend='scipy', method='lu')
+    >>>
     >>> # On CUDA
     >>> val_cuda = val.cuda()
     >>> row_cuda = row.cuda()
@@ -525,15 +470,15 @@ def spsolve(
 
     device = val.device
     n = shape[0]  # Problem size (DOF)
-    
+
     # Auto-select backend based on device and problem size
     if backend == "auto":
         backend = select_backend(device, n=n)
-    
+
     # Auto-select method
     if method == "auto":
         method = select_method(backend, is_symmetric=is_symmetric, is_spd=is_spd)
-    
+
     # Validate backend-method combination
     valid_methods = BACKEND_METHODS.get(backend, [])
     if method not in valid_methods and method != "auto":
@@ -550,10 +495,10 @@ def spsolve(
             row = row.cpu()
             col = col.cpu()
             b = b.cpu()
-        
+
         if not is_scipy_available():
             raise RuntimeError("SciPy is not available. Install with: pip install scipy")
-        
+
         return SparseLinearSolveScipySuperLU.apply(
             val, row, col, shape, b, method, atol, maxiter
         )
@@ -568,33 +513,28 @@ def spsolve(
             row = row.cpu()
             col = col.cpu()
             b = b.cpu()
-        
+
         if not is_eigen_available():
             raise RuntimeError("Eigen backend is not available. Ensure C++ extension is compiled.")
-        
+
         if val.dtype != torch.float64:
             warnings.warn("Using float64 is recommended for good precision with iterative solvers")
-        
+
         if method == "cg":
             return SparseLinearSolveEigenCG.apply(val, row, col, shape, b, atol, maxiter)
         else:  # bicgstab
             return SparseLinearSolveEigenBiCGStab.apply(val, row, col, shape, b, atol, maxiter)
 
     # ========================================================================
-    # cuSOLVER backend (CUDA)
+    # CuPy backend (CUDA)
     # ========================================================================
-    elif backend == "cusolver":
+    elif backend == "cupy":
         if not val.is_cuda:
-            raise ValueError("cuSOLVER backend requires CUDA tensors")
-        if not is_cusolver_available():
-            raise RuntimeError("cuSOLVER backend is not available")
+            raise ValueError("CuPy backend requires CUDA tensors")
+        if not is_cupy_available():
+            raise RuntimeError("CuPy backend is not available. Install with: pip install cupy-cuda12x")
 
-        if method == "qr":
-            return SparseLinearSolveCuSolverQR.apply(val, row, col, shape, b, tol)
-        elif method == "cholesky":
-            return SparseLinearSolveCuSolverCholesky.apply(val, row, col, shape, b, tol)
-        else:  # lu
-            return SparseLinearSolveCuSolverLU.apply(val, row, col, shape, b, tol)
+        return SparseLinearSolveCuPy.apply(val, row, col, shape, b, method, atol, maxiter, tol)
 
     # ========================================================================
     # cuDSS backend (CUDA)
@@ -622,17 +562,17 @@ def spsolve(
         # PyTorch-native iterative solvers work on both CPU and CUDA
         if val.dtype != torch.float64:
             warnings.warn("Using float64 is recommended for good precision with iterative solvers")
-        
+
         rtol = 1e-10  # Relative tolerance (stricter for better accuracy)
         return SparseLinearSolvePyTorch.apply(val, row, col, shape, b, method, atol, rtol, maxiter, preconditioner, mixed_precision)
 
     else:
-        raise ValueError(f"Unknown backend: {backend}. Available: scipy, eigen, pytorch, cusolver, cudss")
+        raise ValueError(f"Unknown backend: {backend}. Available: scipy, eigen, pytorch, cupy, cudss")
 
 
 def spsolve_coo(A: torch.Tensor, b: torch.Tensor, **kwargs) -> torch.Tensor:
     """Solve Ax = b where A is a sparse COO tensor
-    
+
     Parameters
     ----------
     A : torch.Tensor
@@ -641,7 +581,7 @@ def spsolve_coo(A: torch.Tensor, b: torch.Tensor, **kwargs) -> torch.Tensor:
         Right-hand side vector
     **kwargs
         Additional arguments passed to spsolve()
-        
+
     Returns
     -------
     torch.Tensor
@@ -649,20 +589,20 @@ def spsolve_coo(A: torch.Tensor, b: torch.Tensor, **kwargs) -> torch.Tensor:
     """
     assert A.is_sparse, "A must be a sparse tensor"
     assert A.layout == torch.sparse_coo, "A must be in COO format"
-    
+
     indices = A._indices()
     values = A._values()
     shape = tuple(A.shape)
-    
+
     row = indices[0]
     col = indices[1]
-    
+
     return spsolve(values, row, col, shape, b, **kwargs)
 
 
 def spsolve_csr(A: torch.Tensor, b: torch.Tensor, **kwargs) -> torch.Tensor:
     """Solve Ax = b where A is a sparse CSR tensor
-    
+
     Parameters
     ----------
     A : torch.Tensor
@@ -671,7 +611,7 @@ def spsolve_csr(A: torch.Tensor, b: torch.Tensor, **kwargs) -> torch.Tensor:
         Right-hand side vector
     **kwargs
         Additional arguments passed to spsolve()
-        
+
     Returns
     -------
     torch.Tensor
